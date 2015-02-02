@@ -8,44 +8,119 @@
 
 'use strict';
 
+var util = require('util'),
+    request = require('request'),
+    fs = require('fs'),
+    q = require('q');
+
 module.exports = function(grunt) {
 
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
 
-  grunt.registerMultiTask('jira_tasks', 'Grunt tasks for Jira', function() {
+  grunt.registerMultiTask('jira_tasks', 'Create a story in JIRA', function() {
+
+    var done = this.async();
 
     // Merge task-specific and/or target-specific options with these defaults.
     var options = this.options({
       punctuation: '.',
       separator: ', '
     });
+    grunt.verbose.writeflags(options);
 
-    // Iterate over all specified file groups.
-    this.files.forEach(function(f) {
-      // Concat specified files.
-      var src = f.src.filter(function(filepath) {
-        // Warn on and remove invalid source files (if nonull was set).
-        if (!grunt.file.exists(filepath)) {
-          grunt.log.warn('Source file "' + filepath + '" not found.');
-          return false;
-        } else {
-          return true;
+
+    var createStory = function(){
+      grunt.verbose.writeln("Creating story");
+
+      var story_json = options.story,
+          deferred = q.defer();
+
+      grunt.verbose.writeln(JSON.stringify(story));
+
+      request({
+        url: options.jira.api_url + "issue/",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "User-Agent" : "Node Request"
+        },
+        method: 'POST',
+        auth: {
+          user: options.jira.user,
+          pass: options.jira.password
+        },
+        proxy: options.jira.proxy,
+        json: story_json
+      }, function(error, response, body){
+        if (error) {
+          deferred.reject(error);
         }
-      }).map(function(filepath) {
-        // Read file source.
-        return grunt.file.read(filepath);
-      }).join(grunt.util.normalizelf(options.separator));
+        else if (response.statusCode >= 300 ) {
+          deferred.reject(response.statusCode + " - bad response: " + JSON.stringify(response));
+        }
+        else {
+          var storyId = body.id;
+          grunt.log.writeln('Story ID is: ' + storyId);
+          deferred.resolve(storyId);
+        }
+      });
 
-      // Handle options.
-      src += options.punctuation;
+      return deferred.promise;
+    };
 
-      // Write the destination file.
-      grunt.file.write(f.dest, src);
 
-      // Print a success message.
-      grunt.log.writeln('File "' + f.dest + '" created.');
-    });
+    // Update the status of a story to done
+    var updateStaryToDone = function(storyId){
+      grunt.verbose.writeln("Updating story to 'Done' state");
+
+      var deferred = q.defer();
+
+      request({
+        url: options.jira.api_url + util.format("issue/%s/transitions", storyId),
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent" : "Node Request"
+        },
+        method: 'POST',
+        auth: {
+          user: options.jira.user,
+          pass: options.jira.password
+        },
+        proxy: options.jira.proxy,
+        json: {
+          "transition":
+          {
+            "id": options.jira.story_done_state
+          }
+        }
+      }, function(error, response, body){
+        if (error) {
+          deferred.reject(error);
+        }
+        else if (response.statusCode >= 300 ) {
+          deferred.reject(response.statusCode + " - bad response: " + JSON.stringify(response));
+        }
+        else {
+          deferred.resolve(storyId);
+        }
+      });
+
+      return deferred.promise;
+    };
+
+    // Call the create story method and then mark it as done
+    createStory()
+      .then(function(storyId){
+        return updateStoryToDone(storyId);
+      })
+      .catch(function(error){
+        grunt.fatal(error);
+      })
+      .done(function(){
+        grunt.log.writeln("Story created and marked as done.");
+        done();
+      });
 
   });
 
