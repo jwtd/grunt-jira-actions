@@ -1,8 +1,8 @@
 {
-  "name": "grunt-jira-tasks",
-  "description": "Grunt tasks for Jira",
+  "name": "grunt-jira-actions",
+  "description": "Grunt tasks to perform Jira actions",
   "version": "0.1.0",
-  "homepage": "https://github.com/jwtd/grunt-jira-tasks",
+  "homepage": "https://github.com/jwtd/grunt-jira-actions",
   "author": {
     "name": "Jordan Duggan",
     "email": "Jordan.Duggan@Gmail.com",
@@ -10,15 +10,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jwtd/grunt-jira-tasks"
+    "url": "https://github.com/jwtd/grunt-jira-actions"
   },
   "bugs": {
-    "url": "https://github.com/jwtd/grunt-jira-tasks/issues"
+    "url": "https://github.com/jwtd/grunt-jira-actions/issues"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/jwtd/grunt-jira-tasks/LICENSE-MIT"
+      "url": "https://github.com/jwtd/grunt-jira-actions/blob/master/LICENSE-MIT"
     }
   ],
   "engines": {

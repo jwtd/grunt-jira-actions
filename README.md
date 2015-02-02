@@ -1,89 +1,97 @@
-# grunt-jira-tasks
+# grunt-jira-actions
 
-> Grunt tasks for Jira
+> Grunt tasks to perform Jira actions
 
 ## Getting Started
 This plugin requires Grunt `~0.4.5`
 
+### Requirements
+
+* Grunt `~0.4.5`
+* API access to a Jira instance
+
 If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
 
 ```shell
-npm install grunt-jira-tasks --save-dev
+npm install grunt-jira-actions --save-dev
 ```
 
 Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
 
 ```js
-grunt.loadNpmTasks('grunt-jira-tasks');
+grunt.loadNpmTasks('grunt-jira-actions');
 ```
 
-## The "jira_tasks" task
+## The "jiraActions" task
 
 ### Overview
-In your project's Gruntfile, add a section named `jira_tasks` to the data object passed into `grunt.initConfig()`.
+In your project's Gruntfile, add a section named `jiraActions` to the data object passed into `grunt.initConfig()`.
 
 ```js
 grunt.initConfig({
-  jira_tasks: {
-    options: {
-      // Task-specific options go here.
-    },
-    your_target: {
-      // Target-specific file lists and/or options go here.
-    },
-  },
+
+  jiraActions: {
+    createStory {
+      options: {
+        jira: {
+          api_url: "https://company.atlassian.net/rest/api/2/",
+          proxy : null,
+          user: "user",
+          password: "password",
+          issue_type: 3,   // Task
+          done_state: 11   // Done state
+        },
+        project: {
+          project_id: 12100,
+          name: "Foo Project",
+          version: "1.0.1",
+          build_label: "foo_project_1.0.1.12345"
+        },
+        story: {
+          subject: "Foo Project",
+          body: release-manifest.json,
+          state: 11 // Done
+        }
+      }
+    }
+  }
+
 });
 ```
 
 ### Options
 
-#### options.separator
-Type: `String`
-Default value: `',  '`
+- `jira`
+    - `api_url` - Url of the Jira api root
+    - `proxy` - Full url of proxy including port
+    - `user` - Jira username. Default value is process.env.JIRA_UN
+    - `password`  - Jira password. Default value is process.env.JIRA_PW
+    - `issue_type` - Jira id of the type of issue to post the story as
+    - `done_state` - The transition id to end the story workflow
+- `project` - Default values are those specified in package.json
+    - `jira_id` - Jira id of the project the story will be created in
+    - `name` - Default is the project name specified in package.json (displayed in the story's subject)
+    - `build_label` - The build that created this story
+- `story` - The details of the story being created
+    - `subject` - Default is the project name specified in package.json (displayed in the story's subject)
+    - `manifest` - Path to a file whose contents will be the body of the story
+    - `state` - The transition id that the story should end up in. Default is open
 
-A string value that is used to do something with whatever.
+## Contact, feedback and bugs
 
-#### options.punctuation
-Type: `String`
-Default value: `'.'`
+This interface was not developed or reviewed by Atlassian or OpenTable. They bare no responsibility for its quality, performance, or results. Use at your own risk.
 
-A string value that is used to do something else with whatever else.
-
-### Usage Examples
-
-#### Default Options
-In this example, the default options are used to do something with whatever. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result would be `Testing, 1 2 3.`
-
-```js
-grunt.initConfig({
-  jira_tasks: {
-    options: {},
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
-  },
-});
-```
-
-#### Custom Options
-In this example, custom options are used to do something else with whatever else. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result in this case would be `Testing: 1 2 3 !!!`
-
-```js
-grunt.initConfig({
-  jira_tasks: {
-    options: {
-      separator: ': ',
-      punctuation: ' !!!',
-    },
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
-  },
-});
-```
+Please file bugs / issues and feature requests on the [issue tracker](https://github.com/jwtd/grunt-jira-actions/issues)
 
 ## Contributing
-In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
+The code styleguide for this project is captured in the [eslint.json](https://github.com/jwtd/grunt-jira-actions/blob/master/eslint.json) file. Submissions should be accompanied by unit tests for any new or changed functionality. [esLint](http://eslint.org/) and test your code using [Grunt](http://gruntjs.com/).
+
+## Special Thanks
+* Ryan Tomlinson for the helpful write up of [OpenTable's release process](http://tech.opentable.co.uk/blog/2014/05/19/continuous-delivery-automating-deployment-visibility/)
+* [OpenTable](https://github.com/opentable) - for being a progressive organization and allowing their staff to open source their tools.
+* [OpenTable](https://github.com/opentable) - for being a progressive organization and allowing their staff to open source their tools.
+* [Chris Riddle](https://github.com/christriddle) and [Bryce Catlin](https://github.com/bcatlin) for putting together [grunt-ccb](https://github.com/opentable/grunt-ccb), which this project is derived from.
+
 
 ## Release History
 _(Nothing yet)_
