@@ -66,16 +66,23 @@ grunt.initConfig({
     - `proxy` - Full url of proxy including port
     - `user` - Jira username. Default value is process.env.JIRA_UN
     - `password`  - Jira password. Default value is process.env.JIRA_PW
-    - `issue_type` - Jira id of the type of issue to post the story as
-    - `done_state` - The transition id to end the story workflow
 - `project` - Default values are those specified in package.json
     - `jira_id` - Jira id of the project the story will be created in
     - `name` - Default is the project name specified in package.json (displayed in the story's subject)
     - `build_label` - The build that created this story
-- `story` - The details of the story being created
+- `issue` - The details of the story being created
+    - `type` - Jira id of the type of issue to post the story as
+        1 = Bug
+        2 = New Feature
+        3 = Task
+        4 = Improvement
+        5 = Sub-task
+        6 = Epic
+        7 = Story
+        8 = Technical Task
     - `subject` - Default is the project name specified in package.json (displayed in the story's subject)
-    - `manifest` - Path to a file whose contents will be the body of the story
-    - `state` - The transition id that the story should end up in. Default is open
+    - `body` - Path to a file whose contents will be the body of the story
+    - `state` - The transition id that the story should end up in. Default is 1 which is 'open'
 
 ## Contact, feedback and bugs
 

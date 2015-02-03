@@ -18,14 +18,30 @@ module.exports = function(grunt) {
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
 
-  grunt.registerMultiTask('jira_tasks', 'Create a story in JIRA', function() {
+  grunt.registerMultiTask('createStory', 'Create a story in JIRA', function() {
 
     var done = this.async();
 
     // Merge task-specific and/or target-specific options with these defaults.
     var options = this.options({
-      punctuation: '.',
-      separator: ', '
+      jira: {
+        api_url: null,
+        proxy : null,
+        user: process.env.JIRA_UN,
+        password: process.env.JIRA_PW
+      },
+      project: {
+        project_id: null,
+        name: null,
+        version: null,
+        build_label: null
+      },
+      issue: {
+        subject: null,
+        body: null,
+        issue_type: 7, // Story
+        state: 1       // 1 = Open, 11 = Done
+      }
     });
     grunt.verbose.writeflags(options);
 
