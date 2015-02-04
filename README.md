@@ -31,26 +31,27 @@ In your project's Gruntfile, add a section named `jiraActions` to the data objec
 grunt.initConfig({
 
   jiraActions: {
-    createStory {
+    createIssue: {
       options: {
         jira: {
           api_url: "https://company.atlassian.net/rest/api/2/",
           proxy : null,
-          user: "user",
-          password: "password",
-          issue_type: 3,   // Task
-          done_state: 11   // Done state
+          user: "your-username",     // Bad practice - You should pull JIRA_UN from ENV
+          password: "your-password"  // Bad practice - You should pull JIRA_PW from ENV
         },
         project: {
-          project_id: 12100,
+          jira_id: 123456,
           name: "Foo Project",
           version: "1.0.1",
-          build_label: "foo_project_1.0.1.12345"
+          build_label: "foo_project_1.0.1.7890"
         },
-        story: {
-          subject: "Foo Project",
-          body: release-manifest.json,
-          state: 11 // Done
+        issue: {
+          type_id: 7,                 // 7 = Story
+          state: 1,                   // 1 = Open, 11 = Done
+          summary: "Foo Project",
+          //description: 'path/to/some.json'
+          description: 'This is a description of what you want'
+          components: 'ACM'           // This value will be passed as a Jira field
         }
       }
     }
@@ -67,11 +68,12 @@ grunt.initConfig({
     - `user` - Jira username. Default value is process.env.JIRA_UN
     - `password`  - Jira password. Default value is process.env.JIRA_PW
 - `project` - Default values are those specified in package.json
-    - `jira_id` - Jira id of the project the story will be created in
-    - `name` - Default is the project name specified in package.json (displayed in the story's subject)
+    - `id` - Jira id of the project the story will be created in
+    - `name` - Default is the project name specified in package.json
+    - `version` - Default is the version specified in package.json
     - `build_label` - The build that created this story
 - `issue` - The details of the story being created
-    - `type` - Jira id of the type of issue to post the story as
+    - `type_id` - Jira id of the type of issue to post the story as
         1 = Bug
         2 = New Feature
         3 = Task
@@ -80,9 +82,10 @@ grunt.initConfig({
         6 = Epic
         7 = Story
         8 = Technical Task
-    - `subject` - Default is the project name specified in package.json (displayed in the story's subject)
-    - `body` - Path to a file whose contents will be the body of the story
-    - `state` - The transition id that the story should end up in. Default is 1 which is 'open'
+    - `state` - The transition id that the story should end up in. Default is 1 which is Open.
+    - `summary` - Default is the project name specified in package.json (displayed in the story's subject)
+    - `description` - Path to a file whose contents will be the body of the story
+    - OTHER attributes specified in `issue` will be passed directly to Jira via the fields collection in the JSON. For more details check [developer.atlassian.com](https://developer.atlassian.com/display/JIRADEV/JIRA+REST+API+Example+-+Create+Issue)
 
 ## Contact, feedback and bugs
 
@@ -95,7 +98,6 @@ The code styleguide for this project is captured in the [eslint.json](https://gi
 
 ## Special Thanks
 * Ryan Tomlinson for the helpful write up of [OpenTable's release process](http://tech.opentable.co.uk/blog/2014/05/19/continuous-delivery-automating-deployment-visibility/)
-* [OpenTable](https://github.com/opentable) - for being a progressive organization and allowing their staff to open source their tools.
 * [OpenTable](https://github.com/opentable) - for being a progressive organization and allowing their staff to open source their tools.
 * [Chris Riddle](https://github.com/christriddle) and [Bryce Catlin](https://github.com/bcatlin) for putting together [grunt-ccb](https://github.com/opentable/grunt-ccb), which this project is derived from.
 

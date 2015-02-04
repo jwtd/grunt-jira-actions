@@ -18,10 +18,10 @@ module.exports = function(grunt) {
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
 
-  grunt.registerMultiTask('createStory', 'Create a story in JIRA', function() {
+  grunt.registerMultiTask('createIssue', 'Create a issue in JIRA', function() {
 
     var done = this.async();
-
+I
     // Merge task-specific and/or target-specific options with these defaults.
     var options = this.options({
       jira: {
@@ -31,28 +31,42 @@ module.exports = function(grunt) {
         password: process.env.JIRA_PW
       },
       project: {
-        project_id: null,
+        id: null,
         name: null,
         version: null,
         build_label: null
       },
       issue: {
-        subject: null,
-        body: null,
-        issue_type: 7, // Story
-        state: 1       // 1 = Open, 11 = Done
+        type_id: 7, // Story
+        state: 1,    // 1 = Open, 11 = Done
+        summary: null,
+        description: null,
+        components: 'ACM'
       }
     });
     grunt.verbose.writeflags(options);
 
+    var createIssue = function(){
+      grunt.verbose.writeln("Creating issue");
 
-    var createStory = function(){
-      grunt.verbose.writeln("Creating story");
+      var deferred = q.defer();
+      //https://developer.atlassian.com/display/JIRADEV/JIRA+REST+API+Example+-+Create+Issue
+      var issue_json = {
+        "fields": {
+          "project":
+          {
+            "id": options.project.id
+          },
+          "summary": options.issue.summary,
+          "description": options.issue.description,
+          "components": options.issue.components,
+          "issuetype": {
+            "id": options.issue.type_id
+          }
+        }
+      };
 
-      var story_json = options.story,
-          deferred = q.defer();
-
-      grunt.verbose.writeln(JSON.stringify(story));
+      grunt.verbose.writeln(JSON.stringify(issue_json));
 
       request({
         url: options.jira.api_url + "issue/",
@@ -67,7 +81,8 @@ module.exports = function(grunt) {
           pass: options.jira.password
         },
         proxy: options.jira.proxy,
-        json: story_json
+        json: issue_json
+
       }, function(error, response, body){
         if (error) {
           deferred.reject(error);
@@ -76,9 +91,9 @@ module.exports = function(grunt) {
           deferred.reject(response.statusCode + " - bad response: " + JSON.stringify(response));
         }
         else {
-          var storyId = body.id;
-          grunt.log.writeln('Story ID is: ' + storyId);
-          deferred.resolve(storyId);
+          var issue_id = body.id;
+          grunt.log.writeln('Issue ID is: ' + issue_id);
+          deferred.resolve(issue_id);
         }
       });
 
@@ -86,14 +101,14 @@ module.exports = function(grunt) {
     };
 
 
-    // Update the status of a story to done
-    var updateStaryToDone = function(storyId){
-      grunt.verbose.writeln("Updating story to 'Done' state");
+    // Update the status of an issue
+    var transitionIssueToState = function(issue_id){
+      grunt.verbose.writeln("Updating issue to 'Done' state");
 
       var deferred = q.defer();
 
       request({
-        url: options.jira.api_url + util.format("issue/%s/transitions", storyId),
+        url: options.jira.api_url + util.format("issue/%s/transitions", issue_id),
         headers: {
           "Content-Type": "application/json",
           "User-Agent" : "Node Request"
@@ -107,7 +122,7 @@ module.exports = function(grunt) {
         json: {
           "transition":
           {
-            "id": options.jira.story_done_state
+            "id": options.issue.state
           }
         }
       }, function(error, response, body){
@@ -118,23 +133,23 @@ module.exports = function(grunt) {
           deferred.reject(response.statusCode + " - bad response: " + JSON.stringify(response));
         }
         else {
-          deferred.resolve(storyId);
+          deferred.resolve(story_id);
         }
       });
 
       return deferred.promise;
     };
 
-    // Call the create story method and then mark it as done
-    createStory()
-      .then(function(storyId){
-        return updateStoryToDone(storyId);
+    // Call the create issue method and then update its state
+    createIssue()
+      .then(function(issue_id){
+        return transitionIssueToState();
       })
       .catch(function(error){
         grunt.fatal(error);
       })
       .done(function(){
-        grunt.log.writeln("Story created and marked as done.");
+        grunt.log.writeln("Issue created and marked as done.");
         done();
       });
 
