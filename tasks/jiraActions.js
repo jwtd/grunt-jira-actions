@@ -18,9 +18,14 @@ module.exports = function(grunt) {
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
 
-  grunt.registerMultiTask('createJiraIssue', 'Create a issue in JIRA', function() {
+  grunt.registerTask('createJiraIssue', 'Create a issue in JIRA', function() {
+
+    grunt.log.writeln('createJiraIssue registered');
 
     var done = this.async();
+
+    grunt.log.writeln('process.env.JIRA_UN: ' + process.env.JIRA_UN);
+    grunt.log.writeln('process.env.JIRA_PW: ' + process.env.JIRA_PW);
 
     // Merge task-specific and/or target-specific options with these defaults.
     var options = this.options({
@@ -46,20 +51,18 @@ module.exports = function(grunt) {
     });
     grunt.verbose.writeflags(options);
 
-    var createIssue = function(){
+    var createJiraIssue = function(){
       grunt.verbose.writeln("Creating issue");
 
       var deferred = q.defer();
       //https://developer.atlassian.com/display/JIRADEV/JIRA+REST+API+Example+-+Create+Issue
       var issue_json = {
         "fields": {
-          "project":
-          {
-            "id": options.project.id
+          "project": {
+            "id": options.project.jira_id
           },
           "summary": options.issue.summary,
           "description": options.issue.description,
-          "components": options.issue.components,
           "issuetype": {
             "id": options.issue.type_id
           }
@@ -69,11 +72,12 @@ module.exports = function(grunt) {
       grunt.verbose.writeln(JSON.stringify(issue_json));
 
       request({
+        //url: 'https://' + options.jira.user + ':' + options.jira.password + '@' + options.jira.api_url + "issue/",
         url: options.jira.api_url + "issue/",
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/json",
-          "User-Agent" : "Node Request"
+          "Accept": "application/json",
+          "User-Agent" : "grunt-jira-actions"
         },
         method: 'POST',
         auth: {
@@ -103,7 +107,7 @@ module.exports = function(grunt) {
 
     // Update the status of an issue
     var transitionIssueToState = function(issue_id){
-      grunt.verbose.writeln("Updating issue to 'Done' state");
+      grunt.verbose.writeln("Updating issue to state " + options.issue.state);
 
       var deferred = q.defer();
 
@@ -137,19 +141,23 @@ module.exports = function(grunt) {
         }
       });
 
+      grunt.log.writeln("Issue transitioned to state " + options.issue.state);
       return deferred.promise;
     };
 
     // Call the create issue method and then update its state
-    createIssue()
+    createJiraIssue()
       .then(function(issue_id){
-        return transitionIssueToState();
+        grunt.log.writeln("Issue created.");
+        if (options.issue.state > 1) {
+          return transitionIssueToState();
+        }
       })
       .catch(function(error){
         grunt.fatal(error);
       })
       .done(function(){
-        grunt.log.writeln("Issue created and marked as done.");
+        grunt.log.writeln("All updates completed.");
         done();
       });
 

@@ -64,25 +64,25 @@ module.exports = function(grunt) {
     // Configuration to be run (and then tested).
     createJiraIssue: {
       options: {
-        jira: {
-          api_url: "https://company.atlassian.net/rest/api/2/",
-          proxy : null,
-          user: "your-username",     // Bad practice - You should pull JIRA_UN from ENV
-          password: "your-password"  // Bad practice - You should pull JIRA_PW from ENV
+        jira: {   //https://virtru.atlassian.net/rest/api/latest/search?jql=project=WS+AND+status=%22OPEN%22+AND+issuetype+in%20(Bug,%20%22Story%22)
+          api_url: "https://virtru.atlassian.net/rest/api/2/" //,
+          //proxy : null,
+          //user: "your-username",     // Bad practice - You should pull JIRA_UN from ENV
+          //password: "your-password"  // Bad practice - You should pull JIRA_PW from ENV
         },
         project: {
-          jira_id: 123456,
-          name: "Foo Project",
-          version: "1.0.1",
-          build_label: "foo_project_1.0.1.7890"
+          jira_id: 10400 //,
+          //name: "Foo Project",
+          //version: "1.0.1",
+          //build_label: "foo_project_1.0.1.7890"
         },
         issue: {
           type_id: 7,                 // 7 = Story
-          state: 1,                   // 1 = Open, 11 = Done
+          //state: 1,                   // 1 = Open, 11 = Done
           summary: "Foo Project",
+          description: 'This is a description of what you want'//,
           //description: 'path/to/some.json'
-          description: 'This is a description of what you want',
-          components: 'ACM'           // This value will be passed as a Jira field
+          //components: ['ACM']           // This value will be passed as a Jira field
         }
       }
     },
