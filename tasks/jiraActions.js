@@ -20,7 +20,7 @@ module.exports = function(grunt) {
 
   grunt.registerMultiTask('createJiraIssue', 'Create an issue in JIRA', function() {
 
-    grunt.log.writeln('createJiraIssue registered');
+    grunt.log.writeln('createJiraIssue with options:\n' + util.inspect(this.options, {showHidden: false, depth: null}));
 
     var done = this.async();
 
@@ -32,10 +32,8 @@ module.exports = function(grunt) {
       jira: {
         api_url: null
       },
-      project: {
-        jira_id: null
-      },
       issue: {
+        project_id: null,
         type_id: 7, // Story
         state: 1,    // 1 = Open, 11 = Done
         summary: null,

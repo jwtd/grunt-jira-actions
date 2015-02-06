@@ -63,30 +63,50 @@ module.exports = function(grunt) {
 
     // Configuration to be run (and then tested).
     createJiraIssue: {
-      general: {
-        options: {
-          jira: {   //https://virtru.atlassian.net/rest/api/latest/search?jql=project=WS+AND+status=%22OPEN%22+AND+issuetype+in%20(Bug,%20%22Story%22)
-            api_url: "https://virtru.atlassian.net/rest/api/2/" //,
-            //proxy : null,
-            //user: "your-username",     // Bad practice - You should pull JIRA_UN from ENV
-            //password: "your-password"  // Bad practice - You should pull JIRA_PW from ENV
-          },
-          project: {
-            jira_id: 10400 //,
-            //name: "Foo Project",
-            //version: "1.0.1",
-            //build_label: "foo_project_1.0.1.7890"
-          },
-          issue: {
-            type_id: 7,                 // 7 = Story
-            state: 11,                   // 1 = Open, 11 = Done
-            summary: "Foo Project",
-            description: 'This is a description of what you want'//,
-            //description: 'path/to/some.json'
-            //components: ['ACM']           // This value will be passed as a Jira field
-          }
+
+      // Declare options that are common to all Jira actions
+      options: {
+        jira: {   //https://virtru.atlassian.net/rest/api/latest/search?jql=project=WS+AND+status=%22OPEN%22+AND+issuetype+in%20(Bug,%20%22Story%22)
+          api_url: "https://virtru.atlassian.net/rest/api/2/" //,
+          //proxy : null,
+          //user: "your-username",     // Bad practice - You should pull JIRA_UN from ENV
+          //password: "your-password"  // Bad practice - You should pull JIRA_PW from ENV
+        }
+      },
+
+      // Create specific targets to perform different Jira tasks
+      createOpenFooStory: {
+        issue: {
+          project_id: 10400,
+          type_id: 7,                 // 7 = Story
+          state: 11,                   // 1 = Open, 11 = Done
+          summary: "Foo Project",
+          description: 'This is a description of what you want'//,
+          //description: 'path/to/some.json'
+          //name: "Foo Project",
+          //version: "1.0.1",
+          //build_label: "foo_project_1.0.1.7890"
+          //components: ['ACM']           // This value will be passed as a Jira field
+        }
+      },
+
+      // Create specific targets to perform different Jira tasks
+      createOpenFooTask: {
+        issue: {
+          project_id: 10400,
+          type_id: 7,                 // 7 = Story
+          state: 11,                   // 1 = Open, 11 = Done
+          summary: "Foo Project",
+          description: 'This is a description of what you want'//,
+          //description: 'path/to/some.json'
+          //name: "Foo Project",
+          //version: "1.0.1",
+          //build_label: "foo_project_1.0.1.7890"
+          //components: ['ACM']           // This value will be passed as a Jira field
         }
       }
+
+
     },
 
 
