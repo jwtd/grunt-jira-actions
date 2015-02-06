@@ -18,35 +18,28 @@ module.exports = function(grunt) {
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
 
-  grunt.registerTask('createJiraIssue', 'Create a issue in JIRA', function() {
+  grunt.registerMultiTask('createJiraIssue', 'Create an issue in JIRA', function() {
 
     grunt.log.writeln('createJiraIssue registered');
 
     var done = this.async();
 
-    grunt.log.writeln('process.env.JIRA_UN: ' + process.env.JIRA_UN);
-    grunt.log.writeln('process.env.JIRA_PW: ' + process.env.JIRA_PW);
+    // Validate that the minimum required attributes are present
+    //grunt.config.requires(['jira.api_url', 'project.jira_id', 'issue.type_id', 'summary', 'description']);
 
     // Merge task-specific and/or target-specific options with these defaults.
     var options = this.options({
       jira: {
-        api_url: null,
-        proxy : null,
-        user: process.env.JIRA_UN,
-        password: process.env.JIRA_PW
+        api_url: null
       },
       project: {
-        id: null,
-        name: null,
-        version: null,
-        build_label: null
+        jira_id: null
       },
       issue: {
         type_id: 7, // Story
         state: 1,    // 1 = Open, 11 = Done
         summary: null,
-        description: null,
-        components: 'ACM'
+        description: null
       }
     });
     grunt.verbose.writeflags(options);
@@ -55,6 +48,7 @@ module.exports = function(grunt) {
       grunt.verbose.writeln("Creating issue");
 
       var deferred = q.defer();
+
       //https://developer.atlassian.com/display/JIRADEV/JIRA+REST+API+Example+-+Create+Issue
       var issue_json = {
         "fields": {
@@ -71,22 +65,22 @@ module.exports = function(grunt) {
 
       grunt.verbose.writeln(JSON.stringify(issue_json));
 
+      // Call the Jira API
       request({
         //url: 'https://' + options.jira.user + ':' + options.jira.password + '@' + options.jira.api_url + "issue/",
+        method: 'POST',
         url: options.jira.api_url + "issue/",
+        proxy: options.jira.proxy,
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "User-Agent" : "grunt-jira-actions"
+          "User-Agent" : "grunt-jira-actions task for <%= pkg.author.name %>"
         },
-        method: 'POST',
         auth: {
-          user: options.jira.user,
-          pass: options.jira.password
+          user: (options.jira.user || process.env.JIRA_UN),
+          pass: (options.jira.password || process.env.JIRA_PW)
         },
-        proxy: options.jira.proxy,
         json: issue_json
-
       }, function(error, response, body){
         if (error) {
           deferred.reject(error);
@@ -104,29 +98,56 @@ module.exports = function(grunt) {
       return deferred.promise;
     };
 
+    // Call the create issue method and then update its state
+    createJiraIssue()
+      .then(function(issue_id){
+        grunt.log.writeln("Issue created.");
+        if (options.issue.state > 1) {
+          //return transitionIssueToState();
+          grunt.task.run('transitionJiraIssueToState:' + issue_id + ':' + issue.state);
+        }
+      })
+      .catch(function(error){
+        grunt.fatal(error);
+      })
+      .done(function(){
+        grunt.log.writeln("All updates completed.");
+        done();
+      });
+  });
+
+  /*
+   transitionJiraIssueToState allows you to convert a Jira issue to a given state,
+   such as Open, In Development, Resolved, Closed, Reopened, etc
+   */
+  grunt.registerMultiTask('transitionJiraIssueToState', 'Transition an issue in Jira to a specific state', function() {
+
+    grunt.log.writeln('transitionJiraIssueToState registered');
 
     // Update the status of an issue
-    var transitionIssueToState = function(issue_id){
+    var transitionJiraIssueToState = function(issue_id, state_id){
       grunt.verbose.writeln("Updating issue to state " + options.issue.state);
+
+      state_id = options.issue.state;
 
       var deferred = q.defer();
 
       request({
+        method: 'POST',
         url: options.jira.api_url + util.format("issue/%s/transitions", issue_id),
+        proxy: options.jira.proxy,
         headers: {
           "Content-Type": "application/json",
           "User-Agent" : "Node Request"
         },
-        method: 'POST',
         auth: {
-          user: options.jira.user,
-          pass: options.jira.password
+          user: (options.jira.user || process.env.JIRA_UN),
+          pass: (options.jira.password || process.env.JIRA_PW)
         },
-        proxy: options.jira.proxy,
         json: {
           "transition":
           {
-            "id": options.issue.state
+            "id": state_id
           }
         }
       }, function(error, response, body){
@@ -141,23 +162,16 @@ module.exports = function(grunt) {
         }
       });
 
-      grunt.log.writeln("Issue transitioned to state " + options.issue.state);
       return deferred.promise;
     };
 
     // Call the create issue method and then update its state
-    createJiraIssue()
-      .then(function(issue_id){
-        grunt.log.writeln("Issue created.");
-        if (options.issue.state > 1) {
-          return transitionIssueToState();
-        }
-      })
+    return transitionJiraIssueToState(issue_id, state_id)
       .catch(function(error){
         grunt.fatal(error);
       })
       .done(function(){
-        grunt.log.writeln("All updates completed.");
+        grunt.log.writeln("Issue transitioned to state " + state_id);
         done();
       });
 
