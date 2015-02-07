@@ -25,34 +25,31 @@ grunt.loadNpmTasks('grunt-jira-actions');
 ## The "jiraActions" task
 
 ### Overview
-In your project's Gruntfile, add a section named `jiraActions` to the data object passed into `grunt.initConfig()`.
+In your project's Gruntfile, add a section named `createJiraIssue` to the data object passed into `grunt.initConfig()`.
 
 ```js
 grunt.initConfig({
 
-  jiraActions: {
-    createIssue: {
+  createJiraIssue: {
+
+    // Declare options that are common to all Jira actions
+    options: {
+      jira_host: "virtru.atlassian.net",
+      // jira_protocol: 'https',
+      // jira_port: 443,
+      // jira_api_version: '2',
+      // jira_un: "your-username", // Bad practice - Better to allow task to pull JIRA_UN from ENV
+      // jira_pw: "your-password"  // Bad practice - Better to allow task to pull JIRA_PW from ENV
+      project_id: 123456
+    },
+
+    // Create specific targets to perform different Jira tasks
+    createOpenFooStory: {
       options: {
-        jira: {
-          api_url: "https://company.atlassian.net/rest/api/2/",
-          proxy : null,
-          user: "your-username",     // Bad practice - You should pull JIRA_UN from ENV
-          password: "your-password"  // Bad practice - You should pull JIRA_PW from ENV
-        },
-        project: {
-          jira_id: 123456,
-          name: "Foo Project",
-          version: "1.0.1",
-          build_label: "foo_project_1.0.1.7890"
-        },
-        issue: {
-          type_id: 7,                 // 7 = Story
-          state: 1,                   // 1 = Open, 11 = Done
-          summary: "Foo Project",
-          //description: 'path/to/some.json'
-          description: 'This is a description of what you want'
-          components: 'ACM'           // This value will be passed as a Jira field
-        }
+        issue_type_id: 7,         // 7 = Story
+        issue_state: 2,           // 1 = Open, 2 = Closed
+        summary: "Summary of my issue",
+        description: 'This value is the description of my issue'
       }
     }
   }
@@ -62,34 +59,30 @@ grunt.initConfig({
 
 ### Options
 
-- `jira`
-    - `api_url` - Url of the Jira api root
-    - `proxy` - Full url of proxy including port
-    - `user` - Jira username. Default value is process.env.JIRA_UN
-    - `password`  - Jira password. Default value is process.env.JIRA_PW
-- `project` - Default values are those specified in package.json
-    - `id` - Jira id of the project the story will be created in
-    - `name` - Default is the project name specified in package.json
-    - `version` - Default is the version specified in package.json
-    - `build_label` - The build that created this story
-- `issue` - The details of the story being created
-    - `type_id` - Jira id of the type of issue to post the story as
-        1 = Bug
-        2 = New Feature
-        3 = Task
-        4 = Improvement
-        5 = Sub-task
-        6 = Epic
-        7 = Story
-        8 = Technical Task
-    - `state` - The transition id that the story should end up in. Default is 1 which is Open.
-    - `summary` - Default is the project name specified in package.json (displayed in the story's subject)
-    - `description` - Path to a file whose contents will be the body of the story
-    - OTHER attributes specified in `issue` will be passed directly to Jira via the fields collection in the JSON. For more details check [developer.atlassian.com](https://developer.atlassian.com/display/JIRADEV/JIRA+REST+API+Example+-+Create+Issue)
+- `jira_host` - Url of the Jira api root
+- `jira_protocol` - The protocol which Jira's api uses for connections. Default is https.
+- `jira_port` - The port on which Jira's api allows connections on. Default is 443.
+- `jira_api_version` - The version of Jira's api to target. Default is '2'.
+- `jira_un` - Jira username. Default value is pulled from process.env.JIRA_UN
+- `jira_pw` - Jira password. Default value is pulled from process.env.JIRA_PW
+- `project_id` - Jira id of the project the story will be created in
+- `issue_type_id` - Jira id of the type of issue to post the story as
+    1 = Bug
+    2 = New Feature
+    3 = Task
+    4 = Improvement
+    5 = Sub-task
+    6 = Epic
+    7 = Story
+    8 = Technical Task
+- `issue_state` - The transition id that the story should end up in. Default is 1 which is Open. 2 is Closed.
+- `summary` - Default is the project name specified in package.json (displayed in the story's subject)
+- `description` - Path to a file whose contents will be the body of the story
+- OTHER attributes specified in `issue` will be passed directly to Jira via the fields collection in the JSON. For more details check [developer.atlassian.com](https://developer.atlassian.com/display/JIRADEV/JIRA+REST+API+Example+-+Create+Issue)
 
 ## Contact, feedback and bugs
 
-This interface was not developed or reviewed by Atlassian or OpenTable. They bare no responsibility for its quality, performance, or results. Use at your own risk.
+This interface was not developed or reviewed by Atlassian. They bare no responsibility for its quality, performance, or results. Use at your own risk.
 
 Please file bugs / issues and feature requests on the [issue tracker](https://github.com/jwtd/grunt-jira-actions/issues)
 
