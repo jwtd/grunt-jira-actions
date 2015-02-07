@@ -22,10 +22,10 @@ Once the plugin has been installed, it may be enabled inside your Gruntfile with
 grunt.loadNpmTasks('grunt-jira-actions');
 ```
 
-## The "jiraActions" task
+## The "createJiraIssue" task
 
 ### Overview
-In your project's Gruntfile, add a section named `createJiraIssue` to the data object passed into `grunt.initConfig()`.
+In your project's Gruntfile, add a section named `createJiraIssue` to the data object passed into `grunt.initConfig()`. Within that section, you can create any number of targets that add Jira issues of various types. Place common values in the top level options collection. Place target specific values in their respective target's option's collections.
 
 ```js
 grunt.initConfig({
@@ -52,6 +52,7 @@ grunt.initConfig({
         description: 'This value is the description of my issue'
       }
     }
+
   }
 
 });
@@ -59,22 +60,26 @@ grunt.initConfig({
 
 ### Options
 
+#### Environment Parameters
+For security reasons, the Jira username and password are pulled from environment variables.
+- process.env.JIRA_UN
+- process.env.JIRA_PW
+
+#### Target Parameters
 - `jira_host` - Url of the Jira api root
 - `jira_protocol` - The protocol which Jira's api uses for connections. Default is https.
 - `jira_port` - The port on which Jira's api allows connections on. Default is 443.
 - `jira_api_version` - The version of Jira's api to target. Default is '2'.
-- `jira_un` - Jira username. Default value is pulled from process.env.JIRA_UN
-- `jira_pw` - Jira password. Default value is pulled from process.env.JIRA_PW
 - `project_id` - Jira id of the project the story will be created in
 - `issue_type_id` - Jira id of the type of issue to post the story as
-    1 = Bug
-    2 = New Feature
-    3 = Task
-    4 = Improvement
-    5 = Sub-task
-    6 = Epic
-    7 = Story
-    8 = Technical Task
+ - 1 = Bug
+ - 2 = New Feature
+ - 3 = Task
+ - 4 = Improvement
+ - 5 = Sub-task
+ - 6 = Epic
+ - 7 = Story
+ - 8 = Technical Task
 - `issue_state` - The transition id that the story should end up in. Default is 1 which is Open. 2 is Closed.
 - `summary` - Default is the project name specified in package.json (displayed in the story's subject)
 - `description` - Path to a file whose contents will be the body of the story

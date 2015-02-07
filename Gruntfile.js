@@ -79,15 +79,27 @@ module.exports = function(grunt) {
       },
 
       // Create specific targets to perform different Jira tasks
-      createOpenFooStory: {
+      createAndCloseFooStory: {
         options: {
           issue_type_id: 7,         // 7 = Story
           issue_state: 2,           // 1 = Open, 2 = Done
-          summary: "Foo Project",
-          description: 'This is a description of what you want'//,
+          summary: "This is the foo story summary",
+          description: 'This is the foo story description.'
+          //description: 'path/to/some.json'
+        }
+      },
+
+      // Create specific targets to perform different Jira tasks
+      createOpenBarTask: {
+        options: {
+          issue_type_id: 3,         // 3 = Task
+          issue_state: 1,           // 1 = Open, 2 = Done
+          summary: "This is the bar task summary",
+          description: 'This is the bar task description.'
           //description: 'path/to/some.json'
         }
       }
+
     },
 
     // https://virtru.atlassian.net/rest/api/latest/search?jql=project=WS+AND+status=%22OPEN%22+AND+issuetype+in%20(Bug,%20%22Story%22)
@@ -120,7 +132,9 @@ module.exports = function(grunt) {
 
   // By default, lint and run all tests.
   //grunt.registerTask('default', ['eslint', 'test']);
-  grunt.registerTask('default', 'createJiraIssue:createOpenFooStory');
+  //grunt.registerTask('default', 'createJiraIssue:createAndCloseFooStory');
+  grunt.registerTask('default', 'createJiraIssue:createOpenBarTask');
+
 
 
 };

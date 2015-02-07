@@ -6,6 +6,9 @@
  * Licensed under the MIT license.
  */
 
+// node-jira docs can be found at:
+// http://jiraplanner.com/node_modules/jira/docs/jira.html
+
 'use strict';
 
 var request = require('request'),
@@ -24,15 +27,14 @@ module.exports = function(grunt) {
       jira_host: null,
       jira_protocol: 'https',
       jira_port: 443,
-      jira_un: process.env.JIRA_UN,
-      jira_pw: process.env.JIRA_PW,
       jira_api_version: '2',
       issue_type_id: 7, // Story
       issue_state: 1    // 1 = Open, 2 = Closed
+      issue_priority: 10000
     });
 
     // Connect to Jira
-    var jira = new JiraApi(options.jira_protocol, options.jira_host, options.jira_port, options.jira_un, options.jira_pw, options.jira_api_version);
+    var jira = new JiraApi(options.jira_protocol, options.jira_host, options.jira_port, process.env.JIRA_UN, process.env.JIRA_PW, options.jira_api_version);
 
     // Chainable method that creates an issue
     var createJiraIssue = function() {
@@ -50,6 +52,12 @@ module.exports = function(grunt) {
           "issuetype": {
             "id": options.issue_type_id
           }
+          //,"priority": {
+          //  "id": "1"     // 2 = Critical, 3 = Major, 10000 = Medium (default), 4 = Minor
+          //}
+          //, "components": [{
+          //  "id": "10000"
+          //}]
         }
       };
 
@@ -87,11 +95,11 @@ module.exports = function(grunt) {
             deferred.reject(error);
           } else {
             grunt.log.writeln('Transition request ' + response);
-            deferred.resolve(issue_id);
           }
         });
       }
 
+      deferred.resolve(issue_id);
       return deferred.promise;
     }
 
@@ -109,6 +117,61 @@ module.exports = function(grunt) {
       });
 
   });
+
+
+
+  // Comment on a Jira issue
+  grunt.registerMultiTask('commentOnJiraIssue', 'Add a comment to an issue in JIRA', function() {
+
+    var done = this.async();
+
+    // Default options
+    var options = this.options({
+      jira_host: null,
+      jira_protocol: 'https',
+      jira_port: 443,
+      jira_api_version: '2',
+      comment: 'No comment'
+    });
+
+    // Connect to Jira
+    var jira = new JiraApi(options.jira_protocol, options.jira_host, options.jira_port, process.env.JIRA_UN, process.env.JIRA_PW, options.jira_api_version);
+
+    // Chainable method that adds a comment to an issue
+    var addJiraComment = function() {
+      var deferred = q.defer();
+      grunt.log.writeln('Add a comment to an issue in Jira');
+
+      // json that Jira API is expecting
+      var comment_json = {
+        "body": options.comment
+      };
+
+      jira.addNewComment(comment_json, function(error, response){
+        if (error) {
+          grunt.log.writeln('Add comment request error: ' + error);
+          deferred.reject(error);
+        } else {
+          grunt.log.writeln('Add comment: ' + response);
+          deferred.resolve(response);
+        }
+      });
+
+      return deferred.promise;
+    }
+
+    // Call the transition issue method
+    addJiraComment()
+      .catch(function(error){
+        grunt.fatal(error);
+      })
+      .done(function(){
+        grunt.verbose.writeln("Comment addition complete.");
+        done();
+      });
+
+  });
+
 
 // url: options.jira_api_url + util.format("issue/%s/comment", issue_id),
 
