@@ -9,8 +9,8 @@
   ],
   "rules": {
     "block-scoped-var": 0,
-    "brace-style": ["2", "stroustrup"],
-    "camelcase": 1,
+    "brace-style": ["2", "1tbs"],
+    "camelcase": 0,
     "comma-style": [2, "last"],
     "consistent-this": [2, "self"],
     "default-case": 2, 

@@ -71,10 +71,7 @@ module.exports = function(grunt) {
 
       // Declare options that are common to all Jira actions
       options: {
-        jira_host: "virtru.atlassian.net",
-        //jira_proxy : null,
-        //jira_un: "your-username", // Bad practice - Better to allow task to pull JIRA_UN from ENV
-        //jira_pw: "your-password"  // Bad practice - Better to allow task to pull JIRA_PW from ENV
+        jira_host: 'virtru.atlassian.net',
         project_id: 10400
       },
 
@@ -83,27 +80,32 @@ module.exports = function(grunt) {
         options: {
           issue_type_id: 7,         // 7 = Story
           issue_state: 2,           // 1 = Open, 2 = Done
-          summary: "This is the foo story summary",
+          summary: 'This is the foo story summary',
           description: 'This is the foo story description.'
-          //description: 'path/to/some.json'
         }
       },
 
       // Create specific targets to perform different Jira tasks
       createOpenBarTask: {
         options: {
-          issue_type_id: 3,         // 3 = Task
-          issue_state: 1,           // 1 = Open, 2 = Done
-          summary: "This is the bar task summary",
-          description: 'This is the bar task description.'
-          //description: 'path/to/some.json'
+          issue_type: 'Task', // 3 = Task
+          issue_state: 2,     // 1 = Open, 2 = Done
+          summary: 'This is the bar task summary',
+          description: 'test/data/issue_body.txt',
+          optional_fields: {
+            'priority': {
+              'name': 'Major' //  'id': 2      // 2 = Critical, 3 = Major, 10000 = Medium (default), 4 = Minor
+            },
+            'components': [{
+              'id': '10804'
+            }]
+          }
         }
       }
 
     },
 
     // https://virtru.atlassian.net/rest/api/latest/search?jql=project=WS+AND+status=%22OPEN%22+AND+issuetype+in%20(Bug,%20%22Story%22)
-
 
     // Unit tests.
     nodeunit: {
@@ -117,6 +119,7 @@ module.exports = function(grunt) {
    *       Load grunt tasks from package.json       *
    *------------------------------------------------*/
 
+
   // Load from package.json
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
@@ -125,16 +128,14 @@ module.exports = function(grunt) {
   grunt.loadTasks('tasks');
 
 
-  // Whenever the "test" task is run, first clean the "tmp" dir, then run this
+  // Whenever the 'test' task is run, first clean the 'tmp' dir, then run this
   // plugin's task(s), then test the result.
-  grunt.registerTask('test', ['clean', 'jira_tasks', 'nodeunit']);
+  grunt.registerTask('test', ['clean', 'createJiraIssue', 'nodeunit']);
 
 
   // By default, lint and run all tests.
   //grunt.registerTask('default', ['eslint', 'test']);
   //grunt.registerTask('default', 'createJiraIssue:createAndCloseFooStory');
   grunt.registerTask('default', 'createJiraIssue:createOpenBarTask');
-
-
 
 };

@@ -1,0 +1,9 @@
+As a foo, I would like bar, so that I don't have to baz.
+
+*Acceptance Criteria*
+* Bar must exist
+* Foo should not have to baz
+* Bazz should not be present
+
+*Details*
+Look up bar with [Google Search|http://www.google.com].

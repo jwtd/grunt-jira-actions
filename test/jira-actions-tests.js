@@ -2,12 +2,12 @@ var should = require('should'),
     fs = require('fs');
 
 
-describe('Jira Story', function(){
+describe('Create Jira issues', function(){
 
   describe('creation request', function(){
 
-    var actual = JSON.parse(fs.readFileSync('tests/data/actual/story-request.json'));
-    var expected = JSON.parse(fs.readFileSync('tests/data/expected/story-request.json'));
+    var actual = JSON.parse(fs.readFileSync('tests/data/actual/create-story-request.json'));
+    var expected = JSON.parse(fs.readFileSync('tests/data/expected/create-story-request.json'));
 
     it('should set the host correctly', function(){
         actual.headers.host.should.be.equal(expected.headers.host);
@@ -24,8 +24,8 @@ describe('Jira Story', function(){
     it('should send the correct body', function(){
 
       // removing the date field, as this cannot be included in a direct compare
-      var actual_no_dates = JSON.parse(fs.readFileSync('tests/data/actual/story-request.json'));
-      var expected_no_dates = JSON.parse(fs.readFileSync('tests/data/expected/story-request.json'));
+      var actual_no_dates = JSON.parse(fs.readFileSync('tests/data/actual/create-story-request.json'));
+      var expected_no_dates = JSON.parse(fs.readFileSync('tests/data/expected/create-story-request.json'));
 
       // TODO: Update date fields
       //actual_no_dates.body.fields.customfield_11502 = null;
@@ -40,9 +40,10 @@ describe('Jira Story', function(){
       //var one_minute_in_the_past = new Date().getTime() - 60000;
       //actual_date.getTime().should.be.above(one_minute_in_the_past)
     });
+
   });
 
-  describe('transition story to done', function(){
+  describe('transition story', function(){
 
     var actual = JSON.parse(fs.readFileSync('tests/data/actual/transition-to-done-request.json'));
     var expected = JSON.parse(fs.readFileSync('tests/data/expected/transition-to-done-request.json'));
@@ -63,4 +64,5 @@ describe('Jira Story', function(){
         actual.body.should.be.eql(expected.body);
     });
   });
+
 });

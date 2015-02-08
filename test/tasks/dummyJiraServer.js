@@ -2,7 +2,7 @@ var http = require("http"),
     fs = require("fs"),
     server = {},
 
-    createCbbRequest = fs.openSync('tests/data/actual/story-request.json', 'w'),
+    createCbbRequest = fs.openSync('tests/data/actual/create-story-request.json', 'w'),
     doneTransitionRequest = fs.openSync('tests/data/actual/transition-to-done-request.json', 'w');
 
 module.exports = function(grunt){

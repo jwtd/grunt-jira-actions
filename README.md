@@ -22,7 +22,7 @@ Once the plugin has been installed, it may be enabled inside your Gruntfile with
 grunt.loadNpmTasks('grunt-jira-actions');
 ```
 
-## The "createJiraIssue" task
+## The 'createJiraIssue' task
 
 ### Overview
 In your project's Gruntfile, add a section named `createJiraIssue` to the data object passed into `grunt.initConfig()`. Within that section, you can create any number of targets that add Jira issues of various types. Place common values in the top level options collection. Place target specific values in their respective target's option's collections.
@@ -34,12 +34,12 @@ grunt.initConfig({
 
     // Declare options that are common to all Jira actions
     options: {
-      jira_host: "virtru.atlassian.net",
+      jira_host: 'virtru.atlassian.net',
       // jira_protocol: 'https',
       // jira_port: 443,
       // jira_api_version: '2',
-      // jira_un: "your-username", // Bad practice - Better to allow task to pull JIRA_UN from ENV
-      // jira_pw: "your-password"  // Bad practice - Better to allow task to pull JIRA_PW from ENV
+      // jira_un: 'your-username', // Bad practice - Better to allow task to pull JIRA_UN from ENV
+      // jira_pw: 'your-password'  // Bad practice - Better to allow task to pull JIRA_PW from ENV
       project_id: 123456
     },
 
@@ -48,7 +48,7 @@ grunt.initConfig({
       options: {
         issue_type_id: 7,         // 7 = Story
         issue_state: 2,           // 1 = Open, 2 = Closed
-        summary: "Summary of my issue",
+        summary: 'Summary of my issue',
         description: 'This value is the description of my issue'
       }
     }
