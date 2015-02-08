@@ -78,8 +78,8 @@ module.exports = function(grunt) {
       // Create specific targets to perform different Jira tasks
       createAndCloseFooStory: {
         options: {
-          issue_type_id: 7,         // 7 = Story
-          issue_state: 2,           // 1 = Open, 2 = Done
+          issue_type: 'Story', // Story, Epic, Task, Technical Task, Sub-Task, Bug, Improvement, New Feature
+          issue_state: 1,      // 1 = Open, 2 = Done
           summary: 'This is the foo story summary',
           description: 'This is the foo story description.'
         }
@@ -88,13 +88,13 @@ module.exports = function(grunt) {
       // Create specific targets to perform different Jira tasks
       createOpenBarTask: {
         options: {
-          issue_type: 'Task', // 3 = Task
+          issue_type: 'Task',
           issue_state: 2,     // 1 = Open, 2 = Done
           summary: 'This is the bar task summary',
           description: 'test/data/issue_body.txt',
           optional_fields: {
             'priority': {
-              'name': 'Major' //  'id': 2      // 2 = Critical, 3 = Major, 10000 = Medium (default), 4 = Minor
+              'name': 'Major' // Critical, Major, Medium (default), Minor
             },
             'components': [{
               'id': '10804'
