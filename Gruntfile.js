@@ -61,8 +61,14 @@ module.exports = function(grunt) {
     },
 
 
+    // Unit tests.
+    nodeunit: {
+      tests: ['test/*_test.js']
+    },
+
+
     /*--------------------------------*
-     *         Jira Actions           *
+     *         Add Jira Issues        *
      *--------------------------------*/
 
 
@@ -106,6 +112,10 @@ module.exports = function(grunt) {
     },
 
 
+    /*--------------------------------*
+     *       Add Jira Comments        *
+     *--------------------------------*/
+
     // Add comments to existing Jira issues
     addJiraComment: {
 
@@ -130,14 +140,9 @@ module.exports = function(grunt) {
         }
       }
 
-    },
+    }
 
     // https://virtru.atlassian.net/rest/api/latest/search?jql=project=WS+AND+status=%22OPEN%22+AND+issuetype+in%20(Bug,%20%22Story%22)
-
-    // Unit tests.
-    nodeunit: {
-      tests: ['test/*_test.js']
-    }
 
   });
 
