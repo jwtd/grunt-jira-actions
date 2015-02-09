@@ -1,0 +1,3 @@
+I took a look at bar, and it doesn't seem feasible. Foo will just have to bar until we figure it out.
+
+Feel free to use [Google Search|http://www.google.com] to verify my research.

@@ -66,7 +66,7 @@ module.exports = function(grunt) {
      *--------------------------------*/
 
 
-    // Configuration to be run (and then tested).
+    // Create Jira issues
     createJiraIssue: {
 
       // Declare options that are common to all Jira actions
@@ -100,6 +100,33 @@ module.exports = function(grunt) {
               'id': '10804'
             }]
           }
+        }
+      }
+
+    },
+
+
+    // Add comments to existing Jira issues
+    addJiraComment: {
+
+      // Declare options that are common to all Jira actions
+      options: {
+        jira_host: 'virtru.atlassian.net'
+      },
+
+      // Create specific targets to perform different Jira tasks
+      onIssue: {
+        options: {
+          // issue_id: This value will be passed in via target call
+          comment: 'This is a comment on the story.'
+        }
+      },
+
+      // Create specific targets to perform different Jira tasks
+      fromFileToIssue: {
+        options: {
+          // issue_id: This value will be passed in via target call such as addJiraComment:fromFileToIssue:19400
+          comment: 'test/data/comment_body.txt'
         }
       }
 

@@ -11,35 +11,53 @@
 
 'use strict';
 
-var request = require('request'),
+var util = require('util'),
     q = require('q'),
     JiraApi = require('jira').JiraApi;
-var util = require('util');
 
 module.exports = function(grunt) {
 
+
+  // Options common to all targets
+  var common_options = {
+    env_var_for_jira_username: 'JIRA_UN',
+    env_var_for_jira_password: 'JIRA_PW',
+    jira_host: null,
+    jira_protocol: 'https',
+    jira_port: 443,
+    jira_api_version: '2'
+  };
+
+
   // Make sure Jira credentials have been set in ENV
-  if (!process.env.JIRA_UN){
-    grunt.fail.fatal('JIRA_UN environment variable not found. JIRA_UN and JIRA_PW must be set or JIRA calls will fail.');
-  }
-  if (!process.env.JIRA_PW){
-    grunt.fail.fatal('JIRA_PW environment variable not found. JIRA_UN and JIRA_PW must be set or JIRA calls will fail.');
+  function _validate_env_vars(env_un, env_pw) {
+    if (!process.env[env_un]) {
+      grunt.fail.fatal('Environment variable not found. ENV[' + env_un + '] must be set or JIRA calls will fail.');
+    }
+    if (!process.env[env_pw]) {
+      grunt.fail.fatal('Environment variable not found. ENV[' + env_pw + '] must be set or JIRA calls will fail.');
+    }
   }
 
 
   // Add or update existing properties on obj1 with values from obj2
   function _mergeRecursive(obj1, obj2) {
-
-    //iterate over all the properties in the object which is being consumed
+    // Iterate over all the properties in the object which is being consumed
     for (var p in obj2) {
       // Property in destination object set; update its value.
-      if ( obj2.hasOwnProperty(p) && typeof obj1[p] !== "undefined" ) {
+      if ( obj2.hasOwnProperty(p) && typeof obj1[p] !== 'undefined' ) {
         _mergeRecursive(obj1[p], obj2[p]);
       } else {
-        //We don't have that level in the hierarchy so add it
+        // We don't have that level in the hierarchy so add it
         obj1[p] = obj2[p];
       }
     }
+  }
+
+
+  // When verbose is enabled, display the object's structure
+  function _verbose_inspect(msg, obj) {
+    grunt.verbose.writeln(msg + ' ' + util.inspect(obj, {showHidden: false, depth: null}));
   }
 
 
@@ -49,35 +67,43 @@ module.exports = function(grunt) {
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
 
-    // Setup default options
+    // Setup task specific default options
     var default_options = {
-      jira_host: null,
-      jira_protocol: 'https',
-      jira_port: 443,
-      jira_api_version: '2',
-      issue_type: 'Story',   // 7 = Story
+      issue_type: 'Story',   // Story, Epic, Task, Technical Task, Sub-Task, Bug, Improvement, New Feature
       issue_state: 1,        // 1 = Open, 2 = Closed
-      optional_fields: null
+      optional_fields: null  // JSON that should be merged into the request
     };
+
+    // Extend default task specific options with default common options
+    _mergeRecursive(default_options, common_options);
+
+    // Overwrite default values with values specified in the target
     var options = this.options(default_options);
+    _verbose_inspect('Create issue options: ', options);
+
+    // Make sure Jira creds are set
+    _validate_env_vars(options.env_var_for_jira_username, options.env_var_for_jira_password);
 
     // Connect to Jira
-    var jira = new JiraApi(options.jira_protocol, options.jira_host, options.jira_port, process.env.JIRA_UN, process.env.JIRA_PW, options.jira_api_version);
+    var jira = new JiraApi(
+      options.jira_protocol,
+      options.jira_host,
+      options.jira_port,
+      process.env[options.env_var_for_jira_username],
+      process.env[options.env_var_for_jira_password],
+      options.jira_api_version);
 
     // Chainable method that creates an issue
     function createJiraIssue() {
       var deferred = q.defer();
       grunt.log.writeln('Create Jira issue');
 
-      // If the description is a file path, import it as though it
+      // If the description is a file path, use its contents as the description
       var description = options.description;
       if (grunt.file.exists(description)) {
         var ext = description.split('.').pop().toLowerCase();
-        if (ext === 'json') {
-          description = grunt.file.readJSON(description);
-        } else {
-          description = grunt.file.read(description);
-        }
+        grunt.verbose.writeln('Setting issue description to be contents of ' + ext + ' file ' + description);
+        description = (ext === 'json') ? grunt.file.readJSON(description) : grunt.file.read(description);
       }
 
       // json that Jira API is expecting
@@ -96,15 +122,17 @@ module.exports = function(grunt) {
 
       // Add any other options passed in to the JSON
       if (options.optional_fields != null){
-        _mergeRecursive(issue_json.fields, options.optional_fields)
+        _mergeRecursive(issue_json.fields, options.optional_fields);
       }
-      grunt.verbose.writeln('Create issue json:\n' + util.inspect(issue_json, {showHidden: false, depth: null}));
+      _verbose_inspect('Create issue json: ', issue_json);
 
+      // Call Jira REST API using node-jira
       jira.addNewIssue(issue_json, function(error, response){
         if (error) {
           deferred.reject(error);
         } else {
-          grunt.verbose.writeln('New issue\'s id: ' + response.id);
+          _verbose_inspect('Create issue response: ', response);
+          grunt.log.writeln('New issue: ' + response.key + '(' + response.id + ')');
           deferred.resolve(response.id);
         }
       });
@@ -126,13 +154,13 @@ module.exports = function(grunt) {
             'id': options.issue_state
           }
         };
-        grunt.verbose.writeln('Transition issue json:\n' + util.inspect(transition_json, {showHidden: false, depth: null}));
+        _verbose_inspect('Transition issue json: ', transition_json);
 
         jira.transitionIssue(issue_id, transition_json, function(error, response){
           if (error) {
             deferred.reject(error);
           } else {
-            grunt.verbose.writeln('Transition request ' + response);
+            _verbose_inspect('Transition response: ', response);
             deferred.resolve(issue_id);
           }
         });
@@ -144,14 +172,15 @@ module.exports = function(grunt) {
     // Call the create issue method and then transition it if necessary
     createJiraIssue()
       .then(function(issue_id){
+        grunt.config('jira.last_issue_id', issue_id);
         return transitionJiraIssue(issue_id);
       })
       .catch(function(error){
-        grunt.log.writeln('Create issue request error: ' + util.inspect(error, {showHidden: false, depth: null}));
+        _verbose_inspect('Create issue error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
-        grunt.verbose.writeln('All updates completed.');
+        grunt.log.writeln('Create issue completed');
         done();
       });
 
@@ -160,38 +189,53 @@ module.exports = function(grunt) {
 
 
   // Comment on a Jira issue
-  grunt.registerMultiTask('commentOnJiraIssue', 'Add a comment to an issue in JIRA', function() {
+  grunt.registerMultiTask('addJiraComment', 'Add a comment to an issue in JIRA', function(issue_id) {
 
     var done = this.async();
 
-    // Default options
-    var options = this.options({
-      jira_host: null,
-      jira_protocol: 'https',
-      jira_port: 443,
-      jira_api_version: '2',
-      comment: 'No comment'
-    });
+    // Setup task specific default options
+    var default_options = {
+      issue_id: issue_id || grunt.config('jira.last_issue_id'),
+      comment: 'Comment body was not specified'
+    };
+
+    // Extend default task specific options with default common options
+    _mergeRecursive(default_options, common_options);
+
+    // Overwrite default values with values specified in the target
+    var options = this.options(default_options);
+    _verbose_inspect('Add comment options: ', options);
+
+    // Make sure Jira creds are set
+    _validate_env_vars(options.env_var_for_jira_username, options.env_var_for_jira_password);
 
     // Connect to Jira
-    var jira = new JiraApi(options.jira_protocol, options.jira_host, options.jira_port, process.env.JIRA_UN, process.env.JIRA_PW, options.jira_api_version);
+    var jira = new JiraApi(
+      options.jira_protocol,
+      options.jira_host,
+      options.jira_port,
+      process.env[options.env_var_for_jira_username],
+      process.env[options.env_var_for_jira_password],
+      options.jira_api_version);
+
+    // If the comment is a file path, use its contents as the comment
+    var comment = options.comment;
+    if (grunt.file.exists(comment)) {
+      var ext = comment.split('.').pop().toLowerCase();
+      grunt.verbose.writeln('Comment text will be contents of ' + ext + ' file ' + comment);
+      comment = (ext === 'json') ? grunt.file.readJSON(comment) : grunt.file.read(comment);
+    }
 
     // Chainable method that adds a comment to an issue
     function addJiraComment() {
       var deferred = q.defer();
       grunt.log.writeln('Add a comment to an issue in Jira');
 
-      // json that Jira API is expecting
-      var comment_json = {
-        'body': options.comment
-      };
-
-      jira.addNewComment(comment_json, function(error, response){
+      // Pass comment directly to node-jira (instead of json)
+      jira.addComment(issue_id, comment, function(error, response){
         if (error) {
-          grunt.log.writeln('Add comment request error: ' + error);
           deferred.reject(error);
         } else {
-          grunt.log.writeln('Add comment: ' + response);
           deferred.resolve(response);
         }
       });
@@ -201,17 +245,18 @@ module.exports = function(grunt) {
 
     // Call the transition issue method
     addJiraComment()
+      .then(function(response){
+        _verbose_inspect('Add comment response: ', response);
+      })
       .catch(function(error){
+        _verbose_inspect('Add comment error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
-        grunt.verbose.writeln('Comment addition complete.');
+        grunt.log.writeln('Add comment completed');
         done();
       });
 
   });
-
-
-// url: options.jira_api_url + util.format('issue/%s/comment', issue_id),
 
 };

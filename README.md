@@ -34,29 +34,61 @@ grunt.initConfig({
 
     // Declare options that are common to all Jira actions
     options: {
-      jira_host: 'virtru.atlassian.net',
+      jira_host: 'foo.atlassian.net',
       // jira_protocol: 'https',
       // jira_port: 443,
       // jira_api_version: '2',
-      // jira_un: 'your-username', // Bad practice - Better to allow task to pull JIRA_UN from ENV
-      // jira_pw: 'your-password'  // Bad practice - Better to allow task to pull JIRA_PW from ENV
+      // env_var_for_jira_username: 'YOUR_OWN_ENV_VAR_FOR_JIRA_USERNAME',
+      // env_var_for_jira_password: 'YOUR_OWN_ENV_VAR_FOR_JIRA_PASSWORD',
       project_id: 123456
     },
 
     // Create specific targets to perform different Jira tasks
     createOpenFooStory: {
       options: {
-        issue_type_id: 7,         // 7 = Story
-        issue_state: 2,           // 1 = Open, 2 = Closed
+
+        issue_type: 'Story',      // Story, Epic, Task, Technical Task, Sub-Task, Bug, Improvement, New Feature
+        issue_state: 1,           // 1 = Open, 2 = Closed
         summary: 'Summary of my issue',
         description: 'This value is the description of my issue'
       }
     }
 
+
+    // Add comments to existing Jira issues
+    addJiraComment: {
+
+      // Declare options that are common to all Jira actions
+      options: {
+        jira_host: 'foo.atlassian.net'
+      },
+
+      // Create specific targets to perform different Jira tasks
+      onIssue: {
+        options: {
+          // issue_id: This value will be passed in via target call such as addJiraComment:onIssue:19400
+          comment: 'This is a comment on the story.'
+        }
+      },
+
+      // Create specific targets to perform different Jira tasks
+      fromFileToIssue: {
+        options: {
+          // issue_id: This value will be passed in via target call such as addJiraComment:fromFileToIssue:19400
+          comment: 'test/data/comment_body.txt'
+        }
+      }
+
+    }
   }
 
 });
 ```
+
+      issue_type: 'Story',   // Story, Epic, Task, Technical Task, Sub-Task, Bug, Improvement, New Feature
+      issue_state: 1,        // 1 = Open, 2 = Closed
+      optional_fields: null  // JSON that should be merged into the request
+
 
 ### Options
 
@@ -65,25 +97,35 @@ For security reasons, the Jira username and password are pulled from environment
 - process.env.JIRA_UN
 - process.env.JIRA_PW
 
-#### Target Parameters
-- `jira_host` - Url of the Jira api root
-- `jira_protocol` - The protocol which Jira's api uses for connections. Default is https.
+#### Parameters Common to All Targets
+- `env_var_for_jira_username` - Environment variable that holds Jira username. Default is 'JIRA_UN'.
+- `env_var_for_jira_password` - Environment variable that holds Jira password. Default is 'JIRA_PW'.
+- `jira_host` - Base domain of your Jira instance's api root (i.e. 'foo.atlassian.net').
+- `jira_protocol` - The protocol which Jira's api uses for connections. Default is 'https'.
 - `jira_port` - The port on which Jira's api allows connections on. Default is 443.
 - `jira_api_version` - The version of Jira's api to target. Default is '2'.
-- `project_id` - Jira id of the project the story will be created in
-- `issue_type_id` - Jira id of the type of issue to post the story as
- - 1 = Bug
- - 2 = New Feature
- - 3 = Task
- - 4 = Improvement
- - 5 = Sub-task
- - 6 = Epic
- - 7 = Story
- - 8 = Technical Task
+
+#### Parameters specific to `createJiraIssue` target
+- `project_id` - Jira id of the project the story will be created in.
+- `issue_type` - Jira name of the type of issue to be created. Default is 'Story'. Valid values are:
+ - Bug
+ - New Feature
+ - Task
+ - Improvement
+ - Sub-task
+ - Epic
+ - Story
+ - Technical Task
 - `issue_state` - The transition id that the story should end up in. Default is 1 which is Open. 2 is Closed.
 - `summary` - Default is the project name specified in package.json (displayed in the story's subject)
-- `description` - Path to a file whose contents will be the body of the story
-- OTHER attributes specified in `issue` will be passed directly to Jira via the fields collection in the JSON. For more details check [developer.atlassian.com](https://developer.atlassian.com/display/JIRADEV/JIRA+REST+API+Example+-+Create+Issue)
+- `description` - The description of the issue being created. If value is a valid file path, the contents of the file will be used (plain txt and JSON are supported).
+- `optional_fields` - JSON to be added to the create issue call's fields JSON. For more details check [developer.atlassian.com](https://developer.atlassian.com/display/JIRADEV/JIRA+REST+API+Example+-+Create+Issue)
+
+#### Parameters specific to `addJiraComment` target
+- `issue_id` - Jira id of the project the story will be created in.
+- `comment` - The body of the comment being added. If value is a valid file path, the contents of the file will be used (plain txt and JSON are supported).
+
+
 
 ## Contact, feedback and bugs
 
