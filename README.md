@@ -22,7 +22,10 @@ Once the plugin has been installed, it may be enabled inside your Gruntfile with
 grunt.loadNpmTasks('grunt-jira-actions');
 ```
 
-## Parameters Common to All Tasks
+
+## Performing Actions in Jira
+
+### Parameters Common to All Tasks
 - `env_var_for_jira_username` - Environment variable that holds Jira username. Default is 'JIRA_UN'.
 - `env_var_for_jira_password` - Environment variable that holds Jira password. Default is 'JIRA_PW'.
 - `jira_host` - Base domain of your Jira instance's api root (i.e. 'foo.atlassian.net').
@@ -31,11 +34,11 @@ grunt.loadNpmTasks('grunt-jira-actions');
 - `jira_api_version` - The version of Jira's api to target. Default is '2'.
 
 
-## Creating Jira Issues with 'createJiraIssue'
+### Creating Jira Issues with 'createJiraIssue'
 
 In your project's Gruntfile, add a section named `createJiraIssue` to the data object passed into `grunt.initConfig()`. Within that section, you can create any number of targets that add Jira issues of various types. Place common values in the top level options collection. Place target specific values in their respective target's option's collections.
 
-### Parameters specific to `createJiraIssue` target
+#### Parameters specific to `createJiraIssue` target
 - `project_id` - Jira id of the project the story will be created in.
 - `issue_type` - Jira name of the type of issue to be created. Default is 'Story'. Valid values are:
  - Bug
@@ -51,7 +54,7 @@ In your project's Gruntfile, add a section named `createJiraIssue` to the data o
 - `description` - The description of the issue being created. If value is a valid file path, the contents of the file will be used (plain txt and JSON are supported).
 - `optional_fields` - JSON to be added to the create issue call's fields JSON. For more details check [developer.atlassian.com](https://developer.atlassian.com/display/JIRADEV/JIRA+REST+API+Example+-+Create+Issue)
 
-### Example
+#### Example
 
 ```js
 grunt.initConfig({
@@ -97,15 +100,16 @@ grunt.initConfig({
 
 });
 ```
-## Add Comments to Existing Issues with 'addJiraComment'
+
+### Add Comments to Existing Issues with 'addJiraComment'
 
 In your project's Gruntfile, add a section named `addJiraComment` to the data object passed into `grunt.initConfig()`. Within that section, you can create any number of targets that will add Jira comments to existing issues. Place common values in the top level options collection. Place target specific values in their respective target's option's collections.
 
-### Parameters specific to `addJiraComment` target
+#### Parameters specific to `addJiraComment` target
 - `issue_id` - Jira id of the project the story will be created in.
 - `comment` - The body of the comment being added. If value is a valid file path, the contents of the file will be used (plain txt and JSON are supported).
 
-### Example
+#### Example
 
 ```js
 grunt.initConfig({
