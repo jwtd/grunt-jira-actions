@@ -18,15 +18,17 @@ var util = require('util'),
 module.exports = function(grunt) {
 
 
-  // Options common to all targets
-  var common_options = {
-    env_var_for_jira_username: 'JIRA_UN',
-    env_var_for_jira_password: 'JIRA_PW',
-    jira_host: null,
-    jira_protocol: 'https',
-    jira_port: 443,
-    jira_api_version: '2'
-  };
+  // Return Jira global config
+  function common_options() {
+    return {
+      env_var_for_jira_username: grunt.config('env_var_for_jira_username') || 'JIRA_UN',
+      env_var_for_jira_password: grunt.config('env_var_for_jira_password') || 'JIRA_PW',
+      jira_protocol: grunt.config('jira_protocol') || 'https',
+      jira_host: grunt.config('jira_host') || null,
+      jira_port: grunt.config('jira_port') || 443,
+      jira_api_version: grunt.config('jira_api_version') || '2'
+    }
+  }
 
 
   // Make sure Jira credentials have been set in ENV
@@ -61,6 +63,27 @@ module.exports = function(grunt) {
   }
 
 
+  // Setup global Jira configuration
+  grunt.registerTask('setJiraConfig', 'Set common JIRA configuration to be used as defaults for all Jira Action tasks and targets', function() {
+
+    // Overwrite default values with values specified in the target
+    var options = this.options(common_options());
+    _verbose_inspect('setJiraConfig options: ', options);
+
+    // Make sure Jira creds are set
+    _validate_env_vars(options.env_var_for_jira_username, options.env_var_for_jira_password);
+
+    // Save Jira options as global config
+    grunt.config('env_var_for_jira_username', options.env_var_for_jira_username);
+    grunt.config('env_var_for_jira_password', options.env_var_for_jira_password);
+    grunt.config('jira_protocol', options.jira_protocol);
+    grunt.config('jira_host', options.jira_host);
+    grunt.config('jira_port', options.jira_port);
+    grunt.config('jira_api_version', options.jira_api_version);
+
+  });
+
+
   // Create a Jira issue
   grunt.registerMultiTask('createJiraIssue', 'Create an issue in JIRA', function() {
 
@@ -75,7 +98,7 @@ module.exports = function(grunt) {
     };
 
     // Extend default task specific options with default common options
-    _mergeRecursive(default_options, common_options);
+    _mergeRecursive(default_options, common_options());
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
@@ -132,13 +155,65 @@ module.exports = function(grunt) {
           deferred.reject(error);
         } else {
           _verbose_inspect('Create issue response: ', response);
-          grunt.log.writeln('New issue: ' + response.key + '(' + response.id + ')');
+          grunt.log.writeln('Issue created (id = ' + response.id + ') ' + response.key + ' : ' + options.summary);
           deferred.resolve(response.id);
         }
       });
 
       return deferred.promise;
     }
+
+    // Call the create issue method and then transition it if necessary
+    createJiraIssue()
+      .then(function(issue_id){
+        grunt.config('jira.last_issue_id', issue_id);
+        if (options.issue_state > 1) {
+          grunt.task.run('transitionJiraIssue:' + issue_id + ':' + options.issue_state);
+        }
+      })
+      .catch(function(error){
+        _verbose_inspect('Create issue error: ', error);
+        grunt.fatal(error);
+      })
+      .done(function(){
+        grunt.log.writeln('Create issue completed');
+        done();
+      });
+
+  });
+
+
+
+  // Transition a Jira issue
+  grunt.registerTask('transitionJiraIssue', 'Transition an issue in JIRA', function(issue_id, issue_state) {
+
+    // Prepare promise chain for API calls (which are asynchronous)
+    var done = this.async();
+
+    // Setup task specific default options
+    var default_options = {
+      issue_id: issue_id || grunt.config('jira.last_issue_id'),
+      issue_state: issue_state  // 1 = Open, 2 = Closed
+    };
+
+    // Extend default task specific options with default common options
+    _mergeRecursive(default_options, common_options());
+
+    // Overwrite default values with values specified in the target
+    var options = this.options(default_options);
+    _verbose_inspect('Transition issue options: ', options);
+
+    // Make sure Jira creds are set
+    _validate_env_vars(options.env_var_for_jira_username, options.env_var_for_jira_password);
+
+    // Connect to Jira
+    var jira = new JiraApi(
+      options.jira_protocol,
+      options.jira_host,
+      options.jira_port,
+      process.env[options.env_var_for_jira_username],
+      process.env[options.env_var_for_jira_password],
+      options.jira_api_version);
 
     // Chainable method to transition an issue to a specific state
     function transitionJiraIssue(issue_id) {
@@ -156,7 +231,7 @@ module.exports = function(grunt) {
         };
         _verbose_inspect('Transition issue json: ', transition_json);
 
-        jira.transitionIssue(issue_id, transition_json, function(error, response){
+        jira.transitionIssue(options.issue_id, transition_json, function(error, response){
           if (error) {
             deferred.reject(error);
           } else {
@@ -169,18 +244,14 @@ module.exports = function(grunt) {
       return deferred.promise;
     }
 
-    // Call the create issue method and then transition it if necessary
-    createJiraIssue()
-      .then(function(issue_id){
-        grunt.config('jira.last_issue_id', issue_id);
-        return transitionJiraIssue(issue_id);
-      })
+    // Call the transition issue method and then transition it if necessary
+    transitionJiraIssue()
       .catch(function(error){
-        _verbose_inspect('Create issue error: ', error);
+        _verbose_inspect('Transition issue error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
-        grunt.log.writeln('Create issue completed');
+        grunt.log.writeln('Transition issue completed');
         done();
       });
 
@@ -200,7 +271,7 @@ module.exports = function(grunt) {
     };
 
     // Extend default task specific options with default common options
-    _mergeRecursive(default_options, common_options);
+    _mergeRecursive(default_options, common_options());
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);

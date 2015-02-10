@@ -68,6 +68,23 @@ module.exports = function(grunt) {
 
 
     /*--------------------------------*
+     *    Setup Jira Configuration    *
+     *--------------------------------*/
+
+
+    setJiraConfig: {
+      options: {
+        env_var_for_jira_username: 'JIRA_UN',
+        env_var_for_jira_password: 'JIRA_PW',
+        jira_host: 'virtru.atlassian.net',
+        jira_protocol: 'https',
+        jira_port: 443,
+        jira_api_version: '2'
+      }
+    },
+
+
+    /*--------------------------------*
      *         Add Jira Issues        *
      *--------------------------------*/
 
@@ -109,6 +126,18 @@ module.exports = function(grunt) {
         }
       }
 
+    },
+
+
+    /*--------------------------------*
+     *     Transition Jira Issue      *
+     *--------------------------------*/
+
+
+    transitionJiraIssue: {
+      options: {
+        jira_host: 'virtru.atlassian.net'
+      }
     },
 
 
@@ -168,6 +197,6 @@ module.exports = function(grunt) {
   // By default, lint and run all tests.
   //grunt.registerTask('default', ['eslint', 'test']);
   //grunt.registerTask('default', 'createJiraIssue:createAndCloseFooStory');
-  grunt.registerTask('default', 'createJiraIssue:createOpenBarTask');
+  grunt.registerTask('default', ['setJiraConfig', 'createJiraIssue:createOpenBarTask']);
 
 };
