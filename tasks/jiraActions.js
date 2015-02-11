@@ -115,11 +115,11 @@ module.exports = function(grunt) {
       process.env[options.env_var_for_jira_username],
       process.env[options.env_var_for_jira_password],
       options.jira_api_version);
+    grunt.config('last_jira_connection', jira);
 
     // Chainable method that creates an issue
     function createJiraIssue() {
       var deferred = q.defer();
-      grunt.log.writeln('Create Jira issue');
 
       // If the description is a file path, use its contents as the description
       var description = options.description;
@@ -176,7 +176,7 @@ module.exports = function(grunt) {
         grunt.fatal(error);
       })
       .done(function(){
-        grunt.log.writeln('Create issue completed');
+        grunt.verbose.writeln('Create issue completed');
         done();
       });
 
@@ -207,13 +207,21 @@ module.exports = function(grunt) {
     _validate_env_vars(options.env_var_for_jira_username, options.env_var_for_jira_password);
 
     // Connect to Jira
-    var jira = new JiraApi(
-      options.jira_protocol,
-      options.jira_host,
-      options.jira_port,
-      process.env[options.env_var_for_jira_username],
-      process.env[options.env_var_for_jira_password],
-      options.jira_api_version);
+    var jira;
+    if (options.jira_host == null && grunt.config('last_jira_connection')) {
+      jira = grunt.config('last_jira_connection');
+    } else if (options.jira_host != null) {
+      jira = new JiraApi(
+        options.jira_protocol,
+        options.jira_host,
+        options.jira_port,
+        process.env[options.env_var_for_jira_username],
+        process.env[options.env_var_for_jira_password],
+        options.jira_api_version);
+      grunt.config('last_jira_connection', jira);
+    } else {
+      grunt.fatal('jira_host was not specified');
+    }
 
     // Chainable method to transition an issue to a specific state
     function transitionJiraIssue(issue_id) {
@@ -288,6 +296,7 @@ module.exports = function(grunt) {
       process.env[options.env_var_for_jira_username],
       process.env[options.env_var_for_jira_password],
       options.jira_api_version);
+    grunt.config('last_jira_connection', jira);
 
     // If the comment is a file path, use its contents as the comment
     var comment = options.comment;
@@ -300,7 +309,6 @@ module.exports = function(grunt) {
     // Chainable method that adds a comment to an issue
     function addJiraComment() {
       var deferred = q.defer();
-      grunt.log.writeln('Add a comment to an issue in Jira');
 
       // Pass comment directly to node-jira (instead of json)
       jira.addComment(issue_id, comment, function(error, response){
