@@ -21,11 +21,7 @@ module.exports = function(grunt) {
 
 
   // Create global config (gc)
-  var gc = {
-    jiraUsername: process.env.JIRA_UN,
-    jiraPassword: process.env.JIRA_PW
-  };
-
+  var gc = {};
 
   // Project configuration.
   grunt.initConfig({
@@ -66,6 +62,22 @@ module.exports = function(grunt) {
       tests: ['test/*_test.js']
     },
 
+    release: {
+      options: {
+        changelog: true, //default: false
+        commitMessage: 'Release of <%= version %>',
+        tagMessage: 'Version <%= version %>', //default: 'Version <%= version %>',
+        //beforeBump: [],    // optional grunt tasks to run before file versions are bumped
+        //afterBump: [],     // optional grunt tasks to run after file versions are bumped
+        //beforeRelease: [], // optional grunt tasks to run after release version is bumped up but before release is packaged
+        //afterRelease: [],  // optional grunt tasks to run after release is packaged
+        github: {
+          repo: '<%= pkg.repository.url.replace(\'https://github.com/\', \'\') %>', //put your user/repo here
+          usernameVar: 'GITHUB_USERNAME', //ENVIRONMENT VARIABLE that contains Github username
+          passwordVar: 'GITHUB_PASSWORD'  //ENVIRONMENT VARIABLE that contains Github password
+        }
+      }
+    },
 
     /*--------------------------------*
      *    Setup Jira Configuration    *
