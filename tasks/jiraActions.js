@@ -63,6 +63,7 @@ module.exports = function(grunt) {
   }
 
 
+
   // Setup global Jira configuration
   grunt.registerTask('setJiraConfig', 'Set common JIRA configuration to be used as defaults for all Jira Action tasks and targets', function() {
 
@@ -82,6 +83,7 @@ module.exports = function(grunt) {
     grunt.config('jira_api_version', options.jira_api_version);
 
   });
+
 
 
   // Create a Jira issue
@@ -337,5 +339,96 @@ module.exports = function(grunt) {
       });
 
   });
+
+  
+
+  // Create a version
+  grunt.registerMultiTask('createJiraVersion', 'Create a new version for a project in JIRA', function(project_key, version_name, release_date_string) {
+
+    var done = this.async();
+
+    // Format the date as "2010-07-05"
+    var release_date;
+    if (release_date_string) {
+      release_date = grunt.template(release_date, 'yyyy-mm-dd');
+    } else {
+      release_date = grunt.template.today('yyyy-mm-dd');
+    }
+
+    // Setup task specific default options
+    var default_options = {
+      project: project_key || null,
+      name: version_name,
+      description: version_name,
+      archived: false,
+      released: true,
+      release_date: release_date // "2010-07-05"
+      //userReleaseDate: "5/Jul/2010"
+    };
+
+    // Extend default task specific options with default common options
+    _mergeRecursive(default_options, common_options());
+
+    // Overwrite default values with values specified in the target
+    var options = this.options(default_options);
+    _verbose_inspect('Add version options: ', options);
+
+    // Make sure Jira creds are set
+    _validate_env_vars(options.env_var_for_jira_username, options.env_var_for_jira_password);
+
+    // Connect to Jira
+    var jira = new JiraApi(
+      options.jira_protocol,
+      options.jira_host,
+      options.jira_port,
+      process.env[options.env_var_for_jira_username],
+      process.env[options.env_var_for_jira_password],
+      options.jira_api_version);
+    grunt.config('last_jira_connection', jira);
+
+
+    // json that Jira API is expecting
+    var version_json = {
+      'project': options.project,
+      'name': options.name,
+      'description': options.description,
+      'archived': options.archived,
+      'released': options.released,
+      'releaseDate': options.release_date
+    };
+    _verbose_inspect('Create version json: ', version_json);
+
+    // Chainable method that adds a comment to an issue
+    function addJiraVersion() {
+      var deferred = q.defer();
+
+      // Pass version object to node-jira
+      jira.createVersion(version_json, function(error, response){
+        if (error) {
+          deferred.reject(error);
+        } else {
+          deferred.resolve(response);
+        }
+      });
+
+      return deferred.promise;
+    }
+
+    // Call the transition issue method
+    addJiraComment()
+      .then(function(response){
+        _verbose_inspect('Add version response: ', response);
+      })
+      .catch(function(error){
+        _verbose_inspect('Add version error: ', error);
+        grunt.fatal(error);
+      })
+      .done(function(){
+        grunt.log.writeln('Add version completed');
+        done();
+      });
+
+  });
+
 
 };
