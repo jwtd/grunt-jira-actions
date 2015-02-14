@@ -27,7 +27,7 @@ module.exports = function(grunt) {
       jira_host: grunt.config('jira_host') || null,
       jira_port: grunt.config('jira_port') || 443,
       jira_api_version: grunt.config('jira_api_version') || '2'
-    }
+    };
   }
 
 
@@ -45,8 +45,8 @@ module.exports = function(grunt) {
         opt.jira_protocol,
         opt.jira_host,
         opt.jira_port,
-        opt.env[options.env_var_for_jira_username],
-        opt.env[options.env_var_for_jira_password],
+        process.env[opt.env_var_for_jira_username],
+        process.env[opt.env_var_for_jira_password],
         opt.jira_api_version);
     } else {
       grunt.fatal('jira_host was not specified');
@@ -96,7 +96,11 @@ module.exports = function(grunt) {
     if (grunt.file.exists(ref)) {
       var ext = ref.split('.').pop().toLowerCase();
       grunt.verbose.writeln('Extracting description from contents of ' + ext + ' file ' + ref);
-      content = (ext === 'json') ? grunt.file.readJSON(ref) : grunt.file.read(ref);
+      if (ext === 'json') {
+        content = grunt.file.readJSON(ref);
+      } else {
+        content = grunt.file.read(ref);
+      }
     }
     return content;
   }
@@ -232,7 +236,7 @@ module.exports = function(grunt) {
     var jira = jira_cnn(options);
 
     // Chainable method to transition an issue to a specific state
-    function transitionJiraIssue(issue_id) {
+    function transitionJiraIssue() {
       var deferred = q.defer();
 
       // If the state is anything other than Open, then transition the issue to the desired state
@@ -252,7 +256,7 @@ module.exports = function(grunt) {
             deferred.reject(error);
           } else {
             _verbose_inspect('Transition response: ', response);
-            deferred.resolve(issue_id);
+            deferred.resolve(options.issue_id);
           }
         });
       }
@@ -335,7 +339,6 @@ module.exports = function(grunt) {
   /*
    Create a version
    createJiraVersion:project_key:version_name:release_date_string
-   createJiraVersion:GEN:
    */
   grunt.registerMultiTask('createJiraVersion', 'Create a new version for a project in JIRA', function(project_key, version_name, release_date_string) {
 
@@ -351,11 +354,12 @@ module.exports = function(grunt) {
 
     // Setup task specific default options
     var default_options = {
-      project: project_key || null,  // "GEN"
-      name: version_name,            // "New Version 1"
-      description: version_name,     // "New Version 1 is going to be foo"
+      project_key: project_key || null,  // "GEN"
+      name: version_name,                // "New Version 1"
+      description: version_name,         // "New Version 1 is going to be foo"
       archived: false,
       released: true,
+      start_date: null,
       release_date: release_date // "2010-07-05"
       //userReleaseDate: "5/Jul/2010"
     };
@@ -375,13 +379,15 @@ module.exports = function(grunt) {
 
     // json that Jira API is expecting
     var version_json = {
-      'project': options.project,
+      'project': options.project_key,
       'name': options.name,
       'description': description,
       'archived': options.archived,
       'released': options.released,
-      'releaseDate': options.release_date
+      'releaseDate': options.release_date,
+      'startDate': options.start_date
     };
+
     _verbose_inspect('Create version json: ', version_json);
 
     // Chainable method that adds a comment to an issue
@@ -401,7 +407,7 @@ module.exports = function(grunt) {
     }
 
     // Call the transition issue method
-    addJiraComment()
+    addJiraVersion()
       .then(function(response){
         _verbose_inspect('Add version response: ', response);
       })

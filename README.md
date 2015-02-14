@@ -130,10 +130,10 @@ grunt.initConfig({
 
     createJiraIssue: {
 
-      // Override global Jira config options with task specific options
+      // Declare options that are common to all Jira actions (or call setJiraConfig task before this one)
       options: {
         jira_host: 'bar.atlassian.net',
-        project_id: 123456
+        project_id: 123456              // This will be common to all targets
       },
 
       // Create specific targets to perform different Jira tasks
@@ -206,7 +206,7 @@ grunt.initConfig({
     // Add comments to existing Jira issues
     addJiraComment: {
 
-      // Declare options that are common to all Jira actions
+      // Declare options that are common to all Jira actions (or call setJiraConfig task before this one)
       options: {
         jira_host: 'foo.atlassian.net'
       },
@@ -232,6 +232,69 @@ grunt.initConfig({
 });
 
 ```
+
+
+### Create a Project Version with 'createJiraVersion'
+
+In your project's Gruntfile, add a section named `createJiraVersion` to the data object passed into `grunt.initConfig()`. Within that section, you can create any number of targets that can be used to create project versions. Place common values in the top level options collection. Place target specific values in their respective target's option's collections.
+
+#### Parameters specific to `createJiraVersion` target
+
+- `project` - Jira's three letter project key (ex. 'FOO')
+- `name` - String that will be used as the name of the version.
+- `description` - The description of the Version being created. If value is a valid file path, the contents of the file will be used (plain txt and JSON are supported).
+- `archived` - Boolean value indicating whether the version has been archived. Default is false.
+- `released` - Boolean value indicating whether the version has been released. Default is false.
+- `release_date` - Date on which the version was released. Default is the current date.
+
+#### Example
+
+```js
+
+grunt.initConfig({
+
+    // Create a Version of a Jira project
+    createJiraVersion: {
+
+      // Declare options that are common to all Jira actions (or call setJiraConfig task before this one)
+      options: {
+        jira_host: 'virtru.atlassian.net'
+      },
+
+      // Create specific targets for different Jira projects
+      fooProject: {
+        options: {
+          project_key: 'FOO',
+          name: 'New Version 1',
+          description: 'This is the next version.',
+          archived: false,
+          released: true,
+          release_date: '2015-02-21'
+        }
+      },
+
+      // Create specific targets for different Jira projects
+      barProject: {
+        options: {
+          project_key: 'BAR',
+          name: 'New Version 1',
+          description: 'test/data/version_description.txt',
+          archived: false,
+          released: true,
+          release_date: '2015-02-21'
+        }
+      },
+    }
+
+});
+
+```
+
+
+
+
+
+
 
 ## Contact, feedback and bugs
 

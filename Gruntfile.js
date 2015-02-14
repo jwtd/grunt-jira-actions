@@ -181,6 +181,34 @@ module.exports = function(grunt) {
         }
       }
 
+    },
+
+
+    /*--------------------------------*
+     *    Create a Project Version    *
+     *--------------------------------*/
+
+
+    // Create a Version of a Jira project
+    createJiraVersion: {
+
+      // Declare options that are common to all Jira actions
+      options: {
+        jira_host: 'virtru.atlassian.net'
+      },
+
+      // Create specific targets for different Jira projects
+      general: {
+        options: {
+          project_key: 'GEN',
+          name: 'New Version 1',
+          description: 'test/data/version_description.txt',
+          archived: false,
+          released: true,
+          release_date: '2015-02-21'
+          //userReleaseDate: '5/Jul/2010'
+        }
+      }
     }
 
     // https://virtru.atlassian.net/rest/api/latest/search?jql=project=WS+AND+status=%22OPEN%22+AND+issuetype+in%20(Bug,%20%22Story%22)
