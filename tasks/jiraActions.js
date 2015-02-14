@@ -18,7 +18,7 @@ var util = require('util'),
 module.exports = function(grunt) {
 
 
-  // Return Jira global config
+  // Build a fresh version of the Jira global config each time in case overrides were used in a previous task
   function common_options() {
     return {
       env_var_for_jira_username: grunt.config('env_var_for_jira_username') || 'JIRA_UN',
@@ -28,6 +28,33 @@ module.exports = function(grunt) {
       jira_port: grunt.config('jira_port') || 443,
       jira_api_version: grunt.config('jira_api_version') || '2'
     }
+  }
+
+
+  // Make sure Jira credentials have been set in ENV
+  function jira_cnn(opt) {
+    // Make sure Jira creds are set
+    _validate_env_vars(opt.env_var_for_jira_username, opt.env_var_for_jira_password);
+
+    // If a jira host is specified return a connection. If it wasn't, use the cached Jira connection if one exists.
+    var jira;
+    if (opt.jira_host == null && grunt.config('last_jira_connection')) {
+      jira = grunt.config('last_jira_connection');
+    } else if (opt.jira_host != null) {
+      jira = new JiraApi(
+        opt.jira_protocol,
+        opt.jira_host,
+        opt.jira_port,
+        opt.env[options.env_var_for_jira_username],
+        opt.env[options.env_var_for_jira_password],
+        opt.jira_api_version);
+    } else {
+      grunt.fatal('jira_host was not specified');
+    }
+
+    // Cache the connection in config and return connection object
+    grunt.config('last_jira_connection', jira);
+    return jira;
   }
 
 
@@ -62,6 +89,17 @@ module.exports = function(grunt) {
     grunt.verbose.writeln(msg + ' ' + util.inspect(obj, {showHidden: false, depth: null}));
   }
 
+
+  // If a string reference is a valid file path, use its contents as the string, otherwise return the string
+  function _resolve_content(ref) {
+    var content = ref;
+    if (grunt.file.exists(ref)) {
+      var ext = ref.split('.').pop().toLowerCase();
+      grunt.verbose.writeln('Extracting description from contents of ' + ext + ' file ' + ref);
+      content = (ext === 'json') ? grunt.file.readJSON(ref) : grunt.file.read(ref);
+    }
+    return content;
+  }
 
 
   // Setup global Jira configuration
@@ -106,30 +144,15 @@ module.exports = function(grunt) {
     var options = this.options(default_options);
     _verbose_inspect('Create issue options: ', options);
 
-    // Make sure Jira creds are set
-    _validate_env_vars(options.env_var_for_jira_username, options.env_var_for_jira_password);
-
-    // Connect to Jira
-    var jira = new JiraApi(
-      options.jira_protocol,
-      options.jira_host,
-      options.jira_port,
-      process.env[options.env_var_for_jira_username],
-      process.env[options.env_var_for_jira_password],
-      options.jira_api_version);
-    grunt.config('last_jira_connection', jira);
+    // Get a Jira connection
+    var jira = jira_cnn(options);
 
     // Chainable method that creates an issue
     function createJiraIssue() {
       var deferred = q.defer();
 
       // If the description is a file path, use its contents as the description
-      var description = options.description;
-      if (grunt.file.exists(description)) {
-        var ext = description.split('.').pop().toLowerCase();
-        grunt.verbose.writeln('Setting issue description to be contents of ' + ext + ' file ' + description);
-        description = (ext === 'json') ? grunt.file.readJSON(description) : grunt.file.read(description);
-      }
+      var description = _resolve_content(options.description);
 
       // json that Jira API is expecting
       var issue_json = {
@@ -205,25 +228,8 @@ module.exports = function(grunt) {
     var options = this.options(default_options);
     _verbose_inspect('Transition issue options: ', options);
 
-    // Make sure Jira creds are set
-    _validate_env_vars(options.env_var_for_jira_username, options.env_var_for_jira_password);
-
-    // Connect to Jira
-    var jira;
-    if (options.jira_host == null && grunt.config('last_jira_connection')) {
-      jira = grunt.config('last_jira_connection');
-    } else if (options.jira_host != null) {
-      jira = new JiraApi(
-        options.jira_protocol,
-        options.jira_host,
-        options.jira_port,
-        process.env[options.env_var_for_jira_username],
-        process.env[options.env_var_for_jira_password],
-        options.jira_api_version);
-      grunt.config('last_jira_connection', jira);
-    } else {
-      grunt.fatal('jira_host was not specified');
-    }
+    // Get a Jira connection
+    var jira = jira_cnn(options);
 
     // Chainable method to transition an issue to a specific state
     function transitionJiraIssue(issue_id) {
@@ -287,26 +293,11 @@ module.exports = function(grunt) {
     var options = this.options(default_options);
     _verbose_inspect('Add comment options: ', options);
 
-    // Make sure Jira creds are set
-    _validate_env_vars(options.env_var_for_jira_username, options.env_var_for_jira_password);
-
-    // Connect to Jira
-    var jira = new JiraApi(
-      options.jira_protocol,
-      options.jira_host,
-      options.jira_port,
-      process.env[options.env_var_for_jira_username],
-      process.env[options.env_var_for_jira_password],
-      options.jira_api_version);
-    grunt.config('last_jira_connection', jira);
+    // Get a Jira connection
+    var jira = jira_cnn(options);
 
     // If the comment is a file path, use its contents as the comment
-    var comment = options.comment;
-    if (grunt.file.exists(comment)) {
-      var ext = comment.split('.').pop().toLowerCase();
-      grunt.verbose.writeln('Comment text will be contents of ' + ext + ' file ' + comment);
-      comment = (ext === 'json') ? grunt.file.readJSON(comment) : grunt.file.read(comment);
-    }
+    var comment = _resolve_content(options.comment);
 
     // Chainable method that adds a comment to an issue
     function addJiraComment() {
@@ -340,14 +331,17 @@ module.exports = function(grunt) {
 
   });
 
-  
 
-  // Create a version
+  /*
+   Create a version
+   createJiraVersion:project_key:version_name:release_date_string
+   createJiraVersion:GEN:
+   */
   grunt.registerMultiTask('createJiraVersion', 'Create a new version for a project in JIRA', function(project_key, version_name, release_date_string) {
 
     var done = this.async();
 
-    // Format the date as "2010-07-05"
+    // If a release date isn't specified, use the current date. Format the date as "2010-07-05".
     var release_date;
     if (release_date_string) {
       release_date = grunt.template(release_date, 'yyyy-mm-dd');
@@ -357,9 +351,9 @@ module.exports = function(grunt) {
 
     // Setup task specific default options
     var default_options = {
-      project: project_key || null,
-      name: version_name,
-      description: version_name,
+      project: project_key || null,  // "GEN"
+      name: version_name,            // "New Version 1"
+      description: version_name,     // "New Version 1 is going to be foo"
       archived: false,
       released: true,
       release_date: release_date // "2010-07-05"
@@ -373,25 +367,17 @@ module.exports = function(grunt) {
     var options = this.options(default_options);
     _verbose_inspect('Add version options: ', options);
 
-    // Make sure Jira creds are set
-    _validate_env_vars(options.env_var_for_jira_username, options.env_var_for_jira_password);
+    // Get a Jira connection
+    var jira = jira_cnn(options);
 
-    // Connect to Jira
-    var jira = new JiraApi(
-      options.jira_protocol,
-      options.jira_host,
-      options.jira_port,
-      process.env[options.env_var_for_jira_username],
-      process.env[options.env_var_for_jira_password],
-      options.jira_api_version);
-    grunt.config('last_jira_connection', jira);
-
+    // If the description is a file path, use its contents as the description
+    var description = _resolve_content(options.description);
 
     // json that Jira API is expecting
     var version_json = {
       'project': options.project,
       'name': options.name,
-      'description': options.description,
+      'description': description,
       'archived': options.archived,
       'released': options.released,
       'releaseDate': options.release_date
