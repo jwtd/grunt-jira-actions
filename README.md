@@ -1,9 +1,13 @@
 # grunt-jira-actions
 
-> Grunt tasks to perform Jira actions
+> Grunt tasks to perform Jira actions.
 
-## Getting Started
-This plugin requires Grunt `~0.4.5`
+## What You Can Do
+* [Specify Jira connection properties](#setJiraConfig)
+* [Create any type of Jira issue (Epic, Story, Bug, etc)](#createJiraIssue)
+* [Transition issues to any state (Open, In Development, Closed, etc)](#transitionJiraIssue)
+* [Add a comment to an existing issue](#addJiraComment)
+* [Create a new Version in a Jira project](#createJiraVersion)
 
 ### Requirements
 
@@ -26,7 +30,7 @@ grunt.loadNpmTasks('grunt-jira-actions');
 
 ## Performing Actions in Jira
 
-#### Specify Jira Connection Parameters
+### <a name="setJiraConfig"></a>Specify Jira Connection Properties
 
 The following options are used by all Jira Action tasks:
 
@@ -100,7 +104,7 @@ module.exports = function(grunt) {
 
 ```
 
-### Creating Jira Issues with 'createJiraIssue'
+### <a name="createJiraIssue"></a>Creating Jira Issues with 'createJiraIssue'
 
 In your project's Gruntfile, add a section named `createJiraIssue` to the data object passed into `grunt.initConfig()`. Within that section, you can create any number of targets that add Jira issues of various types. Place common values in the top level options collection. Place target specific values in their respective target's option's collections.
 
@@ -170,7 +174,7 @@ grunt.initConfig({
 
 ```
 
-### Transition an Existing Jira Issue 'transitionJiraIssue'
+### <a name="transitionJiraIssue"></a>Transition an Existing Jira Issue 'transitionJiraIssue'
 
 The `transitionJiraIssue` task is called from other tasks, but can also be called directly using the format `grunt transitionJiraIssue:<issue_id>:<issue_state>`.
 
@@ -188,7 +192,7 @@ grunt transitionJiraIssue:19416:2
 ```
 
 
-### Add Comments to Existing Issues with 'addJiraComment'
+### <a name="addJiraComment"></a>Add Comments to Existing Issues with 'addJiraComment'
 
 In your project's Gruntfile, add a section named `addJiraComment` to the data object passed into `grunt.initConfig()`. Within that section, you can create any number of targets that will add Jira comments to existing issues. Place common values in the top level options collection. Place target specific values in their respective target's option's collections.
 
@@ -234,7 +238,7 @@ grunt.initConfig({
 ```
 
 
-### Create a Project Version with 'createJiraVersion'
+### <a name="createJiraVersion"></a>Create a Project Version with 'createJiraVersion'
 
 In your project's Gruntfile, add a section named `createJiraVersion` to the data object passed into `grunt.initConfig()`. Within that section, you can create any number of targets that can be used to create project versions. Place common values in the top level options collection. Place target specific values in their respective target's option's collections.
 
