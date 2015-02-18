@@ -295,11 +295,6 @@ grunt.initConfig({
 ```
 
 
-
-
-
-
-
 ## Contact, feedback and bugs
 
 This interface was not developed or reviewed by Atlassian. They bare no responsibility for its quality, performance, or results. Use at your own risk.
@@ -313,7 +308,3 @@ The code styleguide for this project is captured in the [eslint.json](https://gi
 * Ryan Tomlinson for the helpful write up of [OpenTable's release process](http://tech.opentable.co.uk/blog/2014/05/19/continuous-delivery-automating-deployment-visibility/)
 * [OpenTable](https://github.com/opentable) - for being a progressive organization and allowing their staff to open source their tools.
 * [Chris Riddle](https://github.com/christriddle) and [Bryce Catlin](https://github.com/bcatlin) for putting together [grunt-ccb](https://github.com/opentable/grunt-ccb), which this project is derived from.
-
-
-## Release History
-_(Nothing yet)_
