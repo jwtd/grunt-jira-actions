@@ -52,15 +52,22 @@ module.exports = function(grunt) {
 
 
     // Before generating any new files, remove any previously-created files.
-    clean: {
-      tests: ['tmp']
-    },
+    //clean: {
+    //  tests: ['tmp']
+    //},
 
 
-    // Unit tests.
-    nodeunit: {
-      tests: ['test/*_test.js']
+    // Unit tests
+    mochaTest: {
+      test: {
+        options: {
+          reporter: 'spec',
+          //captureFile: 'results.txt', // Optionally capture the reporter output to a file
+        },
+        src: ['test/**/*-tests.js']
+      }
     },
+
 
     release: {
       options: {
@@ -78,6 +85,7 @@ module.exports = function(grunt) {
         }
       }
     },
+
 
     /*--------------------------------*
      *    Setup Jira Configuration    *
@@ -211,14 +219,25 @@ module.exports = function(grunt) {
       }
     }
 
-    // https://virtru.atlassian.net/rest/api/latest/search?jql=project=WS+AND+status=%22OPEN%22+AND+issuetype+in%20(Bug,%20%22Story%22)
+    /*
+     Jira API Docs
+     https://docs.atlassian.com/jira/REST/latest/#d2e4023
 
+     JQL Searches
+     /rest/api/2/search?
+       jql=
+         project=WS
+         +AND+status=%22OPEN%22
+         +AND+issuetype+in%20(%22Bug%22,%22Story%22)
+
+     Project : /rest/api/2/project/{projectIdOrKey}
+     Project Versions : /rest/api/2/project/{projectIdOrKey}/versions
+     Project Properties : /rest/api/2/project/{projectIdOrKey}/properties
+     Project Version Issues:
+       /jira/rest/api/2/version/{id}/relatedIssueCounts
+       /jira/rest/api/2/version/{id}/unresolvedIssueCount
+    */
   });
-
-
-  /*------------------------------------------------*
-   *       Load grunt tasks from package.json       *
-   *------------------------------------------------*/
 
 
   // Load from package.json
@@ -231,7 +250,7 @@ module.exports = function(grunt) {
 
   // Whenever the 'test' task is run, first clean the 'tmp' dir, then run this
   // plugin's task(s), then test the result.
-  grunt.registerTask('test', ['clean', 'createJiraIssue', 'nodeunit']);
+  grunt.registerTask('test', ['mochaTest']);
 
 
   // By default, lint and run all tests.

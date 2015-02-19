@@ -30,15 +30,19 @@
     "node": ">= 0.8.0"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt mochaTest"
   },
   "devDependencies": {
+    "chai": "^2.0.0",
     "grunt": "~0.4.5",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-eslint": "^5.1.0",
+    "grunt-mocha-test": "^0.12.7",
     "grunt-release": "^0.11.0",
     "mocha": "^2.1.0",
     "nock": "^0.59.1",
+    "sinon": "^1.12.2",
+    "sinon-chai": "^2.7.0",
     "time-grunt": "^1.0.0"
   },
   "peerDependencies": {

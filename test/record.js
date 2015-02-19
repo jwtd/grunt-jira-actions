@@ -27,13 +27,16 @@ module.exports = function (name, options) {
         require('../' + fp);
         has_fixtures = true;
       } catch (e) {
+        console.log('Exception: ' + e);
+        console.log('Recording new fixture');
         nock.recorder.rec({
-          dont_print: true
+          //dont_print: true
         });
       } else {
+        console.log('Recording new fixture');
         has_fixtures = false;
         nock.recorder.rec({
-          dont_print: true
+          //dont_print: true
         });
       }
     },
@@ -42,7 +45,7 @@ module.exports = function (name, options) {
     after: function (done) {
       if (!has_fixtures) {
         has_fixtures = nock.recorder.play();
-        var text = "var nock = require('nock');\n" + fixtures.join('\n');
+        var text = "var nock = require('nock');\n" + has_fixtures.join('\n');
         fs.writeFile(fp, text, done);
       } else {
         done();
