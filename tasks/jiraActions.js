@@ -423,11 +423,8 @@ module.exports = function(grunt) {
   });
 
 
-
-
   /*
    Search Jira
-   createJiraVersion:project_key:version_name:release_date_string
    */
   grunt.registerMultiTask('searchJira', 'Search JIRA with JQL', function() {
 
@@ -438,7 +435,7 @@ module.exports = function(grunt) {
       search_string: null,
       start_at: 0,
       max_results: 50,
-      fields: {},
+      fields: null,
       before_search: [],    // optional grunt tasks to run before search
       after_search: []     // optional grunt tasks to run after search
     };
@@ -459,7 +456,7 @@ module.exports = function(grunt) {
     // json that Jira API is expecting
     var search_json = {
       'startAt': options.start_at,
-      'maxResults': options.maxResults,
+      'maxResults': options.max_results,
       'fields': options.fields
     };
     grunt.verbose.writeln('JQL search_string: ' +  options.search_string);
@@ -470,7 +467,7 @@ module.exports = function(grunt) {
       var deferred = q.defer();
 
       // Pass version object to node-jira
-      jira.searchJira(searchString, search_json, function(error, response){
+      jira.searchJira(options.search_string, search_json, function(error, response){
         if (error) {
           deferred.reject(error);
         } else {

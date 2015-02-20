@@ -64,7 +64,7 @@ module.exports = function(grunt) {
           reporter: 'spec',
           //captureFile: 'results.txt', // Optionally capture the reporter output to a file
         },
-        src: ['test/**/*-tests.js']
+        src: ['test/**/*_tests.js']
       }
     },
 
@@ -217,18 +217,44 @@ module.exports = function(grunt) {
           //userReleaseDate: '5/Jul/2010'
         }
       }
+    },
+
+
+    /*--------------------------------*
+     *     Search Jira using JQL      *
+     *--------------------------------*/
+
+
+    // Search Jira for specific issues
+    searchJira: {
+
+      // Declare options that are common to all Jira actions
+      options: {
+        jira_host: 'virtru.atlassian.net'
+      },
+
+      // Create specific targets for different Jira searches
+      //    /rest/api/2/search?
+      //      jql=
+      //        project=WS
+      //        +AND+status=%22OPEN%22
+      //        +AND+issuetype+in%20(%22Bug%22,%22Story%22)
+      forGenIssues: {
+        options: {
+          search_string: 'project="WS" AND status="OPEN" AND issuetype in ("Bug","Story")',
+          //start_at: 0,
+          max_results: 1//,
+          //fields: {},
+          //before_search: [],    // optional grunt tasks to run before search
+          //after_search: []     // optional grunt tasks to run after search
+        }
+      }
     }
+
 
     /*
      Jira API Docs
      https://docs.atlassian.com/jira/REST/latest/#d2e4023
-
-     JQL Searches
-     /rest/api/2/search?
-       jql=
-         project=WS
-         +AND+status=%22OPEN%22
-         +AND+issuetype+in%20(%22Bug%22,%22Story%22)
 
      Project : /rest/api/2/project/{projectIdOrKey}
      Project Versions : /rest/api/2/project/{projectIdOrKey}/versions
@@ -237,6 +263,7 @@ module.exports = function(grunt) {
        /jira/rest/api/2/version/{id}/relatedIssueCounts
        /jira/rest/api/2/version/{id}/unresolvedIssueCount
     */
+
   });
 
 
@@ -256,6 +283,6 @@ module.exports = function(grunt) {
   // By default, lint and run all tests.
   //grunt.registerTask('default', ['eslint', 'test']);
   //grunt.registerTask('default', 'createJiraIssue:createAndCloseFooStory');
-  grunt.registerTask('default', ['setJiraConfig', 'createJiraIssue:createOpenBarTask']);
+  grunt.registerTask('default', ['setJiraConfig', 'searchJira:forGenIssues']);
 
 };
