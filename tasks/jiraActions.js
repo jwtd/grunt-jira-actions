@@ -423,4 +423,79 @@ module.exports = function(grunt) {
   });
 
 
+
+
+  /*
+   Search Jira
+   createJiraVersion:project_key:version_name:release_date_string
+   */
+  grunt.registerMultiTask('searchJira', 'Search JIRA with JQL', function() {
+
+    var done = this.async();
+
+    // Setup task specific default options
+    var default_options = {
+      search_string: null,
+      start_at: 0,
+      max_results: 50,
+      fields: {},
+      before_search: [],    // optional grunt tasks to run before search
+      after_search: []     // optional grunt tasks to run after search
+    };
+
+    // Extend default task specific options with default common options
+    _mergeRecursive(default_options, common_options());
+
+    // Overwrite default values with values specified in the target
+    var options = this.options(default_options);
+    _verbose_inspect('Add version options: ', options);
+
+    // Get a Jira connection
+    var jira = jira_cnn(options);
+
+    // If the search_string is a file path, use its contents as the search_string
+    var search_string = _resolve_content(options.search_string);
+
+    // json that Jira API is expecting
+    var search_json = {
+      'startAt': options.start_at,
+      'maxResults': options.maxResults,
+      'fields': options.fields
+    };
+    grunt.verbose.writeln('JQL search_string: ' +  options.search_string);
+    _verbose_inspect('Search json: ', search_json);
+
+    // Chainable method that adds a comment to an issue
+    function searchJira() {
+      var deferred = q.defer();
+
+      // Pass version object to node-jira
+      jira.searchJira(searchString, search_json, function(error, response){
+        if (error) {
+          deferred.reject(error);
+        } else {
+          deferred.resolve(response);
+        }
+      });
+
+      return deferred.promise;
+    }
+
+    // Call the transition issue method
+    searchJira()
+      .then(function(response){
+        _verbose_inspect('Jira search response: ', response);
+      })
+      .catch(function(error){
+        _verbose_inspect('Jira search error: ', error);
+        grunt.fatal(error);
+      })
+      .done(function(){
+        grunt.log.writeln('Jira search completed');
+        done();
+      });
+
+  });
+
+
 };
