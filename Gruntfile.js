@@ -243,7 +243,7 @@ module.exports = function(grunt) {
         options: {
           search_string: 'project="WS" AND status="OPEN" AND issuetype in ("Bug","Story")',
           //start_at: 0,
-          max_results: 1//,
+          //max_results: 3,
           //fields: {},
           //before_search: [],    // optional grunt tasks to run before search
           //after_search: []     // optional grunt tasks to run after search

@@ -374,25 +374,24 @@ module.exports = function(grunt) {
     // Get a Jira connection
     var jira = jira_cnn(options);
 
-    // If the description is a file path, use its contents as the description
-    var description = _resolve_content(options.description);
-
-    // json that Jira API is expecting
-    var version_json = {
-      'project': options.project_key,
-      'name': options.name,
-      'description': description,
-      'archived': options.archived,
-      'released': options.released,
-      'releaseDate': options.release_date,
-      'startDate': options.start_date
-    };
-
-    _verbose_inspect('Create version json: ', version_json);
-
     // Chainable method that adds a comment to an issue
     function addJiraVersion() {
       var deferred = q.defer();
+
+      // If the description is a file path, use its contents as the description
+      var description = _resolve_content(options.description);
+
+      // json that Jira API is expecting
+      var version_json = {
+        'project': options.project_key,
+        'name': options.name,
+        'description': description,
+        'archived': options.archived,
+        'released': options.released,
+        'releaseDate': options.release_date,
+        'startDate': options.start_date
+      };
+      _verbose_inspect('Create version json: ', version_json);
 
       // Pass version object to node-jira
       jira.createVersion(version_json, function(error, response){
@@ -434,7 +433,7 @@ module.exports = function(grunt) {
     var default_options = {
       search_string: null,
       start_at: 0,
-      max_results: 50,
+      max_results: 9999,
       fields: null,
       before_search: [],    // optional grunt tasks to run before search
       after_search: []     // optional grunt tasks to run after search
@@ -450,28 +449,44 @@ module.exports = function(grunt) {
     // Get a Jira connection
     var jira = jira_cnn(options);
 
-    // If the search_string is a file path, use its contents as the search_string
-    var search_string = _resolve_content(options.search_string);
-
-    // json that Jira API is expecting
-    var search_json = {
-      'startAt': options.start_at,
-      'maxResults': options.max_results,
-      'fields': options.fields
-    };
-    grunt.verbose.writeln('JQL search_string: ' +  options.search_string);
-    _verbose_inspect('Search json: ', search_json);
-
     // Chainable method that adds a comment to an issue
     function searchJira() {
       var deferred = q.defer();
+
+      // If the search_string is a file path, use its contents as the search_string
+      var search_string = _resolve_content(options.search_string);
+
+      // json that Jira API is expecting
+      var search_json = {
+        'startAt': options.start_at,
+        'maxResults': options.max_results,
+        'fields': options.fields
+      };
+      grunt.verbose.writeln('JQL search_string: ' +  options.search_string);
+      _verbose_inspect('Search json: ', search_json);
 
       // Pass version object to node-jira
       jira.searchJira(options.search_string, search_json, function(error, response){
         if (error) {
           deferred.reject(error);
         } else {
-          deferred.resolve(response);
+          grunt.verbose.writeln('JQL search returned ' +  response.total + ' items');
+          //_verbose_inspect('JQL search response: ', response);
+          // Loop over and add to cache
+          var i,
+              issue,
+              results = [];
+          for (i in response.issues) {
+            issue = response.issues[i];
+            results.push({
+                id: issue.id,
+                key: issue.key,
+                summary: issue.fields.summary,
+                status_id: issue.fields.status.id,
+                status: issue.fields.status.name
+              });
+          }
+          deferred.resolve(results);
         }
       });
 
