@@ -162,8 +162,26 @@ module.exports = function(grunt) {
 
 
     /*--------------------------------*
+     *       Link Jira Issues         *
+     *--------------------------------*/
+
+    
+    // linkJiraIssue:GEN-200:Relates:GEN-201
+    linkJiraIssue: {
+      options: {
+        jira_host: 'virtru.atlassian.net',
+        from_issue_key: from_issue_key,
+        link_type: 'Relates',              // Blocks, Cloners, Duplicate, Relates
+        to_issue_key: to_issue_key,
+        comment: 'This is a test link'
+      }
+    },
+
+
+    /*--------------------------------*
      *       Add Jira Comments        *
      *--------------------------------*/
+
 
     // Add comments to existing Jira issues
     addJiraComment: {
@@ -215,6 +233,28 @@ module.exports = function(grunt) {
           released: true,
           release_date: '2015-02-21'
           //userReleaseDate: '5/Jul/2010'
+        }
+      }
+    },
+
+
+    /*--------------------------------*
+     *   Lookup Jira project details  *
+     *--------------------------------*/
+
+
+    // Lookup Jira project details
+    jiraProjectDetails: {
+
+      // Declare options that are common to all Jira actions
+      options: {
+        jira_host: 'virtru.atlassian.net'
+      },
+
+      // Create specific targets for different Jira project lookups
+      forGeneralProject: {
+        options: {
+          project_key: 'GEN'
         }
       }
     },

@@ -239,24 +239,100 @@ module.exports = function(grunt) {
     function transitionJiraIssue() {
       var deferred = q.defer();
 
+      grunt.verbose.writeln('Set issue_state to: ' + options.issue_state);
+
+      // json that Jira API is expecting
+      var transition_json = {
+        'transition': {
+          'id': options.issue_state
+        }
+      };
+      _verbose_inspect('Transition issue json: ', transition_json);
+
+      jira.transitionIssue(options.issue_id, transition_json, function(error, response){
+        if (error) {
+          deferred.reject(error);
+        } else {
+          deferred.resolve(options.issue_id);
+        }
+      });
+
+      return deferred.promise;
+    }
+
+    // Call the transition issue method and then transition it if necessary
+    transitionJiraIssue()
+      .then(function(response){
+        _verbose_inspect('Transition response: ', response);
+      })
+      .catch(function(error){
+        _verbose_inspect('Transition issue error: ', error);
+        grunt.fatal(error);
+      })
+      .done(function(){
+        grunt.log.writeln('Transition issue completed');
+        done();
+      });
+
+  });
+
+
+
+  /*
+  Link a Jira issue
+  linkJiraIssue:from_issue_key:link_type:to_issue_key
+  */
+  grunt.registerTask('linkJiraIssue', 'Link two Jira issues', function(from_issue_key, link_type, to_issue_key) {
+
+    // Prepare promise chain for API calls (which are asynchronous)
+    var done = this.async();
+
+    // Setup task specific default options
+    var default_options = {
+      from_issue_key: from_issue_key,
+      link_type: link_type || 'Relates', // Blocks, Cloners, Decomposition, Duplicate, Relates
+      to_issue_key: to_issue_key,
+      comment: ''
+    };
+
+    // Extend default task specific options with default common options
+    _mergeRecursive(default_options, common_options());
+
+    // Overwrite default values with values specified in the target
+    var options = this.options(default_options);
+    _verbose_inspect('Link issue options: ', options);
+
+    // Get a Jira connection
+    var jira = jira_cnn(options);
+
+    // Chainable method to link an issue to a specific state
+    function linkJiraIssues() {
+      var deferred = q.defer();
+
       // If the state is anything other than Open, then transition the issue to the desired state
       if (options.issue_state > 1){
         grunt.verbose.writeln('Set issue_state to: ' + options.issue_state);
 
         // json that Jira API is expecting
-        var transition_json = {
-          'transition': {
-            'id': options.issue_state
+        var link_json = {
+          'linkType': options.link_type, // 'Duplicate'
+          'fromIssueKey': options.from_issue_key,
+          'toIssueKey': options.to_issue_key,
+          'comment': {
+            'body': options.comment//,
+            //'visibility': {
+            //  'type': 'GROUP',
+            //  'value': 'jira-users'
+            //}
           }
         };
-        _verbose_inspect('Transition issue json: ', transition_json);
+        _verbose_inspect('Link issue json: ', link_json);
 
-        jira.transitionIssue(options.issue_id, transition_json, function(error, response){
+        jira.issueLink(link_json, function(error, response){
           if (error) {
             deferred.reject(error);
           } else {
-            _verbose_inspect('Transition response: ', response);
-            deferred.resolve(options.issue_id);
+            deferred.resolve(options.from_issue_key);
           }
         });
       }
@@ -265,13 +341,16 @@ module.exports = function(grunt) {
     }
 
     // Call the transition issue method and then transition it if necessary
-    transitionJiraIssue()
+    linkJiraIssues()
+      .then(function(response){
+        _verbose_inspect('Link issues response: ', response);
+      })
       .catch(function(error){
-        _verbose_inspect('Transition issue error: ', error);
+        _verbose_inspect('Link issues error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
-        grunt.log.writeln('Transition issue completed');
+        grunt.log.writeln('Link issues completed');
         done();
       });
 
@@ -347,7 +426,7 @@ module.exports = function(grunt) {
     // If a release date isn't specified, use the current date. Format the date as "2010-07-05".
     var release_date;
     if (release_date_string) {
-      release_date = grunt.template(release_date, 'yyyy-mm-dd');
+      release_date = grunt.template(release_date_string, 'yyyy-mm-dd');
     } else {
       release_date = grunt.template.today('yyyy-mm-dd');
     }
@@ -369,7 +448,7 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    _verbose_inspect('Add version options: ', options);
+    _verbose_inspect('createJiraVersion options: ', options);
 
     // Get a Jira connection
     var jira = jira_cnn(options);
@@ -444,7 +523,7 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    _verbose_inspect('Add version options: ', options);
+    _verbose_inspect('searchJira options: ', options);
 
     // Get a Jira connection
     var jira = jira_cnn(options);
@@ -475,16 +554,16 @@ module.exports = function(grunt) {
           // Loop over and add to cache
           var i,
               issue,
-              results = [];
+              results = {};
           for (i in response.issues) {
             issue = response.issues[i];
-            results.push({
+            results[issue.key] = {
                 id: issue.id,
                 key: issue.key,
                 summary: issue.fields.summary,
                 status_id: issue.fields.status.id,
                 status: issue.fields.status.name
-              });
+              };
           }
           deferred.resolve(results);
         }
@@ -495,8 +574,9 @@ module.exports = function(grunt) {
 
     // Call the transition issue method
     searchJira()
-      .then(function(response){
-        _verbose_inspect('Jira search response: ', response);
+      .then(function(results){
+        _verbose_inspect('Jira search results: ', results);
+        grunt.config('last_search_results', results);
       })
       .catch(function(error){
         _verbose_inspect('Jira search error: ', error);
@@ -509,5 +589,61 @@ module.exports = function(grunt) {
 
   });
 
+
+
+
+  /*
+   Lookup Jira Project
+   */
+  grunt.registerMultiTask('jiraProjectDetails', 'Lookup a JIRA project\'s details', function(project_key) {
+
+    var done = this.async();
+
+    // Setup task specific default options
+    var default_options = {
+      project_key: null
+    };
+
+    // Extend default task specific options with default common options
+    _mergeRecursive(default_options, common_options());
+
+    // Overwrite default values with values specified in the target
+    var options = this.options(default_options);
+    _verbose_inspect('jiraProjectDetails options: ', options);
+
+    // Get a Jira connection
+    var jira = jira_cnn(options);
+
+    // Chainable method that adds a comment to an issue
+    function getProject() {
+      var deferred = q.defer();
+
+      // Pass version object to node-jira
+      jira.getProject(options.project_key, function(error, response){
+        if (error) {
+          deferred.reject(error);
+        } else {
+          deferred.resolve(response);
+        }
+      });
+
+      return deferred.promise;
+    }
+
+    // Call the transition issue method
+    getProject()
+      .then(function(response){
+        _verbose_inspect('Jira project response: ', response);
+      })
+      .catch(function(error){
+        _verbose_inspect('Jira project error: ', error);
+        grunt.fatal(error);
+      })
+      .done(function(){
+        grunt.log.writeln('Jira project completed');
+        done();
+      });
+
+  });
 
 };
