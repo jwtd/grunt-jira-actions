@@ -165,7 +165,7 @@ module.exports = function(grunt) {
      *       Link Jira Issues         *
      *--------------------------------*/
 
-    
+
     // linkJiraIssue:GEN-200:Relates:GEN-201
     linkJiraIssue: {
       options: {

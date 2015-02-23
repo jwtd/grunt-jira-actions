@@ -277,12 +277,11 @@ module.exports = function(grunt) {
   });
 
 
-
   /*
   Link a Jira issue
-  linkJiraIssue:from_issue_key:link_type:to_issue_key
+  linkJiraIssues:<from_issue_key>:<to_issue_key>:<link_type>:<comment>
   */
-  grunt.registerTask('linkJiraIssue', 'Link two Jira issues', function(from_issue_key, link_type, to_issue_key) {
+  grunt.registerTask('linkJiraIssue', 'Link two Jira issues', function(from_issue_key, to_issue_key, link_type, comment) {
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -290,9 +289,9 @@ module.exports = function(grunt) {
     // Setup task specific default options
     var default_options = {
       from_issue_key: from_issue_key,
-      link_type: link_type || 'Relates', // Blocks, Cloners, Decomposition, Duplicate, Relates
       to_issue_key: to_issue_key,
-      comment: ''
+      link_type: link_type || 'Relates', // Blocks, Cloners, Duplicate, Relates
+      comment: comment
     };
 
     // Extend default task specific options with default common options
@@ -309,33 +308,31 @@ module.exports = function(grunt) {
     function linkJiraIssues() {
       var deferred = q.defer();
 
-      // If the state is anything other than Open, then transition the issue to the desired state
-      if (options.issue_state > 1){
-        grunt.verbose.writeln('Set issue_state to: ' + options.issue_state);
+      // If the comment is a file path, use its contents as the comment
+      var c = _resolve_content(options.comment);
 
-        // json that Jira API is expecting
-        var link_json = {
-          'linkType': options.link_type, // 'Duplicate'
-          'fromIssueKey': options.from_issue_key,
-          'toIssueKey': options.to_issue_key,
-          'comment': {
-            'body': options.comment//,
-            //'visibility': {
-            //  'type': 'GROUP',
-            //  'value': 'jira-users'
-            //}
-          }
-        };
-        _verbose_inspect('Link issue json: ', link_json);
+      // json that Jira API is expecting
+      var link_json = {
+        'linkType': options.link_type, // 'Duplicate'
+        'fromIssueKey': options.from_issue_key,
+        'toIssueKey': options.to_issue_key,
+        'comment': {
+          'body': c //,
+          //'visibility': {
+          //  'type': 'GROUP',
+          //  'value': 'jira-users'
+          //}
+        }
+      };
+      _verbose_inspect('Link issue json: ', link_json);
 
-        jira.issueLink(link_json, function(error, response){
-          if (error) {
-            deferred.reject(error);
-          } else {
-            deferred.resolve(options.from_issue_key);
-          }
-        });
-      }
+      jira.issueLink(link_json, function(error, response){
+        if (error) {
+          deferred.reject(error);
+        } else {
+          deferred.resolve(options.from_issue_key);
+        }
+      });
 
       return deferred.promise;
     }
@@ -576,7 +573,7 @@ module.exports = function(grunt) {
     searchJira()
       .then(function(results){
         _verbose_inspect('Jira search results: ', results);
-        grunt.config('last_search_results', results);
+        grunt.config(this.target + 'search_results', results);
       })
       .catch(function(error){
         _verbose_inspect('Jira search error: ', error);

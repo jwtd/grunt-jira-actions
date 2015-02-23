@@ -6,8 +6,11 @@
 * [Specify Jira connection properties](#setJiraConfig)
 * [Create any type of Jira issue (Epic, Story, Bug, etc)](#createJiraIssue)
 * [Transition issues to any state (Open, In Development, Closed, etc)](#transitionJiraIssue)
+* [Link two issues together (Blocks, Cloners, Duplicate, Relates)](#linkJiraIssues)
 * [Add a comment to an existing issue](#addJiraComment)
 * [Create a new Version in a Jira project](#createJiraVersion)
+* [Fetch a hash of Jira issues using a JQL search](#searchJira)
+
 
 ### Requirements
 
@@ -192,6 +195,27 @@ grunt transitionJiraIssue:19416:2
 ```
 
 
+### <a name="linkJiraIssues"></a>Add Comments to Existing Issues with 'linkJiraIssues'
+
+The `linkJiraIssues` task can be called directly using the format `grunt linkJiraIssues:<from_issue_key>:<to_issue_key>:<link_type>:<comment>`.
+
+#### Parameters specific to `linkJiraIssues` target
+
+- `from_issue_key` - Jira issue KEY that will be linked.
+- `to_issue_key` - Jira issue KEY that will be linked.
+- `link_type` - The type of link that should be setup. Valid values are 'Blocks', 'Cloners', 'Duplicate', 'Relates'. Default is 'Relates'.
+- `comment` - The body of the comment that should accompany the link. If value is a valid file path, the contents of the file will be used (plain txt and JSON are supported).
+
+
+#### Example
+
+```shell
+
+grunt linkJiraIssues:GEN-200:GEN-201:Relates:tmp/link/description.txt
+
+```
+
+
 ### <a name="addJiraComment"></a>Add Comments to Existing Issues with 'addJiraComment'
 
 In your project's Gruntfile, add a section named `addJiraComment` to the data object passed into `grunt.initConfig()`. Within that section, you can create any number of targets that will add Jira comments to existing issues. Place common values in the top level options collection. Place target specific values in their respective target's option's collections.
@@ -262,7 +286,7 @@ grunt.initConfig({
 
       // Declare options that are common to all Jira actions (or call setJiraConfig task before this one)
       options: {
-        jira_host: 'virtru.atlassian.net'
+        jira_host: 'foo.atlassian.net'
       },
 
       // Create specific targets for different Jira projects
@@ -293,6 +317,88 @@ grunt.initConfig({
 });
 
 ```
+
+
+### <a name="searchJira"></a>Use JQL to fetch a hash of Jira issues with 'searchJira'
+
+In your project's Gruntfile, add a section named `searchJira` to the data object passed into `grunt.initConfig()`. Within that section, you can create any number of targets that can be used to submit different JQL queries. Place common values in the top level options collection. Place target specific values in their respective target's option's collections.
+
+Each target within this task will save its results `grunt.config` with the variable `this.target + 'search_results` as a hash of issues with the issue key as the hash key.
+
+#### Parameters specific to `searchJira` target
+
+- `search_string` - A valid JQL search string.
+- `start_at` - Optional page offset for the search. Default is 0.
+- `max_results` - Optional max limit of issues. Default is 9999.
+
+#### Example
+
+```js
+
+grunt.initConfig({
+
+    // Search Jira for specific issues
+    searchJira: {
+
+      // Declare options that are common to all Jira actions
+      options: {
+        jira_host: 'foo.atlassian.net'
+      },
+
+      // Create specific targets for different Jira searches
+      // This target's search results can be accessed via grunt.config('forGenStoriesAndBugs.search_results');
+      forGenStoriesAndBugs: {
+        options: {
+          search_string: 'project="GEN" AND status="OPEN" AND issuetype in ("Bug","Story")',
+          //start_at: 0,
+          //max_results: 3,
+        }
+      }
+
+      // Add another JQL search
+      // This target's search results can be accessed via grunt.config('forGenEpics.search_results');
+      forGenEpics: {
+        options: {
+          search_string: 'project="GEN" issuetype in ("Epic")',
+        }
+      }
+
+    }
+
+});
+
+```
+
+
+#### JQL Search Results
+
+The results hash contains the issue id, key, summary, status id, and status label.
+
+```
+
+{
+  'GEN-1':
+   { id: '10221',
+     key: 'GEN-1',
+     summary: 'Issue summary foo',
+     status_id: '1',
+     status: 'Open' },
+  'GEN-2':
+   { id: '13897',
+     key: 'GEN-2',
+     summary: 'Issue summary bar',
+     status_id: '1',
+     status: 'Open' },
+  'GEN-3':
+   { id: '17429',
+     key: 'GEN-3',
+     summary: 'Issue summary baz',
+     status_id: '1',
+     status: 'Open' }
+}
+
+```
+
 
 
 ## Contact, feedback and bugs
