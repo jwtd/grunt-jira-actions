@@ -136,6 +136,8 @@ module.exports = function(grunt) {
 
     // Setup task specific default options
     var default_options = {
+      project_id: null,
+      summary: null,
       issue_type: 'Story',   // Story, Epic, Task, Technical Task, Sub-Task, Bug, Improvement, New Feature
       issue_state: 1,        // 1 = Open, 2 = Closed
       optional_fields: null  // JSON that should be merged into the request
@@ -154,6 +156,15 @@ module.exports = function(grunt) {
     // Chainable method that creates an issue
     function createJiraIssue() {
       var deferred = q.defer();
+
+      // If project_id is null, fail
+      if (options.project_id === null) {
+        deferred.reject('"project_id" was not specified.');
+      }
+      // If project_id is null, fail
+      if (options.summary === null) {
+        deferred.reject('"summary" was not specified.');
+      }
 
       // If the description is a file path, use its contents as the description
       var description = resolveContent(options.description);

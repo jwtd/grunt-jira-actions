@@ -30,13 +30,13 @@ module.exports = function (name, options) {
         console.log('Exception: ' + e);
         console.log('Recording new fixture');
         nock.recorder.rec({
-          //dont_print: true
+          dont_print: true
         });
       } else {
         console.log('Recording new fixture');
         has_fixtures = false;
         nock.recorder.rec({
-          //dont_print: true
+          dont_print: true
         });
       }
     },

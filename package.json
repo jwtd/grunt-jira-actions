@@ -39,11 +39,8 @@
     "grunt-eslint": "^5.1.0",
     "grunt-mocha-test": "^0.12.7",
     "grunt-release": "^0.11.0",
-    "grunt-run-task": "^0.1.2",
     "mocha": "^2.1.0",
     "nock": "^0.59.1",
-    "sinon": "^1.12.2",
-    "sinon-chai": "^2.7.0",
     "time-grunt": "^1.0.0"
   },
   "peerDependencies": {
