@@ -19,7 +19,7 @@ module.exports = function(grunt) {
 
 
   // Build a fresh version of the Jira global config each time in case overrides were used in a previous task
-  function common_options() {
+  var commonOptions = function(grunt) {
     return {
       env_var_for_jira_username: grunt.config('env_var_for_jira_username') || 'JIRA_UN',
       env_var_for_jira_password: grunt.config('env_var_for_jira_password') || 'JIRA_PW',
@@ -32,9 +32,9 @@ module.exports = function(grunt) {
 
 
   // Make sure Jira credentials have been set in ENV
-  function jira_cnn(opt) {
+  var jiraCnn = function(opt) {
     // Make sure Jira creds are set
-    _validate_env_vars(opt.env_var_for_jira_username, opt.env_var_for_jira_password);
+    validateEnvVars(opt.env_var_for_jira_username, opt.env_var_for_jira_password);
 
     // If a jira host is specified return a connection. If it wasn't, use the cached Jira connection if one exists.
     var jira;
@@ -59,7 +59,7 @@ module.exports = function(grunt) {
 
 
   // Make sure Jira credentials have been set in ENV
-  function _validate_env_vars(env_un, env_pw) {
+  var validateEnvVars = function(env_un, env_pw) {
     if (!process.env[env_un]) {
       grunt.fail.fatal('Environment variable not found. ENV[' + env_un + '] must be set or JIRA calls will fail.');
     }
@@ -70,12 +70,12 @@ module.exports = function(grunt) {
 
 
   // Add or update existing properties on obj1 with values from obj2
-  function _mergeRecursive(obj1, obj2) {
+  var recursiveMerge = function(obj1, obj2) {
     // Iterate over all the properties in the object which is being consumed
     for (var p in obj2) {
       // Property in destination object set; update its value.
       if ( obj2.hasOwnProperty(p) && typeof obj1[p] !== 'undefined' ) {
-        _mergeRecursive(obj1[p], obj2[p]);
+        recursiveMerge(obj1[p], obj2[p]);
       } else {
         // We don't have that level in the hierarchy so add it
         obj1[p] = obj2[p];
@@ -85,13 +85,13 @@ module.exports = function(grunt) {
 
 
   // When verbose is enabled, display the object's structure
-  function _verbose_inspect(msg, obj) {
+  var verboseInspect = function(msg, obj) {
     grunt.verbose.writeln(msg + ' ' + util.inspect(obj, {showHidden: false, depth: null}));
   }
 
 
   // If a string reference is a valid file path, use its contents as the string, otherwise return the string
-  function _resolve_content(ref) {
+  var resolveContent = function(ref) {
     var content = ref;
     if (grunt.file.exists(ref)) {
       var ext = ref.split('.').pop().toLowerCase();
@@ -110,11 +110,11 @@ module.exports = function(grunt) {
   grunt.registerTask('setJiraConfig', 'Set common JIRA configuration to be used as defaults for all Jira Action tasks and targets', function() {
 
     // Overwrite default values with values specified in the target
-    var options = this.options(common_options());
-    _verbose_inspect('setJiraConfig options: ', options);
+    var options = this.options(commonOptions());
+    verboseInspect('setJiraConfig options: ', options);
 
     // Make sure Jira creds are set
-    _validate_env_vars(options.env_var_for_jira_username, options.env_var_for_jira_password);
+    validateEnvVars(options.env_var_for_jira_username, options.env_var_for_jira_password);
 
     // Save Jira options as global config
     grunt.config('env_var_for_jira_username', options.env_var_for_jira_username);
@@ -142,21 +142,21 @@ module.exports = function(grunt) {
     };
 
     // Extend default task specific options with default common options
-    _mergeRecursive(default_options, common_options());
+    recursiveMerge(default_options, commonOptions());
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    _verbose_inspect('Create issue options: ', options);
+    verboseInspect('Create issue options: ', options);
 
     // Get a Jira connection
-    var jira = jira_cnn(options);
+    var jira = jiraCnn(options);
 
     // Chainable method that creates an issue
     function createJiraIssue() {
       var deferred = q.defer();
 
       // If the description is a file path, use its contents as the description
-      var description = _resolve_content(options.description);
+      var description = resolveContent(options.description);
 
       // json that Jira API is expecting
       var issue_json = {
@@ -174,16 +174,16 @@ module.exports = function(grunt) {
 
       // Add any other options passed in to the JSON
       if (options.optional_fields != null){
-        _mergeRecursive(issue_json.fields, options.optional_fields);
+        recursiveMerge(issue_json.fields, options.optional_fields);
       }
-      _verbose_inspect('Create issue json: ', issue_json);
+      verboseInspect('Create issue json: ', issue_json);
 
       // Call Jira REST API using node-jira
       jira.addNewIssue(issue_json, function(error, response){
         if (error) {
           deferred.reject(error);
         } else {
-          _verbose_inspect('Create issue response: ', response);
+          verboseInspect('Create issue response: ', response);
           grunt.log.writeln('Issue created (id = ' + response.id + ') ' + response.key + ' : ' + options.summary);
           deferred.resolve(response.id);
         }
@@ -201,7 +201,7 @@ module.exports = function(grunt) {
         }
       })
       .catch(function(error){
-        _verbose_inspect('Create issue error: ', error);
+        verboseInspect('Create issue error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -226,14 +226,14 @@ module.exports = function(grunt) {
     };
 
     // Extend default task specific options with default common options
-    _mergeRecursive(default_options, common_options());
+    recursiveMerge(default_options, commonOptions());
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    _verbose_inspect('Transition issue options: ', options);
+    verboseInspect('Transition issue options: ', options);
 
     // Get a Jira connection
-    var jira = jira_cnn(options);
+    var jira = jiraCnn(options);
 
     // Chainable method to transition an issue to a specific state
     function transitionJiraIssue() {
@@ -247,7 +247,7 @@ module.exports = function(grunt) {
           'id': options.issue_state
         }
       };
-      _verbose_inspect('Transition issue json: ', transition_json);
+      verboseInspect('Transition issue json: ', transition_json);
 
       jira.transitionIssue(options.issue_id, transition_json, function(error, response){
         if (error) {
@@ -263,10 +263,10 @@ module.exports = function(grunt) {
     // Call the transition issue method and then transition it if necessary
     transitionJiraIssue()
       .then(function(response){
-        _verbose_inspect('Transition response: ', response);
+        verboseInspect('Transition response: ', response);
       })
       .catch(function(error){
-        _verbose_inspect('Transition issue error: ', error);
+        verboseInspect('Transition issue error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -295,21 +295,21 @@ module.exports = function(grunt) {
     };
 
     // Extend default task specific options with default common options
-    _mergeRecursive(default_options, common_options());
+    recursiveMerge(default_options, commonOptions());
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    _verbose_inspect('Link issue options: ', options);
+    verboseInspect('Link issue options: ', options);
 
     // Get a Jira connection
-    var jira = jira_cnn(options);
+    var jira = jiraCnn(options);
 
     // Chainable method to link an issue to a specific state
     function linkJiraIssues() {
       var deferred = q.defer();
 
       // If the comment is a file path, use its contents as the comment
-      var c = _resolve_content(options.comment);
+      var c = resolveContent(options.comment);
 
       // json that Jira API is expecting
       var link_json = {
@@ -324,7 +324,7 @@ module.exports = function(grunt) {
           //}
         }
       };
-      _verbose_inspect('Link issue json: ', link_json);
+      verboseInspect('Link issue json: ', link_json);
 
       jira.issueLink(link_json, function(error, response){
         if (error) {
@@ -340,10 +340,10 @@ module.exports = function(grunt) {
     // Call the transition issue method and then transition it if necessary
     linkJiraIssues()
       .then(function(response){
-        _verbose_inspect('Link issues response: ', response);
+        verboseInspect('Link issues response: ', response);
       })
       .catch(function(error){
-        _verbose_inspect('Link issues error: ', error);
+        verboseInspect('Link issues error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -367,17 +367,17 @@ module.exports = function(grunt) {
     };
 
     // Extend default task specific options with default common options
-    _mergeRecursive(default_options, common_options());
+    recursiveMerge(default_options, commonOptions());
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    _verbose_inspect('Add comment options: ', options);
+    verboseInspect('Add comment options: ', options);
 
     // Get a Jira connection
-    var jira = jira_cnn(options);
+    var jira = jiraCnn(options);
 
     // If the comment is a file path, use its contents as the comment
-    var comment = _resolve_content(options.comment);
+    var comment = resolveContent(options.comment);
 
     // Chainable method that adds a comment to an issue
     function addJiraComment() {
@@ -398,10 +398,10 @@ module.exports = function(grunt) {
     // Call the transition issue method
     addJiraComment()
       .then(function(response){
-        _verbose_inspect('Add comment response: ', response);
+        verboseInspect('Add comment response: ', response);
       })
       .catch(function(error){
-        _verbose_inspect('Add comment error: ', error);
+        verboseInspect('Add comment error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -441,21 +441,21 @@ module.exports = function(grunt) {
     };
 
     // Extend default task specific options with default common options
-    _mergeRecursive(default_options, common_options());
+    recursiveMerge(default_options, commonOptions());
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    _verbose_inspect('createJiraVersion options: ', options);
+    verboseInspect('createJiraVersion options: ', options);
 
     // Get a Jira connection
-    var jira = jira_cnn(options);
+    var jira = jiraCnn(options);
 
     // Chainable method that adds a comment to an issue
     function addJiraVersion() {
       var deferred = q.defer();
 
       // If the description is a file path, use its contents as the description
-      var description = _resolve_content(options.description);
+      var description = resolveContent(options.description);
 
       // json that Jira API is expecting
       var version_json = {
@@ -467,7 +467,7 @@ module.exports = function(grunt) {
         'releaseDate': options.release_date,
         'startDate': options.start_date
       };
-      _verbose_inspect('Create version json: ', version_json);
+      verboseInspect('Create version json: ', version_json);
 
       // Pass version object to node-jira
       jira.createVersion(version_json, function(error, response){
@@ -484,10 +484,10 @@ module.exports = function(grunt) {
     // Call the transition issue method
     addJiraVersion()
       .then(function(response){
-        _verbose_inspect('Add version response: ', response);
+        verboseInspect('Add version response: ', response);
       })
       .catch(function(error){
-        _verbose_inspect('Add version error: ', error);
+        verboseInspect('Add version error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -516,21 +516,21 @@ module.exports = function(grunt) {
     };
 
     // Extend default task specific options with default common options
-    _mergeRecursive(default_options, common_options());
+    recursiveMerge(default_options, commonOptions());
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    _verbose_inspect('searchJira options: ', options);
+    verboseInspect('searchJira options: ', options);
 
     // Get a Jira connection
-    var jira = jira_cnn(options);
+    var jira = jiraCnn(options);
 
     // Chainable method that adds a comment to an issue
     function searchJira() {
       var deferred = q.defer();
 
       // If the search_string is a file path, use its contents as the search_string
-      var search_string = _resolve_content(options.search_string);
+      var search_string = resolveContent(options.search_string);
 
       // json that Jira API is expecting
       var search_json = {
@@ -539,7 +539,7 @@ module.exports = function(grunt) {
         'fields': options.fields
       };
       grunt.verbose.writeln('JQL search_string: ' +  options.search_string);
-      _verbose_inspect('Search json: ', search_json);
+      verboseInspect('Search json: ', search_json);
 
       // Pass version object to node-jira
       jira.searchJira(options.search_string, search_json, function(error, response){
@@ -547,7 +547,7 @@ module.exports = function(grunt) {
           deferred.reject(error);
         } else {
           grunt.verbose.writeln('JQL search returned ' +  response.total + ' items');
-          //_verbose_inspect('JQL search response: ', response);
+          //verboseInspect('JQL search response: ', response);
           // Loop over and add to cache
           var i,
               issue,
@@ -572,11 +572,11 @@ module.exports = function(grunt) {
     // Call the transition issue method
     searchJira()
       .then(function(results){
-        _verbose_inspect('Jira search results: ', results);
+        verboseInspect('Jira search results: ', results);
         grunt.config(this.target + 'search_results', results);
       })
       .catch(function(error){
-        _verbose_inspect('Jira search error: ', error);
+        verboseInspect('Jira search error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -602,14 +602,14 @@ module.exports = function(grunt) {
     };
 
     // Extend default task specific options with default common options
-    _mergeRecursive(default_options, common_options());
+    recursiveMerge(default_options, commonOptions());
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    _verbose_inspect('jiraProjectDetails options: ', options);
+    verboseInspect('jiraProjectDetails options: ', options);
 
     // Get a Jira connection
-    var jira = jira_cnn(options);
+    var jira = jiraCnn(options);
 
     // Chainable method that adds a comment to an issue
     function getProject() {
@@ -630,10 +630,10 @@ module.exports = function(grunt) {
     // Call the transition issue method
     getProject()
       .then(function(response){
-        _verbose_inspect('Jira project response: ', response);
+        verboseInspect('Jira project response: ', response);
       })
       .catch(function(error){
-        _verbose_inspect('Jira project error: ', error);
+        verboseInspect('Jira project error: ', error);
         grunt.fatal(error);
       })
       .done(function(){

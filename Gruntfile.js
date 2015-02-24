@@ -170,9 +170,9 @@ module.exports = function(grunt) {
     linkJiraIssue: {
       options: {
         jira_host: 'virtru.atlassian.net',
-        from_issue_key: from_issue_key,
+        from_issue_key: 'GEN-345',
         link_type: 'Relates',              // Blocks, Cloners, Duplicate, Relates
-        to_issue_key: to_issue_key,
+        to_issue_key: 'GEN-123',
         comment: 'This is a test link'
       }
     },
