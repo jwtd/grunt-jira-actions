@@ -61,7 +61,7 @@ module.exports = function(grunt) {
     mochaTest: {
       test: {
         options: {
-          reporter: 'spec',
+          reporter: 'spec'
           //captureFile: 'results.txt', // Optionally capture the reporter output to a file
         },
         src: ['test/**/*_tests.js']
