@@ -19,26 +19,18 @@ var util = require('util');
 var grunt = require('grunt');
 
 
-
-exports.tests = {
-  createIssue: function(test) {
-    test.expect(1);
-    exec('createJiraIssue:createAndCloseFooStory', execOptions, function(error, stdout) {
-      //var message = MESSAGES.NEWLINE_MAXIMUM_INVALIDVALUE.message.replace('{a}', '0');
-      var message = 'Look for this value';
-      test.equal(stdout.indexOf(message) > -1, true,
-        'Put error message here'
-      );
-      test.done();
-    });
-  }
-};
+// Keep tests in seperate gruntfiles
+//function callGruntfile(filename, whenDoneCallback) {
+//  var command, options;
+//  command = "grunt --gruntfile " + filename + " --no-color";
+//  options = {cwd: 'test/'};
+//  exec(command, options, whenDoneCallback);
+//}
 
 
 describe('createJiraIssue', function () {
   var recorder = record('createJiraIssue');
   before(recorder.before);
-
 
   // Make sure the task was loaded
   it('should register itself with Grunt', function () {
@@ -47,36 +39,38 @@ describe('createJiraIssue', function () {
 
   describe('when using the default options', function () {
 
-    // Tell Mocha to wait for first call to complete
-    this.timeout(5000);
-
-    grunt.tasks(['createJiraIssue:createAndCloseFooStory'], {}, function() {
-      grunt.log.ok('Done running createJiraIssue.');
-
-      console.log('this.option() :: ' + util.inspect(this.option(), {showHidden: false, depth: null}));
-
-      it('should merge common option defaults into task option defaults', function() {
-
-        var o = grunt.option;
-
-        // Task options
-        expect(o('issue_type')).to.equal('Story');
-        expect(o('issue_state')).to.equal(1);
-        expect(o('optional_fields')).to.equal(null);
-
-        // Common options
-        expect(o('env_var_for_jira_username')).to.equal('JIRA_UN');
-        expect(o('env_var_for_jira_username')).to.equal('JIRA_PW');
-        expect(o('jira_host')).to.equal(null);
-        expect(o('jira_port')).to.equal(443);
-        expect(o('jira_api_version')).to.equal('2');
-
+    it('should merge common option defaults into task option defaults', function() {
+        exec('grunt createJiraIssue:createAndCloseFooStory --TEST=true', execOptions, function(error, stdout, stderr) {
+        // AssertionError: Expected command should not fail
+        expect(error).to.equal(null);
+        // AssertionError: Expected standard error stream should be empty
+        expect(stderr).to.equal('');
+        // AssertionError: Expected plugin worked correctly
+        var stdoutOk = contains(stdout, 'Plugin worked correctly.');
+        expect(stdoutOk).to.equal();, "Missing stdout message.");
       });
+
+      //it('should merge common option defaults into task option defaults', function() {
+      //
+      //  var o = grunt.option;
+      //
+      //  // Task options
+      //  expect(o('issue_type')).to.equal('Story');
+      //  expect(o('issue_state')).to.equal(1);
+      //  expect(o('optional_fields')).to.equal(null);
+      //
+      //  // Common options
+      //  expect(o('env_var_for_jira_username')).to.equal('JIRA_UN');
+      //  expect(o('env_var_for_jira_username')).to.equal('JIRA_PW');
+      //  expect(o('jira_host')).to.equal(null);
+      //  expect(o('jira_port')).to.equal(443);
+      //  expect(o('jira_api_version')).to.equal('2');
+      //
+      //});
 
     });
 
   });
-
 
   // Capture the fixture recording if it was created
   after(recorder.after);

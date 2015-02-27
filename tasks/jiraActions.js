@@ -90,6 +90,14 @@ module.exports = function(grunt) {
   }
 
 
+  // When TEST flags are set, write out test data
+  var testData = function(obj) {
+    if (proccess.env['jiraActions-TEST'] || grunt.config('TEST')) {
+      grunt.verbose.writeln('>>TEST DATA<< ::' + util.inspect(obj, {showHidden: false, depth: null}));
+    }
+  }
+
+
   // If a string reference is a valid file path, use its contents as the string, otherwise return the string
   var resolveContent = function(ref) {
     var content = ref;
@@ -124,6 +132,9 @@ module.exports = function(grunt) {
     grunt.config('jira_port', options.jira_port);
     grunt.config('jira_api_version', options.jira_api_version);
 
+    // Output for tests
+    testData(grunt.config);
+
   });
 
 
@@ -149,6 +160,7 @@ module.exports = function(grunt) {
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
     verboseInspect('Create issue options: ', options);
+    testData(options);
 
     // Get a Jira connection
     var jira = jiraCnn(options);
@@ -188,6 +200,7 @@ module.exports = function(grunt) {
         recursiveMerge(issue_json.fields, options.optional_fields);
       }
       verboseInspect('Create issue json: ', issue_json);
+      testData(issue_json);
 
       // Call Jira REST API using node-jira
       jira.addNewIssue(issue_json, function(error, response){
@@ -195,7 +208,7 @@ module.exports = function(grunt) {
           deferred.reject(error);
         } else {
           verboseInspect('Create issue response: ', response);
-          grunt.log.writeln('Issue created (id = ' + response.id + ') ' + response.key + ' : ' + options.summary);
+          testData(response);
           deferred.resolve(response.id);
         }
       });
@@ -206,6 +219,7 @@ module.exports = function(grunt) {
     // Call the create issue method and then transition it if necessary
     createJiraIssue()
       .then(function(issue_id){
+        grunt.log.writeln('Issue created (id = ' + response.id + ') ' + response.key + ' : ' + options.summary);
         grunt.config('jira.last_issue_id', issue_id);
         if (options.issue_state > 1) {
           grunt.task.run('transitionJiraIssue:' + issue_id + ':' + options.issue_state);
