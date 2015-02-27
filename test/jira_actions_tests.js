@@ -1,23 +1,46 @@
 "use strict";
 
 // BDD using chai
-var chai = require("chai"),
+var util = require('util'),
+    chai = require("chai"),
   expect = require('chai').expect,
   should = require('chai').should();
 
 var path = require('path'),
-    exec = require('child_process').exec,
-    execOptions = {
-      cwd: path.join(__dirname, '..')
-    }
+    exec = require('child_process').exec
+
+/*
+ If timeout is greater than 0, then it will kill the child process if it runs longer
+ than timeout milliseconds. The child process is killed with killSignal (default: 'SIGTERM').
+ maxBuffer specifies the largest amount of data allowed on stdout or stderr - if this
+ value is exceeded then the child process is killed.
+ */
+
+// Duplicate the environment object
+// NOTE: Environment variables in child processes are always strings
+var envDup,
+    someVar;
+for (someVar in env) {
+  envDup[someVar] = env[someVar];
+}
+
+// Now, extend this with some new variables:
+envDup['TEST'] = true;
+
+var execOptions = {
+  cwd: path.join(__dirname, '..'),
+  env: envDup
+  //encoding: 'utf8',
+  //timeout: 0,
+  //maxBuffer: 200*1024,
+  //killSignal: 'SIGTERM',
+}
 
 // Use nock recorder to mock API responses
 var record = require('./record');
-var util = require('util');
 
 // Prepare the grunt tasks for testing
 var grunt = require('grunt');
-
 
 // Keep tests in seperate gruntfiles
 //function callGruntfile(filename, whenDoneCallback) {
@@ -39,17 +62,22 @@ describe('createJiraIssue', function () {
 
   describe('when using the default options', function () {
 
-    it('should merge common option defaults into task option defaults', function() {
-        exec('grunt createJiraIssue:createAndCloseFooStory --TEST=true', execOptions, function(error, stdout, stderr) {
-        // AssertionError: Expected command should not fail
-        expect(error).to.equal(null);
-        // AssertionError: Expected standard error stream should be empty
-        expect(stderr).to.equal('');
+    var result = exec('grunt createJiraIssue:createAndCloseFooStory --TEST=true', execOptions, function(error, stdout, stderr) {
+      console.log('stdout :: ' + util.inspect(stdout, {showHidden: false, depth: null}));
+      // AssertionError: Expected command should not fail
+      expect(error).to.equal(null);
+      // AssertionError: Expected standard error stream should be empty
+      expect(stderr).to.equal('');
+      var stdoutOk = contains(stdout, 'Done, without errors.');
+      // AssertionError: Expected plugin worked correctly
+      expect(stdoutOk).to.equal(true);
 
-        var stdoutOk = contains(stdout, 'Done, without errors.');
-        // AssertionError: Expected plugin worked correctly
-        expect(stdoutOk).to.equal(true); 
-      });
+      result = stdout;
+
+    });
+
+    it('should run without errors', function() {
+      console.log('result :: ' + util.inspect(result, {showHidden: false, depth: null}));
 
       //it('should merge common option defaults into task option defaults', function() {
       //
