@@ -45,9 +45,10 @@ describe('createJiraIssue', function () {
         expect(error).to.equal(null);
         // AssertionError: Expected standard error stream should be empty
         expect(stderr).to.equal('');
+
+        var stdoutOk = contains(stdout, 'Done, without errors.');
         // AssertionError: Expected plugin worked correctly
-        var stdoutOk = contains(stdout, 'Plugin worked correctly.');
-        expect(stdoutOk).to.equal();, "Missing stdout message.");
+        expect(stdoutOk).to.equal(true); 
       });
 
       //it('should merge common option defaults into task option defaults', function() {
