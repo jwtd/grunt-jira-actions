@@ -19,9 +19,10 @@ module.exports = function(grunt) {
    *        Global properties for use in all tasks        *
    *------------------------------------------------------*/
 
-
   // Create global config (gc)
-  var gc = {};
+  var gc = {
+    env: grunt.option('env') || 'default'
+  };
 
   // Project configuration.
   grunt.initConfig({
@@ -51,21 +52,10 @@ module.exports = function(grunt) {
     },
 
 
-    // Before generating any new files, remove any previously-created files.
-    //clean: {
-    //  tests: ['tmp']
-    //},
-
-
-    // Unit tests
-    mochaTest: {
-      test: {
-        options: {
-          reporter: 'spec'
-          //captureFile: 'results.txt', // Optionally capture the reporter output to a file
-        },
-        src: ['test/**/*_tests.js']
-      }
+    nodeunit: {
+      all: [
+        'test/**/*_tests.js'
+      ]
     },
 
 
@@ -314,15 +304,9 @@ module.exports = function(grunt) {
   // Actually load this plugin's task(s).
   grunt.loadTasks('tasks');
 
-
-  // Whenever the 'test' task is run, first clean the 'tmp' dir, then run this
-  // plugin's task(s), then test the result.
-  grunt.registerTask('test', ['mochaTest']);
-
-
-  // By default, lint and run all tests.
-  //grunt.registerTask('default', ['eslint', 'test']);
-  //grunt.registerTask('default', 'createJiraIssue:createAndCloseFooStory');
-  grunt.registerTask('default', ['setJiraConfig', 'searchJira:forGenIssues']);
+  // Project tasks
+  grunt.registerTask('check', ['eslint', 'test']);
+  grunt.registerTask('test', ['nodeunit']);
+  //grunt.registerTask('default', ['setJiraConfig', 'searchJira:forGenIssues']);
 
 };

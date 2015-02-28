@@ -92,8 +92,8 @@ module.exports = function(grunt) {
 
   // When TEST flags are set, write out test data
   var testData = function(obj) {
-    if (process.env['jiraActions-TEST'] || grunt.config('TEST')) {
-      grunt.verbose.writeln('>>TEST DATA<< ::' + util.inspect(obj, {showHidden: false, depth: null}));
+    if (grunt.option('env') == 'TEST') {
+      grunt.log.writeln('>>>TEST DATA<<<\n' + util.inspect(obj, {showHidden: false, depth: null}));
     }
   }
 
