@@ -84,6 +84,14 @@ module.exports = function(grunt) {
   }
 
 
+  // Fail if option is not null
+  function validatePresenceOf(opt, val){
+    if (opt[val] === null) {
+      grunt.fatal('Required option ' + val + ' was null');
+    };
+  }
+
+
   // When verbose is enabled, display the object's structure
   var verboseInspect = function(msg, obj) {
     grunt.verbose.writeln(msg + ' ' + util.inspect(obj, {showHidden: false, depth: null}));
@@ -147,11 +155,12 @@ module.exports = function(grunt) {
 
     // Setup task specific default options
     var default_options = {
-      project_id: null,
-      summary: null,
       issue_type: 'Story',   // Story, Epic, Task, Technical Task, Sub-Task, Bug, Improvement, New Feature
       issue_state: 1,        // 1 = Open, 2 = Closed
-      optional_fields: null  // JSON that should be merged into the request
+      project_id: null,
+      summary: null,
+      description: null,
+      additional_fields: null  // JSON that should be merged into the request
     };
 
     // Extend default task specific options with default common options
@@ -161,6 +170,11 @@ module.exports = function(grunt) {
     var options = this.options(default_options);
     verboseInspect('Create issue options: ', options);
     testData(options);
+
+    // Validate presence of values
+    validatePresenceOf(options, 'project_id');
+    validatePresenceOf(options, 'summary');
+    validatePresenceOf(options, 'description');
 
     // Get a Jira connection
     var jira = jiraCnn(options);
@@ -196,8 +210,8 @@ module.exports = function(grunt) {
       };
 
       // Add any other options passed in to the JSON
-      if (options.optional_fields != null){
-        recursiveMerge(issue_json.fields, options.optional_fields);
+      if (options.additional_fields != null){
+        recursiveMerge(issue_json.fields, options.additional_fields);
       }
       verboseInspect('Create issue json: ', issue_json);
       testData(issue_json);

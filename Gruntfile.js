@@ -53,9 +53,28 @@ module.exports = function(grunt) {
 
 
     nodeunit: {
-      all: [
-        'test/**/*_tests.js'
-      ]
+      all: ['test/**/*_tests.js'],
+      options: {
+        reporter: 'verbose'
+      },
+      tap: {
+        options: {
+          reporter: 'tap',
+          reporterOutput: 'tap-test-results.tap',
+          reporterOptions: {
+            output: './reports'
+          }
+        }
+      },
+      ci: {
+        options: {
+          reporter: 'junit', // Creates jUnit compatible XML reports, which can be used with continuous integration tools such as Hudson.
+          reporterOutput: 'junit-test-results.xml',
+          reporterOptions: {
+            output: './reports'
+          }
+        }
+      }
     },
 
 
@@ -108,6 +127,12 @@ module.exports = function(grunt) {
         project_id: 10400
       },
 
+      // Failure Cases
+      withOutRequiredOptions: {
+        options: {
+        }
+      },
+
       // Create specific targets to perform different Jira tasks
       createAndCloseFooStory: {
         options: {
@@ -125,7 +150,7 @@ module.exports = function(grunt) {
           issue_state: 2,     // 1 = Open, 2 = Done
           summary: 'This is the bar task summary',
           description: 'test/data/issue_body.txt',
-          optional_fields: {
+          additional_fields: {
             'priority': {
               'name': 'Major' // Critical, Major, Medium (default), Minor
             },

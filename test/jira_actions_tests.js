@@ -42,35 +42,61 @@ function callGrunt(task, whenDoneCallback) {
 // createJiraIssue tests
 exports.group = {
 
-  createJiraIssue_runs_without_errors: function(test) {
-    test.expect(1); // # of assertions that should run
-    callGrunt('createJiraIssue:createAndCloseFooStory', function(error, stdout) {
+  //setUp: function (callback) {
+  //  this.foo = 'bar';
+  //  this.recorder = record('createJiraIssue');
+  //  this.recorder.before;
+  //  callback();
+  //},
+  //tearDown: function (callback) {
+  //  // clean up
+  //  recorder.after
+  //  callback();
+  //},
 
-      console.log(stdout);
+  createJiraIssue_createAndCloseFooStory: function(test) {
+    test.expect(11); // # of assertions that should run
 
+    // Registers itself as a task
+    test.ok(
+      grunt.task._tasks['createJiraIssue'],
+      'Registers itself as a grunt task'
+    );
+
+    callGrunt('createJiraIssue:createAndCloseFooStory', function(error, stdout, stderr) {
+      //console.log('stdout :: ' + util.inspect(stdout, {showHidden: false, depth: null}));
+
+      // Make sure there were no errors
       test.equal(
-        stdout.indexOf('Done, without errors.') > -1,
+        stderr,
+        '',
+        "Standard error stream should be empty"
+      );
+      test.equal(
+        error,
+        null,
+        "Should not fail."
+      );
+      test.equal(
+        stdout.indexOf('Done, without errors') > -1,
         true,
-        'Found done'
+        'Should report that it was Done, without errors'
       );
 
-      //test.equal(
-      //  stdout.indexOf('L8') > -1,
-      //  true,
-      //  'too many newlines in newline blocks in file'
-      //);
-      //
-      //test.equal(
-      //  stdout.indexOf('L17') > -1,
-      //  true,
-      //  'too many newlines in newline blocks in file'
-      //);
-      //
-      //test.equal(
-      //  stdout.indexOf('L32') > -1,
-      //  true,
-      //  'toomany lines at the end of file.'
-      //);
+      // Should merge common option defaults into task option defaults
+      var i, defaults =[
+        "issue_type: 'Story'",
+        "issue_state: 1",
+        "env_var_for_jira_username: 'JIRA_UN'",
+        "env_var_for_jira_password: 'JIRA_PW'",
+        "jira_protocol: 'https'",
+        "jira_port: 443",
+        "jira_api_version: '2'"
+      ];
+      for (i in defaults) {
+        test.equal( stdout.indexOf(defaults[i]) > -1, true, 'Target options should have default: ' + defaults[i]);
+      }
+
       test.done();
     });
   }
