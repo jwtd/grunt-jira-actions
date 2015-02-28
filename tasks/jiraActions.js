@@ -13,9 +13,43 @@
 
 var util = require('util'),
     q = require('q'),
-    JiraApi = require('jira').JiraApi;
+    JiraApi = require('jira').JiraApi,
+    record = require('../test/record');
+
 
 module.exports = function(grunt) {
+
+
+  // Determine run parameters
+  var TESTING     = (grunt.option('env') == 'TEST');
+  var NOCK_RECORD = (!!grunt.option('NOCK_RECORD') || !!process.env['NOCK_RECORD']);
+  var NOCK_OFF    = (!NOCK_RECORD || !!grunt.option('NOCK_OFF') || !!process.env['NOCK_OFF']);
+  grunt.verbose.writeln('TESTING: ' + TESTING);
+  grunt.verbose.writeln('NOCK_RECORD: ' + NOCK_RECORD);
+  grunt.verbose.writeln('NOCK_OFF: ' + NOCK_OFF);
+
+  // nock recording methods to mock HTTP calls when env=TEST
+  var recorder = null;
+
+  function startRecord(name) {
+    if (NOCK_RECORD) {
+      recorder = record(name);
+      recorder.before;
+    }
+  }
+
+  function stopRecord() {
+    if (NOCK_RECORD) {
+      recorder.after
+    }
+  }
+
+  // When TEST flags are set, write out test data
+  var testData = function(obj) {
+    if (TESTING) {
+      grunt.log.writeln('>>>TEST DATA<<<\n' + util.inspect(obj, {showHidden: false, depth: null}));
+    }
+  }
 
 
   // Build a fresh version of the Jira global config each time in case overrides were used in a previous task
@@ -28,6 +62,66 @@ module.exports = function(grunt) {
       jira_port: grunt.config('jira_port') || 443,
       jira_api_version: grunt.config('jira_api_version') || '2'
     };
+  }
+
+
+  // Add or update existing properties on obj1 with values from obj2
+  var recursiveMerge = function(obj1, obj2) {
+    // Iterate over all the properties in the object which is being consumed
+    for (var p in obj2) {
+      // Property in destination object set; update its value.
+      if ( obj2.hasOwnProperty(p) && typeof obj1[p] !== 'undefined' ) {
+        recursiveMerge(obj1[p], obj2[p]);
+      } else {
+        // We don't have that level in the hierarchy so add it
+        obj1[p] = obj2[p];
+      }
+    }
+  }
+
+
+  // Make sure Jira credentials have been set in ENV
+  var validateEnvVars = function(env_un, env_pw) {
+    if (!process.env[env_un]) {
+      grunt.fail.fatal('Environment variable not found. ENV[' + env_un + '] must be set or JIRA calls will fail.');
+    }
+    if (!process.env[env_pw]) {
+      grunt.fail.fatal('Environment variable not found. ENV[' + env_pw + '] must be set or JIRA calls will fail.');
+    }
+  }
+
+
+  // Fail if option is not null
+  function validatePresenceOf(opt, val){
+    // Make sure val is in an array
+    if (val.constructor === String){
+      val = [val];
+    }
+    var v, missing='';
+    for (v in val) {
+      if (opt[val[v]] === null) {
+        missing = missing + '\nRequired option ' + val[v] + ' was null';
+      }
+    }
+    if (missing != '') {
+      grunt.fatal(missing);
+    }
+  }
+
+
+  // If a string reference is a valid file path, use its contents as the string, otherwise return the string
+  var resolveContent = function(ref) {
+    var content = ref;
+    if (grunt.file.exists(ref)) {
+      var ext = ref.split('.').pop().toLowerCase();
+      grunt.verbose.writeln('Extracting description from contents of ' + ext + ' file ' + ref);
+      if (ext === 'json') {
+        content = grunt.file.readJSON(ref);
+      } else {
+        content = grunt.file.read(ref);
+      }
+    }
+    return content;
   }
 
 
@@ -58,67 +152,9 @@ module.exports = function(grunt) {
   }
 
 
-  // Make sure Jira credentials have been set in ENV
-  var validateEnvVars = function(env_un, env_pw) {
-    if (!process.env[env_un]) {
-      grunt.fail.fatal('Environment variable not found. ENV[' + env_un + '] must be set or JIRA calls will fail.');
-    }
-    if (!process.env[env_pw]) {
-      grunt.fail.fatal('Environment variable not found. ENV[' + env_pw + '] must be set or JIRA calls will fail.');
-    }
-  }
-
-
-  // Add or update existing properties on obj1 with values from obj2
-  var recursiveMerge = function(obj1, obj2) {
-    // Iterate over all the properties in the object which is being consumed
-    for (var p in obj2) {
-      // Property in destination object set; update its value.
-      if ( obj2.hasOwnProperty(p) && typeof obj1[p] !== 'undefined' ) {
-        recursiveMerge(obj1[p], obj2[p]);
-      } else {
-        // We don't have that level in the hierarchy so add it
-        obj1[p] = obj2[p];
-      }
-    }
-  }
-
-
-  // Fail if option is not null
-  function validatePresenceOf(opt, val){
-    if (opt[val] === null) {
-      grunt.fatal('Required option ' + val + ' was null');
-    };
-  }
-
-
   // When verbose is enabled, display the object's structure
   var verboseInspect = function(msg, obj) {
     grunt.verbose.writeln(msg + ' ' + util.inspect(obj, {showHidden: false, depth: null}));
-  }
-
-
-  // When TEST flags are set, write out test data
-  var testData = function(obj) {
-    if (grunt.option('env') == 'TEST') {
-      grunt.log.writeln('>>>TEST DATA<<<\n' + util.inspect(obj, {showHidden: false, depth: null}));
-    }
-  }
-
-
-  // If a string reference is a valid file path, use its contents as the string, otherwise return the string
-  var resolveContent = function(ref) {
-    var content = ref;
-    if (grunt.file.exists(ref)) {
-      var ext = ref.split('.').pop().toLowerCase();
-      grunt.verbose.writeln('Extracting description from contents of ' + ext + ' file ' + ref);
-      if (ext === 'json') {
-        content = grunt.file.readJSON(ref);
-      } else {
-        content = grunt.file.read(ref);
-      }
-    }
-    return content;
   }
 
 
@@ -150,6 +186,10 @@ module.exports = function(grunt) {
   // Create a Jira issue
   grunt.registerMultiTask('createJiraIssue', 'Create an issue in JIRA', function() {
 
+    // Reveal task, target, and options
+    var current_action = this.nameArgs.replace(':', '_');
+    testData(current_action);
+
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
 
@@ -172,9 +212,7 @@ module.exports = function(grunt) {
     testData(options);
 
     // Validate presence of values
-    validatePresenceOf(options, 'project_id');
-    validatePresenceOf(options, 'summary');
-    validatePresenceOf(options, 'description');
+    validatePresenceOf(options, ['summary', 'description']);
 
     // Get a Jira connection
     var jira = jiraCnn(options);
@@ -217,6 +255,10 @@ module.exports = function(grunt) {
       testData(issue_json);
 
       // Call Jira REST API using node-jira
+      //var recorder = record('create_jira_issue');
+      //before(recorder.before);
+      startNockRecorder(current_action);
+
       jira.addNewIssue(issue_json, function(error, response){
         if (error) {
           deferred.reject(error);
@@ -227,6 +269,8 @@ module.exports = function(grunt) {
           deferred.resolve(response.id);
         }
       });
+
+      stopNockRecorder();
 
       return deferred.promise;
     }
