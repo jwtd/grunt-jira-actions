@@ -19,11 +19,12 @@ var util = require('util'),
 
 module.exports = function(grunt) {
 
-
   // Determine run parameters
+  var VERBOSE     = !!grunt.option('verbose');
   var TESTING     = (grunt.option('env') == 'TEST');
-  var NOCK_RECORD = (!!grunt.option('NOCK_RECORD') || !!process.env['NOCK_RECORD']);
+  var NOCK_RECORD = (TESTING || !!grunt.option('NOCK_RECORD') || !!process.env['NOCK_RECORD']);
   var NOCK_OFF    = (!NOCK_RECORD || !!grunt.option('NOCK_OFF') || !!process.env['NOCK_OFF']);
+  grunt.log.writeln('VERBOSE: ' + VERBOSE);
   grunt.verbose.writeln('TESTING: ' + TESTING);
   grunt.verbose.writeln('NOCK_RECORD: ' + NOCK_RECORD);
   grunt.verbose.writeln('NOCK_OFF: ' + NOCK_OFF);
@@ -31,25 +32,29 @@ module.exports = function(grunt) {
   // nock recording methods to mock HTTP calls when env=TEST
   var recorder = null;
 
-  function startRecord(name) {
+  var startRecord = function(name) {
     if (NOCK_RECORD) {
+      console.log('START RECORDER: ' + name);
       recorder = record(name);
-      recorder.before;
+      recorder.before();
     }
-  }
+  };
 
-  function stopRecord() {
+  var stopRecord = function() {
     if (NOCK_RECORD) {
-      recorder.after
+      recorder.after(function() {
+        console.log('END RECORDER');
+      });
     }
-  }
+  };
 
-  // When TEST flags are set, write out test data
-  var testData = function(obj) {
-    if (TESTING) {
-      grunt.log.writeln('>>>TEST DATA<<<\n' + util.inspect(obj, {showHidden: false, depth: null}));
+
+  // When testing or when verbose is enabled, display the object's structure
+  var writeToConsole = function(msg, obj) {
+    if (TESTING || VERBOSE) {
+      grunt.log.writeln(msg + '\n' + util.inspect(obj, {showHidden: false, depth: null}));
     }
-  }
+  };
 
 
   // Build a fresh version of the Jira global config each time in case overrides were used in a previous task
@@ -62,7 +67,7 @@ module.exports = function(grunt) {
       jira_port: grunt.config('jira_port') || 443,
       jira_api_version: grunt.config('jira_api_version') || '2'
     };
-  }
+  };
 
 
   // Add or update existing properties on obj1 with values from obj2
@@ -77,7 +82,7 @@ module.exports = function(grunt) {
         obj1[p] = obj2[p];
       }
     }
-  }
+  };
 
 
   // Make sure Jira credentials have been set in ENV
@@ -88,11 +93,11 @@ module.exports = function(grunt) {
     if (!process.env[env_pw]) {
       grunt.fail.fatal('Environment variable not found. ENV[' + env_pw + '] must be set or JIRA calls will fail.');
     }
-  }
+  };
 
 
   // Fail if option is not null
-  function validatePresenceOf(opt, val){
+  var validatePresenceOf = function(opt, val){
     // Make sure val is in an array
     if (val.constructor === String){
       val = [val];
@@ -106,7 +111,7 @@ module.exports = function(grunt) {
     if (missing != '') {
       grunt.fatal(missing);
     }
-  }
+  };
 
 
   // If a string reference is a valid file path, use its contents as the string, otherwise return the string
@@ -122,7 +127,7 @@ module.exports = function(grunt) {
       }
     }
     return content;
-  }
+  };
 
 
   // Make sure Jira credentials have been set in ENV
@@ -149,13 +154,8 @@ module.exports = function(grunt) {
     // Cache the connection in config and return connection object
     grunt.config('last_jira_connection', jira);
     return jira;
-  }
+  };
 
-
-  // When verbose is enabled, display the object's structure
-  var verboseInspect = function(msg, obj) {
-    grunt.verbose.writeln(msg + ' ' + util.inspect(obj, {showHidden: false, depth: null}));
-  }
 
 
   // Setup global Jira configuration
@@ -163,7 +163,7 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(commonOptions());
-    verboseInspect('setJiraConfig options: ', options);
+    writeToConsole('setJiraConfig options: ', options);
 
     // Make sure Jira creds are set
     validateEnvVars(options.env_var_for_jira_username, options.env_var_for_jira_password);
@@ -177,10 +177,9 @@ module.exports = function(grunt) {
     grunt.config('jira_api_version', options.jira_api_version);
 
     // Output for tests
-    testData(grunt.config);
+    writeToConsole('grunt.config: ', grunt.config);
 
   });
-
 
 
   // Create a Jira issue
@@ -188,7 +187,6 @@ module.exports = function(grunt) {
 
     // Reveal task, target, and options
     var current_action = this.nameArgs.replace(':', '_');
-    testData(current_action);
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -208,11 +206,10 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    verboseInspect('Create issue options: ', options);
-    testData(options);
+    writeToConsole('Create issue options: ', options);
 
-    // Validate presence of values
-    validatePresenceOf(options, ['summary', 'description']);
+    // Validate presence of values for required options
+    validatePresenceOf(options, ['project_id', 'summary', 'description']);
 
     // Get a Jira connection
     var jira = jiraCnn(options);
@@ -251,26 +248,20 @@ module.exports = function(grunt) {
       if (options.additional_fields != null){
         recursiveMerge(issue_json.fields, options.additional_fields);
       }
-      verboseInspect('Create issue json: ', issue_json);
-      testData(issue_json);
+      writeToConsole('Create issue json: ', issue_json);
 
       // Call Jira REST API using node-jira
-      //var recorder = record('create_jira_issue');
-      //before(recorder.before);
-      startNockRecorder(current_action);
-
+      startRecord(current_action);
       jira.addNewIssue(issue_json, function(error, response){
         if (error) {
           deferred.reject(error);
         } else {
-          verboseInspect('Create issue response: ', response);
+          writeToConsole('Create issue response: ', response);
           grunt.log.writeln('Issue created (id = ' + response.id + ') ' + response.key + ' : ' + options.summary);
-          testData(response);
           deferred.resolve(response.id);
         }
       });
-
-      stopNockRecorder();
+      stopRecord();
 
       return deferred.promise;
     }
@@ -284,7 +275,7 @@ module.exports = function(grunt) {
         }
       })
       .catch(function(error){
-        verboseInspect('Create issue error: ', error);
+        writeToConsole('Create issue error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -298,6 +289,9 @@ module.exports = function(grunt) {
 
   // Transition a Jira issue
   grunt.registerTask('transitionJiraIssue', 'Transition an issue in JIRA', function(issue_id, issue_state) {
+
+    // Reveal task, target, and options
+    var current_action = this.nameArgs.replace(':', '_');
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -313,7 +307,10 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    verboseInspect('Transition issue options: ', options);
+    writeToConsole('Transition issue options: ', options);
+
+    // Validate presence of values for required options
+    validatePresenceOf(options, ['issue_id', 'issue_state']);
 
     // Get a Jira connection
     var jira = jiraCnn(options);
@@ -330,7 +327,7 @@ module.exports = function(grunt) {
           'id': options.issue_state
         }
       };
-      verboseInspect('Transition issue json: ', transition_json);
+      writeToConsole('Transition issue json: ', transition_json);
 
       jira.transitionIssue(options.issue_id, transition_json, function(error, response){
         if (error) {
@@ -346,10 +343,10 @@ module.exports = function(grunt) {
     // Call the transition issue method and then transition it if necessary
     transitionJiraIssue()
       .then(function(response){
-        verboseInspect('Transition response: ', response);
+        writeToConsole('Transition response: ', response);
       })
       .catch(function(error){
-        verboseInspect('Transition issue error: ', error);
+        writeToConsole('Transition issue error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -365,6 +362,9 @@ module.exports = function(grunt) {
   linkJiraIssues:<from_issue_key>:<to_issue_key>:<link_type>:<comment>
   */
   grunt.registerTask('linkJiraIssue', 'Link two Jira issues', function(from_issue_key, to_issue_key, link_type, comment) {
+
+    // Reveal task, target, and options
+    var current_action = this.nameArgs.replace(':', '_');
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -382,7 +382,10 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    verboseInspect('Link issue options: ', options);
+    writeToConsole('Link issue options: ', options);
+
+    // Validate presence of values for required options
+    validatePresenceOf(options, ['from_issue_key', 'to_issue_key']);
 
     // Get a Jira connection
     var jira = jiraCnn(options);
@@ -407,7 +410,7 @@ module.exports = function(grunt) {
           //}
         }
       };
-      verboseInspect('Link issue json: ', link_json);
+      writeToConsole('Link issue json: ', link_json);
 
       jira.issueLink(link_json, function(error, response){
         if (error) {
@@ -423,10 +426,10 @@ module.exports = function(grunt) {
     // Call the transition issue method and then transition it if necessary
     linkJiraIssues()
       .then(function(response){
-        verboseInspect('Link issues response: ', response);
+        writeToConsole('Link issues response: ', response);
       })
       .catch(function(error){
-        verboseInspect('Link issues error: ', error);
+        writeToConsole('Link issues error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -441,12 +444,16 @@ module.exports = function(grunt) {
   // Comment on a Jira issue
   grunt.registerMultiTask('addJiraComment', 'Add a comment to an issue in JIRA', function(issue_id) {
 
+    // Reveal task, target, and options
+    var current_action = this.nameArgs.replace(':', '_');
+
+    // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
 
     // Setup task specific default options
     var default_options = {
       issue_id: issue_id || grunt.config('jira.last_issue_id'),
-      comment: 'Comment body was not specified'
+      comment: null
     };
 
     // Extend default task specific options with default common options
@@ -454,7 +461,10 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    verboseInspect('Add comment options: ', options);
+    writeToConsole('Add comment options: ', options);
+
+    // Validate presence of values for required options
+    validatePresenceOf(options, ['issue_id', 'comment']);
 
     // Get a Jira connection
     var jira = jiraCnn(options);
@@ -481,10 +491,10 @@ module.exports = function(grunt) {
     // Call the transition issue method
     addJiraComment()
       .then(function(response){
-        verboseInspect('Add comment response: ', response);
+        writeToConsole('Add comment response: ', response);
       })
       .catch(function(error){
-        verboseInspect('Add comment error: ', error);
+        writeToConsole('Add comment error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -501,6 +511,10 @@ module.exports = function(grunt) {
    */
   grunt.registerMultiTask('createJiraVersion', 'Create a new version for a project in JIRA', function(project_key, version_name, release_date_string) {
 
+    // Reveal task, target, and options
+    var current_action = this.nameArgs.replace(':', '_');
+
+    // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
 
     // If a release date isn't specified, use the current date. Format the date as "2010-07-05".
@@ -528,7 +542,10 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    verboseInspect('createJiraVersion options: ', options);
+    writeToConsole('createJiraVersion options: ', options);
+
+    // Validate presence of values for required options
+    validatePresenceOf(options, ['project_key', 'version_name']);
 
     // Get a Jira connection
     var jira = jiraCnn(options);
@@ -550,7 +567,7 @@ module.exports = function(grunt) {
         'releaseDate': options.release_date,
         'startDate': options.start_date
       };
-      verboseInspect('Create version json: ', version_json);
+      writeToConsole('Create version json: ', version_json);
 
       // Pass version object to node-jira
       jira.createVersion(version_json, function(error, response){
@@ -567,10 +584,10 @@ module.exports = function(grunt) {
     // Call the transition issue method
     addJiraVersion()
       .then(function(response){
-        verboseInspect('Add version response: ', response);
+        writeToConsole('Add version response: ', response);
       })
       .catch(function(error){
-        verboseInspect('Add version error: ', error);
+        writeToConsole('Add version error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -586,6 +603,10 @@ module.exports = function(grunt) {
    */
   grunt.registerMultiTask('searchJira', 'Search JIRA with JQL', function() {
 
+    // Reveal task, target, and options
+    var current_action = this.nameArgs.replace(':', '_');
+
+    // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
 
     // Setup task specific default options
@@ -603,7 +624,10 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    verboseInspect('searchJira options: ', options);
+    writeToConsole('searchJira options: ', options);
+
+    // Validate presence of values for required options
+    validatePresenceOf(options, ['search_string']);
 
     // Get a Jira connection
     var jira = jiraCnn(options);
@@ -622,7 +646,7 @@ module.exports = function(grunt) {
         'fields': options.fields
       };
       grunt.verbose.writeln('JQL search_string: ' +  options.search_string);
-      verboseInspect('Search json: ', search_json);
+      writeToConsole('Search json: ', search_json);
 
       // Pass version object to node-jira
       jira.searchJira(options.search_string, search_json, function(error, response){
@@ -630,7 +654,7 @@ module.exports = function(grunt) {
           deferred.reject(error);
         } else {
           grunt.verbose.writeln('JQL search returned ' +  response.total + ' items');
-          //verboseInspect('JQL search response: ', response);
+          //writeToConsole('JQL search response: ', response);
           // Loop over and add to cache
           var i,
               issue,
@@ -655,11 +679,11 @@ module.exports = function(grunt) {
     // Call the transition issue method
     searchJira()
       .then(function(results){
-        verboseInspect('Jira search results: ', results);
+        writeToConsole('Jira search results: ', results);
         grunt.config(this.target + 'search_results', results);
       })
       .catch(function(error){
-        verboseInspect('Jira search error: ', error);
+        writeToConsole('Jira search error: ', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -671,12 +695,15 @@ module.exports = function(grunt) {
 
 
 
-
   /*
    Lookup Jira Project
    */
   grunt.registerMultiTask('jiraProjectDetails', 'Lookup a JIRA project\'s details', function(project_key) {
 
+    // Reveal task, target, and options
+    var current_action = this.nameArgs.replace(':', '_');
+
+    // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
 
     // Setup task specific default options
@@ -689,7 +716,10 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    verboseInspect('jiraProjectDetails options: ', options);
+    writeToConsole('jiraProjectDetails options: ', options);
+
+    // Validate presence of values for required options
+    validatePresenceOf(options, ['project_key']);
 
     // Get a Jira connection
     var jira = jiraCnn(options);
@@ -713,10 +743,10 @@ module.exports = function(grunt) {
     // Call the transition issue method
     getProject()
       .then(function(response){
-        verboseInspect('Jira project response: ', response);
+        writeToConsole('Jira project response: ', response);
       })
       .catch(function(error){
-        verboseInspect('Jira project error: ', error);
+        writeToConsole('Jira project error: ', error);
         grunt.fatal(error);
       })
       .done(function(){

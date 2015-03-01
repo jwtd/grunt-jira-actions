@@ -12,31 +12,35 @@ module.exports = function (name, options) {
   var fixtures_folder = options.fixtures_folder || 'fixtures';
   var fp = path.join(test_folder, fixtures_folder, name + '.js');
 
+  console.log('fp: ' + fp);
+
   /*
   `has_fixtures` indicates whether the test has fixtures we should read,
   or doesn't, so we should record and save them.
   the environment variable `NOCK_RECORD` can be used to force a new recording.
   */
   var has_fixtures = !!process.env.NOCK_RECORD;
+  console.log('has_fixtures: ' + has_fixtures);
 
   return {
 
     // Use existing fixture, or start recording to create a new one
     before: function () {
       if (!has_fixtures) try {
+        console.log('BEFORE !has_fixtures');
         require('../' + fp);
         has_fixtures = true;
       } catch (e) {
         console.log('Exception: ' + e);
         console.log('Recording new fixture');
         nock.recorder.rec({
-          dont_print: true
+          dont_print: false
         });
       } else {
         console.log('Recording new fixture');
         has_fixtures = false;
         nock.recorder.rec({
-          dont_print: true
+          dont_print: false
         });
       }
     },
@@ -44,6 +48,7 @@ module.exports = function (name, options) {
     // If a recording was created, save it as a new fixuture
     after: function (done) {
       if (!has_fixtures) {
+        console.log('AFTER !has_fixtures');
         has_fixtures = nock.recorder.play();
         var text = "var nock = require('nock');\n" + has_fixtures.join('\n');
         fs.writeFile(fp, text, done);

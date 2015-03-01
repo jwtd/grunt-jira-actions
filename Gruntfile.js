@@ -60,7 +60,7 @@ module.exports = function(grunt) {
       tap: {
         options: {
           reporter: 'tap',
-          reporterOutput: 'tap-test-results.tap',
+          reporterOutput: 'reports/tap-test-results.tap',
           reporterOptions: {
             output: './reports'
           }
@@ -69,7 +69,7 @@ module.exports = function(grunt) {
       ci: {
         options: {
           reporter: 'junit', // Creates jUnit compatible XML reports, which can be used with continuous integration tools such as Hudson.
-          reporterOutput: 'junit-test-results.xml',
+          reporterOutput: 'reports/junit-test-results.xml',
           reporterOptions: {
             output: './reports'
           }
