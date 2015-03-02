@@ -7,6 +7,7 @@ var util = require('util'),
   exec   = require('child_process').exec,
  exports = module.exports;
 
+
 // Duplicate the environment object
 // NOTE: Environment variables in child processes are always strings
 var envDup = [],

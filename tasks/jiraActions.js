@@ -19,40 +19,45 @@ var util = require('util'),
 
 module.exports = function(grunt) {
 
-  // Determine run parameters
-  var VERBOSE     = !!grunt.option('verbose');
+
+  // Determine run parameters.
   var TESTING     = (grunt.option('env') == 'TEST');
-  var NOCK_RECORD = (TESTING || !!grunt.option('NOCK_RECORD') || !!process.env['NOCK_RECORD']);
-  var NOCK_OFF    = (!NOCK_RECORD || !!grunt.option('NOCK_OFF') || !!process.env['NOCK_OFF']);
-  grunt.log.writeln('VERBOSE: ' + VERBOSE);
+
+  // If testing, force verbose on so tests can read output via stdout from exec calls
+  if (TESTING) {grunt.option('verbose', true)}
+  var VERBOSE     = !!grunt.option('verbose');
   grunt.verbose.writeln('TESTING: ' + TESTING);
-  grunt.verbose.writeln('NOCK_RECORD: ' + NOCK_RECORD);
-  grunt.verbose.writeln('NOCK_OFF: ' + NOCK_OFF);
-
-  // nock recording methods to mock HTTP calls when env=TEST
-  var recorder = null;
-
-  var startRecord = function(name) {
-    if (NOCK_RECORD) {
-      console.log('START RECORDER: ' + name);
-      recorder = record(name);
-      recorder.before();
-    }
-  };
-
-  var stopRecord = function() {
-    if (NOCK_RECORD) {
-      recorder.after(function() {
-        console.log('END RECORDER');
-      });
-    }
-  };
-
+  grunt.log.writeln('VERBOSE: ' + VERBOSE);
 
   // When testing or when verbose is enabled, display the object's structure
   var writeToConsole = function(msg, obj) {
     if (TESTING || VERBOSE) {
       grunt.log.writeln(msg + '\n' + util.inspect(obj, {showHidden: false, depth: null}));
+    }
+  };
+
+
+  // Prepare nock to record and mock HTTP calls when env=TEST
+  var recorder    = null;
+  var NOCK_RECORD = (TESTING || !!grunt.option('NOCK_RECORD') || !!process.env['NOCK_RECORD']);
+  var NOCK_OFF    = (!NOCK_RECORD || !!grunt.option('NOCK_OFF') || !!process.env['NOCK_OFF']);
+  grunt.verbose.writeln('NOCK_RECORD: ' + NOCK_RECORD);
+  grunt.verbose.writeln('NOCK_OFF: ' + NOCK_OFF);
+
+  // Start nock recorder
+  var startRecord = function(name) {
+    if (NOCK_RECORD) {
+      grunt.verbose.writeln('START NOCK RECORDING: ' + name);
+      recorder = record(name);
+      recorder.before();
+    }
+  };
+
+  // Stop nock recorder
+  var stopRecord = function() {
+    if (NOCK_RECORD) {
+      grunt.verbose.writeln('STOP NOCK RECORDING');
+      recorder.after();
     }
   };
 
@@ -251,7 +256,7 @@ module.exports = function(grunt) {
       writeToConsole('Create issue json: ', issue_json);
 
       // Call Jira REST API using node-jira
-      startRecord(current_action);
+
       jira.addNewIssue(issue_json, function(error, response){
         if (error) {
           deferred.reject(error);
@@ -261,18 +266,20 @@ module.exports = function(grunt) {
           deferred.resolve(response.id);
         }
       });
-      stopRecord();
 
       return deferred.promise;
     }
 
     // Call the create issue method and then transition it if necessary
+    startRecord(current_action);
     createJiraIssue()
       .then(function(issue_id){
+        stopRecord();//function() {
         grunt.config('jira.last_issue_id', issue_id);
         if (options.issue_state > 1) {
           grunt.task.run('transitionJiraIssue:' + issue_id + ':' + options.issue_state);
         }
+        //});
       })
       .catch(function(error){
         writeToConsole('Create issue error: ', error);
