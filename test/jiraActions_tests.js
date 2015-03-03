@@ -1,11 +1,12 @@
-"use strict";
+'use strict';
 
 // nodeunit
 var util = require('util'),
     path = require('path'),
    grunt = require('grunt'),
-  exec   = require('child_process').exec,
- exports = module.exports;
+    exec = require('child_process').exec;
+
+var exports = module.exports;
 
 
 // Duplicate the environment object
@@ -17,7 +18,7 @@ for (envVar in process.env) {
 }
 
 // Record new http mocks
-envDup['NOCK_RECORD'] = true;
+envDup.NOCK_RECORD = true;
 
 // Prepare configuration for exec calls
 var execOptions = {
@@ -27,14 +28,12 @@ var execOptions = {
   //timeout: 0,            // kill child process if it runs longer than timeout milliseconds
   //maxBuffer: 200*1024,   // kill child process if data in stdout or stderr exceeds this limit
   //killSignal: 'SIGTERM'  // The child process is killed with killSignal (default: 'SIGTERM')
-}
+};
 
 
 // Call grunt with the correct flags
 function callGrunt(task, whenDoneCallback) {
-  var command, options;
-  command = 'grunt ' + task + ' --env=TEST --no-color';
-  exec(command, execOptions, whenDoneCallback);
+  exec('grunt ' + task + ' --env=TEST --no-color', execOptions, whenDoneCallback);
 }
 
 
@@ -57,12 +56,12 @@ exports.group = {
       test.equal(
         stderr,
         '',
-        "Standard error stream should be empty"
+        'Standard error stream should be empty'
       );
       test.equal(
         error,
         null,
-        "Should not fail."
+        'Should not fail.'
       );
       test.equal(
         stdout.indexOf('Done, without errors') > -1,
@@ -88,4 +87,4 @@ exports.group = {
     });
   }
 
-}
+};

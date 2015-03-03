@@ -46,8 +46,8 @@ module.exports = function(grunt) {
       },
       target: [
         'Gruntfile.js',
-        'tasks/*.js',
-        '<%= nodeunit.tests %>'
+        'tasks/**/*.js',
+        'test/**/*_tests.js'
       ]
     },
 

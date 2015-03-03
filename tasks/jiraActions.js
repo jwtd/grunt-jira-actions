@@ -21,49 +21,51 @@ module.exports = function(grunt) {
 
 
   // Determine run parameters.
-  var TESTING     = (grunt.option('env') == 'TEST');
+  var TESTING = (grunt.option('env') === 'TEST');
 
   // If testing, force verbose on so tests can read output via stdout from exec calls
-  if (TESTING) {grunt.option('verbose', true)}
-  var VERBOSE     = !!grunt.option('verbose');
+  if (TESTING) {
+    grunt.option('verbose', true)
+  }
+  var VERBOSE = !!grunt.option('verbose');
   grunt.verbose.writeln('TESTING: ' + TESTING);
   grunt.log.writeln('VERBOSE: ' + VERBOSE);
 
   // When testing or when verbose is enabled, display the object's structure
-  var writeToConsole = function(msg, obj) {
+  function writeToConsole(msg, obj) {
     if (TESTING || VERBOSE) {
       grunt.log.writeln(msg + '\n' + util.inspect(obj, {showHidden: false, depth: null}));
     }
-  };
+  }
 
 
   // Prepare nock to record and mock HTTP calls when env=TEST
-  var recorder    = null;
+  var recorder = null;
   var NOCK_RECORD = (TESTING || !!grunt.option('NOCK_RECORD') || !!process.env['NOCK_RECORD']);
-  var NOCK_OFF    = (!NOCK_RECORD || !!grunt.option('NOCK_OFF') || !!process.env['NOCK_OFF']);
+  var NOCK_OFF = (!NOCK_RECORD || !!grunt.option('NOCK_OFF') || !!process.env['NOCK_OFF']);
   grunt.verbose.writeln('NOCK_RECORD: ' + NOCK_RECORD);
   grunt.verbose.writeln('NOCK_OFF: ' + NOCK_OFF);
 
   // Start nock recorder
-  var startRecord = function(name) {
+  function startRecord(name) {
     if (NOCK_RECORD) {
       grunt.verbose.writeln('START NOCK RECORDING: ' + name);
       recorder = record(name);
       recorder.before();
     }
-  };
+  }
 
   // Stop nock recorder
-  var stopRecord = function() {
+  function stopRecord() {
     if (NOCK_RECORD) {
       grunt.verbose.writeln('STOP NOCK RECORDING');
       recorder.after();
     }
-  };
+  }
 
 
   // Build a fresh version of the Jira global config each time in case overrides were used in a previous task
-  var commonOptions = function() {
+  function commonOptions() {
     return {
       env_var_for_jira_username: grunt.config('env_var_for_jira_username') || 'JIRA_UN',
       env_var_for_jira_password: grunt.config('env_var_for_jira_password') || 'JIRA_PW',
@@ -72,11 +74,11 @@ module.exports = function(grunt) {
       jira_port: grunt.config('jira_port') || 443,
       jira_api_version: grunt.config('jira_api_version') || '2'
     };
-  };
+  }
 
 
   // Add or update existing properties on obj1 with values from obj2
-  var recursiveMerge = function(obj1, obj2) {
+  function recursiveMerge(obj1, obj2) {
     // Iterate over all the properties in the object which is being consumed
     for (var p in obj2) {
       // Property in destination object set; update its value.
@@ -87,22 +89,22 @@ module.exports = function(grunt) {
         obj1[p] = obj2[p];
       }
     }
-  };
+  }
 
 
   // Make sure Jira credentials have been set in ENV
-  var validateEnvVars = function(env_un, env_pw) {
+  function validateEnvVars(env_un, env_pw) {
     if (!process.env[env_un]) {
       grunt.fail.fatal('Environment variable not found. ENV[' + env_un + '] must be set or JIRA calls will fail.');
     }
     if (!process.env[env_pw]) {
       grunt.fail.fatal('Environment variable not found. ENV[' + env_pw + '] must be set or JIRA calls will fail.');
     }
-  };
+  }
 
 
   // Fail if option is not null
-  var validatePresenceOf = function(opt, val){
+  function validatePresenceOf(opt, val){
     // Make sure val is in an array
     if (val.constructor === String){
       val = [val];
@@ -113,14 +115,14 @@ module.exports = function(grunt) {
         missing = missing + '\nRequired option ' + val[v] + ' was null';
       }
     }
-    if (missing != '') {
+    if (missing !== '') {
       grunt.fatal(missing);
     }
-  };
+  }
 
 
   // If a string reference is a valid file path, use its contents as the string, otherwise return the string
-  var resolveContent = function(ref) {
+  function resolveContent(ref) {
     var content = ref;
     if (grunt.file.exists(ref)) {
       var ext = ref.split('.').pop().toLowerCase();
@@ -132,11 +134,11 @@ module.exports = function(grunt) {
       }
     }
     return content;
-  };
+  }
 
 
   // Make sure Jira credentials have been set in ENV
-  var jiraCnn = function(opt) {
+  function jiraCnn(opt) {
     // Make sure Jira creds are set
     validateEnvVars(opt.env_var_for_jira_username, opt.env_var_for_jira_password);
 
@@ -159,7 +161,7 @@ module.exports = function(grunt) {
     // Cache the connection in config and return connection object
     grunt.config('last_jira_connection', jira);
     return jira;
-  };
+  }
 
 
 
@@ -660,7 +662,7 @@ module.exports = function(grunt) {
         'maxResults': options.max_results,
         'fields': options.fields
       };
-      grunt.verbose.writeln('JQL search_string: ' +  options.search_string);
+      grunt.verbose.writeln('JQL search_string: ' + options.search_string);
       writeToConsole('Search json: ', search_json);
 
       // Pass version object to node-jira
@@ -668,7 +670,7 @@ module.exports = function(grunt) {
         if (error) {
           deferred.reject(error);
         } else {
-          grunt.verbose.writeln('JQL search returned ' +  response.total + ' items');
+          grunt.verbose.writeln('JQL search returned ' + response.total + ' items');
           //writeToConsole('JQL search response: ', response);
           // Loop over and add to cache
           var i,
