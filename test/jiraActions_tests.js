@@ -14,7 +14,9 @@ var exports = module.exports;
 var envDup = [],
     envVar;
 for (envVar in process.env) {
-  envDup[envVar] = process.env[envVar];
+  if (process.env.hasOwnProperty(envVar)) {
+    envDup[envVar] = process.env[envVar];
+  }
 }
 
 // Record new http mocks
@@ -45,7 +47,7 @@ exports.group = {
 
     // Registers itself as a task
     test.ok(
-      grunt.task._tasks['createJiraIssue'],
+      grunt.task._tasks.createJiraIssue,
       'Registers itself as a grunt task'
     );
 
@@ -80,7 +82,9 @@ exports.group = {
         "jira_api_version: '2'"
       ];
       for (i in defaults) {
-        test.equal( stdout.indexOf(defaults[i]) > -1, true, 'Target options should have default: ' + defaults[i]);
+        if (defaults.hasOwnProperty(i)) {
+          test.equal(stdout.indexOf(defaults[i]) > -1, true, 'Target options should have default: ' + defaults[i]);
+        }
       }
 
       test.done();

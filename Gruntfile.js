@@ -296,7 +296,7 @@ module.exports = function(grunt) {
       //        +AND+issuetype+in%20(%22Bug%22,%22Story%22)
       forGenIssues: {
         options: {
-          search_string: 'project="WS" AND status="OPEN" AND issuetype in ("Bug","Story")',
+          search_string: 'project="WS" AND status="OPEN" AND issuetype in ("Bug","Story")'
           //start_at: 0,
           //max_results: 3,
           //fields: {},

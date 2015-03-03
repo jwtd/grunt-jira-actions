@@ -21,11 +21,11 @@ module.exports = function(grunt) {
 
 
   // Determine run parameters.
-  var TESTING = (grunt.option('env') === 'TEST');
+  var TESTING = grunt.option('env') === 'TEST';
 
   // If testing, force verbose on so tests can read output via stdout from exec calls
   if (TESTING) {
-    grunt.option('verbose', true)
+    grunt.option('verbose', true);
   }
   var VERBOSE = !!grunt.option('verbose');
   grunt.verbose.writeln('TESTING: ' + TESTING);
@@ -41,8 +41,8 @@ module.exports = function(grunt) {
 
   // Prepare nock to record and mock HTTP calls when env=TEST
   var recorder = null;
-  var NOCK_RECORD = (TESTING || !!grunt.option('NOCK_RECORD') || !!process.env['NOCK_RECORD']);
-  var NOCK_OFF = (!NOCK_RECORD || !!grunt.option('NOCK_OFF') || !!process.env['NOCK_OFF']);
+  var NOCK_RECORD = TESTING || !!grunt.option('NOCK_RECORD') || !!process.env.NOCK_RECORD;
+  var NOCK_OFF = !NOCK_RECORD || !!grunt.option('NOCK_OFF') || !!process.env.NOCK_OFF;
   grunt.verbose.writeln('NOCK_RECORD: ' + NOCK_RECORD);
   grunt.verbose.writeln('NOCK_OFF: ' + NOCK_OFF);
 
@@ -109,10 +109,11 @@ module.exports = function(grunt) {
     if (val.constructor === String){
       val = [val];
     }
-    var v, missing='';
+    var v,
+        missing = '';
     for (v in val) {
       if (opt[val[v]] === null) {
-        missing = missing + '\nRequired option ' + val[v] + ' was null';
+        missing += '\nRequired option ' + val[v] + ' was null';
       }
     }
     if (missing !== '') {
@@ -342,7 +343,7 @@ module.exports = function(grunt) {
         if (error) {
           deferred.reject(error);
         } else {
-          deferred.resolve(options.issue_id);
+          deferred.resolve(response);
         }
       });
 
@@ -427,7 +428,7 @@ module.exports = function(grunt) {
         if (error) {
           deferred.reject(error);
         } else {
-          deferred.resolve(options.from_issue_key);
+          deferred.resolve(response);
         }
       });
 
@@ -666,7 +667,7 @@ module.exports = function(grunt) {
       writeToConsole('Search json: ', search_json);
 
       // Pass version object to node-jira
-      jira.searchJira(options.search_string, search_json, function(error, response){
+      jira.searchJira(search_string, search_json, function(error, response){
         if (error) {
           deferred.reject(error);
         } else {
@@ -677,14 +678,16 @@ module.exports = function(grunt) {
               issue,
               results = {};
           for (i in response.issues) {
-            issue = response.issues[i];
-            results[issue.key] = {
+            if (response.issues.hasOwnProperty(i)) {
+              issue = response.issues[i];
+              results[issue.key] = {
                 id: issue.id,
                 key: issue.key,
                 summary: issue.fields.summary,
                 status_id: issue.fields.status.id,
                 status: issue.fields.status.name
               };
+            }
           }
           deferred.resolve(results);
         }
@@ -727,7 +730,7 @@ module.exports = function(grunt) {
 
     // Setup task specific default options
     var default_options = {
-      project_key: null
+      project_key: project_key
     };
 
     // Extend default task specific options with default common options
