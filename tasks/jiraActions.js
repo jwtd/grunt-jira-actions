@@ -274,7 +274,7 @@ module.exports = function(grunt) {
     startRecord(current_action);
     createJiraIssue()
       .then(function(issue_id){
-        stopRecord();//function() {
+        stopRecord();
         grunt.config('jira.last_issue_id', issue_id);
         if (options.issue_state > 1) {
           grunt.task.run('transitionJiraIssue:' + issue_id + ':' + options.issue_state);
@@ -348,8 +348,10 @@ module.exports = function(grunt) {
     }
 
     // Call the transition issue method and then transition it if necessary
+    startRecord(current_action);
     transitionJiraIssue()
       .then(function(response){
+        stopRecord();
         writeToConsole('Transition response: ', response);
       })
       .catch(function(error){
@@ -431,8 +433,10 @@ module.exports = function(grunt) {
     }
 
     // Call the transition issue method and then transition it if necessary
+    startRecord(current_action);
     linkJiraIssues()
       .then(function(response){
+        stopRecord();
         writeToConsole('Link issues response: ', response);
       })
       .catch(function(error){
@@ -496,8 +500,10 @@ module.exports = function(grunt) {
     }
 
     // Call the transition issue method
+    startRecord(current_action);
     addJiraComment()
       .then(function(response){
+        stopRecord();
         writeToConsole('Add comment response: ', response);
       })
       .catch(function(error){
@@ -589,8 +595,10 @@ module.exports = function(grunt) {
     }
 
     // Call the transition issue method
+    startRecord(current_action);
     addJiraVersion()
       .then(function(response){
+        stopRecord();
         writeToConsole('Add version response: ', response);
       })
       .catch(function(error){
@@ -684,8 +692,10 @@ module.exports = function(grunt) {
     }
 
     // Call the transition issue method
+    startRecord(current_action);
     searchJira()
       .then(function(results){
+        stopRecord();
         writeToConsole('Jira search results: ', results);
         grunt.config(this.target + 'search_results', results);
       })
@@ -748,8 +758,10 @@ module.exports = function(grunt) {
     }
 
     // Call the transition issue method
+    startRecord(current_action);
     getProject()
       .then(function(response){
+        stopRecord();
         writeToConsole('Jira project response: ', response);
       })
       .catch(function(error){
