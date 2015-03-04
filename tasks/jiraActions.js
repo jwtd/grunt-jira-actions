@@ -34,7 +34,7 @@ module.exports = function(grunt) {
   // When testing or when verbose is enabled, display the object's structure
   function writeToConsole(msg, obj) {
     if (TESTING || VERBOSE) {
-      grunt.log.writeln('**** ' + msg + ' ****\n' + util.inspect(obj, {showHidden: false, depth: null}));
+      grunt.log.writeln(msg + '\n****\n' + JSON.stringify(obj) + '\n****');
     }
   }
 
@@ -229,15 +229,6 @@ module.exports = function(grunt) {
     function createJiraIssue() {
       var deferred = q.defer();
 
-      // If project_id is null, fail
-      if (options.project_id === null) {
-        deferred.reject('"project_id" was not specified.');
-      }
-      // If project_id is null, fail
-      if (options.summary === null) {
-        deferred.reject('"summary" was not specified.');
-      }
-
       // If the description is a file path, use its contents as the description
       var description = resolveContent(options.description);
 
@@ -254,6 +245,7 @@ module.exports = function(grunt) {
         }
       };
 
+      // If a description is provided, add it
       if (description != null){
         issue_json.fields['description'] = description
       }

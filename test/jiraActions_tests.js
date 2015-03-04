@@ -38,110 +38,169 @@ function callGrunt(task, whenDoneCallback) {
   exec('grunt ' + task + ' --env=TEST --no-color', execOptions, whenDoneCallback);
 }
 
+function parseTestOutput(s){
+  var n;
+  var blocks = s.split('***');
+  for (n in blocks) {
+    if (blocks.hasOwnProperty(n)) {
+      console.log('** ' + n + ' **\n' + blocks[n]);
+    }
+  }
+  //console.log('Inspect Object :: ' + util.inspect(blocks, {showHidden: false, depth: null}));
+}
 
 // createJiraIssue tests
 exports.group = {
 
 
   createJiraIssue_withMinimumOptions_should_PASS: function(test) {
-    test.expect(11); // # of assertions that should run
 
-    // Registers itself as a task
+    // Make sure task registers itself in grunt
     test.ok(
       grunt.task._tasks.createJiraIssue,
-      'Registers itself as a grunt task'
+      'SHould register itself as a grunt task'
     );
 
-
-/*
- createJiraIssue:withMinimumOptions_should_PASS
- *** Create issue options ***
- { issue_type: 'Story',
- issue_state: 1,
- project_id: 10400,
- summary: 'Issue from project_id, jira_host, summary, and defaults for everything else',
- description: null,
- additional_fields: null,
- env_var_for_jira_username: 'JIRA_UN',
- env_var_for_jira_password: 'JIRA_PW',
- jira_protocol: 'https',
- jira_host: 'virtru.atlassian.net',
- jira_port: 443,
- jira_api_version: '2' }
- *** Create issue json ***
- { fields:
- { project: { id: 10400 },
- issuetype: { name: 'Story' },
- summary: 'Issue from project_id, jira_host, summary, and defaults for everything else' } }
- *** Create issue response ***
- { id: '19850',
- key: 'GEN-281',
- self: 'https://virtru.atlassian.net/rest/api/2/issue/19850' }
- Issue created (id = 19850) GEN-281 : Issue from project_id, jira_host, summary, and defaults for everything else
- Create issue completed
-*/
     callGrunt('createJiraIssue:withMinimumOptions_should_PASS', function(error, stdout, stderr) {
-      console.log(stdout);
+      //console.log(stdout);
+      //parseTestOutput(stdout);
+
+      // Parse test output
+      var blocks = stdout.split('***');
+      var target_options = JSON.parse(blocks[1]); // Create issue options
+      var jira_api_json = JSON.parse(blocks[3]);  // Create issue json
+      var response = JSON.parse(blocks[5]);       // Create issue response
 
       // Make sure there were no errors
       test.equal(
         stderr,
         '',
-        'Standard error stream should be empty'
+        'Should have an empty standard error stream'
       );
       test.equal(
         error,
         null,
         'Should not fail.'
       );
+
+      // Should have required fields
+      var opt;
+      var required = [
+        'project_id',
+        'summary',
+        'jira_host'
+      ];
+      for (opt in required) {
+        if (required.hasOwnProperty(opt)) {
+          test.ok(
+            target_options[required[opt]],
+            'Should have required option ' + required[opt]
+          );
+        }
+      }
+
+
+      /*
+       Should merge common option defaults into task option defaults
+
+       { issue_type: 'Story',
+       issue_state: 1,
+       project_id: 10400,
+       summary: 'Issue from project_id, jira_host, summary, and defaults for everything else',
+       description: null,
+       additional_fields: null,
+       env_var_for_jira_username: 'JIRA_UN',
+       env_var_for_jira_password: 'JIRA_PW',
+       jira_protocol: 'https',
+       jira_host: 'virtru.atlassian.net',
+       jira_port: 443,
+       jira_api_version: '2' }
+      */
+      var defaults = {
+        'issue_type': 'Story',
+        'issue_state': '1',
+        'env_var_for_jira_username': 'JIRA_UN',
+        'env_var_for_jira_password': 'JIRA_PW',
+        'jira_protocol': 'https',
+        'jira_port': 443,
+        'jira_api_version': '2'
+      };
+      for (opt in defaults) {
+        if (defaults.hasOwnProperty(opt)) {
+          test.equal(
+            target_options[opt],
+            defaults[opt],
+            'Should have option ' + opt + ' = ' + defaults[opt]
+          );
+        }
+      }
+
+
+      /*
+       Verify api_json
+
+       { fields:
+       { project: { id: 10400 },
+       issuetype: { name: 'Story' },
+       summary: 'Issue from project_id, jira_host, summary, and defaults for everything else',
+       description: undefined } }
+      */
+      test.equal(
+        jira_api_json.fields.project.id,
+        10400,
+        'project should be 10400'
+      );
+
+      test.equal(
+        jira_api_json.fields.issuetype.name,
+        'Story',
+        'issuetype should be Story'
+      );
+
+      test.equal(
+        jira_api_json.fields.summary,
+        'Issue from project_id, jira_host, summary, and defaults for everything else',
+        'Summary should be an expected text string.'
+      );
+
+
+      /*
+       Verify response against nocked response unless nock is off
+
+       { id: '19854',
+       key: 'GEN-285',
+       self: 'https://virtru.atlassian.net/rest/api/2/issue/19854' }
+      */
+      test.ok(
+        response.id,
+        'Should create an issue with a new id'
+      );
+
+      test.ok(
+        response.key,
+        'Should create an issue with a valid key'
+      );
+
+      test.ok(
+        response.self,
+        'Should create an issue with a valid url as a reference'
+      );
+
       test.equal(
         stdout.indexOf('Done, without errors') > -1,
         true,
         'Should report that it was Done, without errors'
       );
 
-      // Should merge common option defaults into task option defaults
-      var i, defaults = [
-        "issue_type: 'Story'",
-        "issue_state: 1",
-        "env_var_for_jira_username: 'JIRA_UN'",
-        "env_var_for_jira_password: 'JIRA_PW'",
-        "jira_protocol: 'https'",
-        "jira_port: 443",
-        "jira_api_version: '2'"
-      ];
-      for (i in defaults) {
-        if (defaults.hasOwnProperty(i)) {
-          test.equal(stdout.indexOf(defaults[i]) > -1, true, 'Target options should have default: ' + defaults[i]);
-        }
-      }
-
-      test.equal(
-        stdout.indexOf('project: { id: 10400 }') > -1,
-        true,
-        'node-jira json should be valid'
-      );
-      test.equal(
-        stdout.indexOf('project: { id: 10400 }') > -1,
-        true,
-        'node-jira json should be valid'
-      );
-      test.equal(
-        stdout.indexOf('project: { id: 10400 }') > -1,
-        true,
-        'node-jira json should be valid'
-      );
-
-      /*
-      { fields:
-      { project: { id: 10400 },
-        issuetype: { name: 'Story' },
-        summary: 'Issue from project_id, jira_host, summary, and defaults for everything else',
-          description: undefined } }
-      */
-
+      test.expect(20);
       test.done();
     });
+
+
+
+
+
+
   }
 
 };
