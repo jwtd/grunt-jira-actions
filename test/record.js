@@ -12,15 +12,12 @@ module.exports = function (name, options) {
   var fixtures_folder = options.fixtures_folder || 'fixtures';
   var fp = path.join(test_folder, fixtures_folder, name + '.js');
 
-  console.log('fp: ' + fp);
-
   /*
   `has_fixtures` indicates whether the test has fixtures we should read,
   or doesn't, so we should record and save them.
   the environment variable `NOCK_RECORD` can be used to force a new recording.
   */
   var has_fixtures = !!process.env.NOCK_RECORD;
-  console.log('has_fixtures: ' + has_fixtures);
 
   return {
 
@@ -34,13 +31,13 @@ module.exports = function (name, options) {
         //console.log('Exception: ' + e);
         console.log('Recording new fixture');
         nock.recorder.rec({
-          dont_print: false
+          dont_print: true
         });
       } else {
         console.log('Recording new fixture');
         has_fixtures = false;
         nock.recorder.rec({
-          dont_print: false
+          dont_print: true
         });
       }
     },

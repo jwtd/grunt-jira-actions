@@ -34,7 +34,7 @@ module.exports = function(grunt) {
   // When testing or when verbose is enabled, display the object's structure
   function writeToConsole(msg, obj) {
     if (TESTING || VERBOSE) {
-      grunt.log.writeln(msg + '\n' + util.inspect(obj, {showHidden: false, depth: null}));
+      grunt.log.writeln('**** ' + msg + ' ****\n' + util.inspect(obj, {showHidden: false, depth: null}));
     }
   }
 
@@ -49,7 +49,7 @@ module.exports = function(grunt) {
   // Start nock recorder
   function startRecord(name) {
     if (NOCK_RECORD) {
-      grunt.verbose.writeln('START NOCK RECORDING: ' + name);
+      //grunt.verbose.writeln('START NOCK RECORDING: ' + name);
       recorder = record(name);
       recorder.before();
     }
@@ -58,7 +58,7 @@ module.exports = function(grunt) {
   // Stop nock recorder
   function stopRecord() {
     if (NOCK_RECORD) {
-      grunt.verbose.writeln('STOP NOCK RECORDING');
+      //grunt.verbose.writeln('STOP NOCK RECORDING');
       recorder.after();
     }
   }
@@ -124,8 +124,11 @@ module.exports = function(grunt) {
 
   // If a string reference is a valid file path, use its contents as the string, otherwise return the string
   function resolveContent(ref) {
+    if (!ref){
+      return null;
+    }
     var content = ref;
-    if (grunt.file.exists(ref)) {
+    if (!ref && grunt.file.exists(ref)) {
       var ext = ref.split('.').pop().toLowerCase();
       grunt.verbose.writeln('Extracting description from contents of ' + ext + ' file ' + ref);
       if (ext === 'json') {
@@ -185,7 +188,7 @@ module.exports = function(grunt) {
     grunt.config('jira_api_version', options.jira_api_version);
 
     // Output for tests
-    writeToConsole('grunt.config: ', grunt.config);
+    writeToConsole('grunt.config', grunt.config);
 
   });
 
@@ -214,7 +217,7 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    writeToConsole('Create issue options: ', options);
+    writeToConsole('Create issue options', options);
 
     // Validate presence of values for required options
     validatePresenceOf(options, ['project_id', 'summary']);
@@ -247,16 +250,19 @@ module.exports = function(grunt) {
           'issuetype': {
             'name': options.issue_type
           },
-          'summary': options.summary,
-          'description': description
+          'summary': options.summary
         }
       };
+
+      if (description != null){
+        issue_json.fields['description'] = description
+      }
 
       // Add any other options passed in to the JSON
       if (options.additional_fields != null){
         recursiveMerge(issue_json.fields, options.additional_fields);
       }
-      writeToConsole('Create issue json: ', issue_json);
+      writeToConsole('Create issue json', issue_json);
 
       // Call Jira REST API using node-jira
 
@@ -264,7 +270,7 @@ module.exports = function(grunt) {
         if (error) {
           deferred.reject(error);
         } else {
-          writeToConsole('Create issue response: ', response);
+          writeToConsole('Create issue response', response);
           grunt.log.writeln('Issue created (id = ' + response.id + ') ' + response.key + ' : ' + options.summary);
           deferred.resolve(response.id);
         }
@@ -285,7 +291,7 @@ module.exports = function(grunt) {
         //});
       })
       .catch(function(error){
-        writeToConsole('Create issue error: ', error);
+        writeToConsole('Create issue error', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -317,7 +323,7 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    writeToConsole('Transition issue options: ', options);
+    writeToConsole('Transition issue options', options);
 
     // Validate presence of values for required options
     validatePresenceOf(options, ['issue_id', 'issue_state']);
@@ -337,7 +343,7 @@ module.exports = function(grunt) {
           'id': options.issue_state
         }
       };
-      writeToConsole('Transition issue json: ', transition_json);
+      writeToConsole('Transition issue json', transition_json);
 
       jira.transitionIssue(options.issue_id, transition_json, function(error, response){
         if (error) {
@@ -355,10 +361,10 @@ module.exports = function(grunt) {
     transitionJiraIssue()
       .then(function(response){
         stopRecord();
-        writeToConsole('Transition response: ', response);
+        writeToConsole('Transition response', response);
       })
       .catch(function(error){
-        writeToConsole('Transition issue error: ', error);
+        writeToConsole('Transition issue error', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -394,7 +400,7 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    writeToConsole('Link issue options: ', options);
+    writeToConsole('Link issue options', options);
 
     // Validate presence of values for required options
     validatePresenceOf(options, ['from_issue_key', 'to_issue_key']);
@@ -422,7 +428,7 @@ module.exports = function(grunt) {
           //}
         }
       };
-      writeToConsole('Link issue json: ', link_json);
+      writeToConsole('Link issue json', link_json);
 
       jira.issueLink(link_json, function(error, response){
         if (error) {
@@ -440,10 +446,10 @@ module.exports = function(grunt) {
     linkJiraIssues()
       .then(function(response){
         stopRecord();
-        writeToConsole('Link issues response: ', response);
+        writeToConsole('Link issues response', response);
       })
       .catch(function(error){
-        writeToConsole('Link issues error: ', error);
+        writeToConsole('Link issues error', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -475,7 +481,7 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    writeToConsole('Add comment options: ', options);
+    writeToConsole('Add comment options', options);
 
     // Validate presence of values for required options
     validatePresenceOf(options, ['issue_id', 'comment']);
@@ -507,10 +513,10 @@ module.exports = function(grunt) {
     addJiraComment()
       .then(function(response){
         stopRecord();
-        writeToConsole('Add comment response: ', response);
+        writeToConsole('Add comment response', response);
       })
       .catch(function(error){
-        writeToConsole('Add comment error: ', error);
+        writeToConsole('Add comment error', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -558,7 +564,7 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    writeToConsole('createJiraVersion options: ', options);
+    writeToConsole('createJiraVersion options', options);
 
     // Validate presence of values for required options
     validatePresenceOf(options, ['project_key', 'version_name']);
@@ -583,7 +589,7 @@ module.exports = function(grunt) {
         'releaseDate': options.release_date,
         'startDate': options.start_date
       };
-      writeToConsole('Create version json: ', version_json);
+      writeToConsole('Create version json', version_json);
 
       // Pass version object to node-jira
       jira.createVersion(version_json, function(error, response){
@@ -602,10 +608,10 @@ module.exports = function(grunt) {
     addJiraVersion()
       .then(function(response){
         stopRecord();
-        writeToConsole('Add version response: ', response);
+        writeToConsole('Add version response', response);
       })
       .catch(function(error){
-        writeToConsole('Add version error: ', error);
+        writeToConsole('Add version error', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -642,7 +648,7 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    writeToConsole('searchJira options: ', options);
+    writeToConsole('searchJira options', options);
 
     // Validate presence of values for required options
     validatePresenceOf(options, ['search_string']);
@@ -664,7 +670,7 @@ module.exports = function(grunt) {
         'fields': options.fields
       };
       grunt.verbose.writeln('JQL search_string: ' + options.search_string);
-      writeToConsole('Search json: ', search_json);
+      writeToConsole('Search json', search_json);
 
       // Pass version object to node-jira
       jira.searchJira(search_string, search_json, function(error, response){
@@ -701,11 +707,11 @@ module.exports = function(grunt) {
     searchJira()
       .then(function(results){
         stopRecord();
-        writeToConsole('Jira search results: ', results);
+        writeToConsole('Jira search results', results);
         grunt.config(this.target + 'search_results', results);
       })
       .catch(function(error){
-        writeToConsole('Jira search error: ', error);
+        writeToConsole('Jira search error', error);
         grunt.fatal(error);
       })
       .done(function(){
@@ -738,7 +744,7 @@ module.exports = function(grunt) {
 
     // Overwrite default values with values specified in the target
     var options = this.options(default_options);
-    writeToConsole('jiraProjectDetails options: ', options);
+    writeToConsole('jiraProjectDetails options', options);
 
     // Validate presence of values for required options
     validatePresenceOf(options, ['project_key']);
@@ -767,10 +773,10 @@ module.exports = function(grunt) {
     getProject()
       .then(function(response){
         stopRecord();
-        writeToConsole('Jira project response: ', response);
+        writeToConsole('Jira project response', response);
       })
       .catch(function(error){
-        writeToConsole('Jira project error: ', error);
+        writeToConsole('Jira project error', error);
         grunt.fatal(error);
       })
       .done(function(){
