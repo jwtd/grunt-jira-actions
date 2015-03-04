@@ -61,7 +61,7 @@ exports.group = {
       'SHould register itself as a grunt task'
     );
 
-    callGrunt('createJiraIssue:withMinimumOptions_should_PASS', function(error, stdout, stderr) {
+    callGrunt('createJiraIssue:withMinimumOptions_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
@@ -80,7 +80,7 @@ exports.group = {
       test.equal(
         error,
         null,
-        'Should not fail.'
+        'Should not throw an error'
       );
 
       // Should have required fields
@@ -115,7 +115,7 @@ exports.group = {
        jira_host: 'virtru.atlassian.net',
        jira_port: 443,
        jira_api_version: '2' }
-      */
+       */
       var defaults = {
         'issue_type': 'Story',
         'issue_state': '1',
@@ -144,7 +144,7 @@ exports.group = {
        issuetype: { name: 'Story' },
        summary: 'Issue from project_id, jira_host, summary, and defaults for everything else',
        description: undefined } }
-      */
+       */
       test.equal(
         jira_api_json.fields.project.id,
         10400,
@@ -160,7 +160,7 @@ exports.group = {
       test.equal(
         jira_api_json.fields.summary,
         'Issue from project_id, jira_host, summary, and defaults for everything else',
-        'Summary should be an expected text string.'
+        'Summary should be an expected text string'
       );
 
 
@@ -170,7 +170,7 @@ exports.group = {
        { id: '19854',
        key: 'GEN-285',
        self: 'https://virtru.atlassian.net/rest/api/2/issue/19854' }
-      */
+       */
       test.ok(
         response.id,
         'Should create an issue with a new id'
@@ -195,12 +195,85 @@ exports.group = {
       test.expect(20);
       test.done();
     });
+  },
 
 
 
 
 
 
+
+  createJiraIssue_asValidStoryDescrFromOption_should_PASS: function(test) {
+
+    // Make sure task registers itself in grunt
+    test.ok(
+      grunt.task._tasks.createJiraIssue,
+      'SHould register itself as a grunt task'
+    );
+
+    callGrunt('createJiraIssue:asValidStoryDescrFromOption_should_PASS', function (error, stdout, stderr) {
+      //console.log(stdout);
+      //parseTestOutput(stdout);
+
+      // Parse test output
+      var blocks = stdout.split('***');
+      var jira_api_json = JSON.parse(blocks[3]);  // Create issue json
+      var response = JSON.parse(blocks[5]);       // Create issue response
+
+      // Make sure there were no errors
+      test.equal(
+        stderr,
+        '',
+        'Should have an empty standard error stream'
+      );
+      test.equal(
+        error,
+        null,
+        'Should not throw an error'
+      );
+
+      // Test the only thing different in this target
+      test.equal(
+        jira_api_json.fields.description,
+        'This is the story description as string.',
+        'Description should be an expected text string'
+      );
+
+
+      /*
+       Verify response against nocked response unless nock is off
+
+       {"id":"19884",
+       "key":"GEN-308",
+       "self":"https://virtru.atlassian.net/rest/api/2/issue/19884"}
+       */
+      test.ok(
+        response.id,
+        'Should create an issue with a new id'
+      );
+
+      test.ok(
+        response.key,
+        'Should create an issue with a valid key'
+      );
+
+      test.ok(
+        response.self,
+        'Should create an issue with a valid url as a reference'
+      );
+
+      // TODO: Search for issue and verify that its description was set correctly
+
+      test.equal(
+        stdout.indexOf('Done, without errors') > -1,
+        true,
+        'Should report that it was Done, without errors'
+      );
+
+      test.expect(8);
+      test.done();
+    });
   }
+
 
 };
