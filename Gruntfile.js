@@ -121,45 +121,128 @@ module.exports = function(grunt) {
     // Create Jira issues
     createJiraIssue: {
 
+
       // Declare options that are common to all Jira actions
       options: {
         jira_host: 'virtru.atlassian.net',
         project_id: 10400
       },
 
-      // Failure Cases
-      withOutRequiredOptions: {
+
+      /*- Pass Cases ------------------*/
+
+
+      withMinimumOptions_should_PASS: {
         options: {
-        }
+          summary: 'Issue from project_id, jira_host, summary, and defaults for everything else'}
       },
 
-      // Create specific targets to perform different Jira tasks
-      createAndCloseFooStory: {
+
+      asValidStoryDescrFromOption_should_PASS: {
         options: {
           issue_type: 'Story', // Story, Epic, Task, Technical Task, Sub-Task, Bug, Improvement, New Feature
-          issue_state: 1,      // 1 = Open, 2 = Done
-          summary: 'This is the foo story summary',
-          description: 'This is the foo story description.'
+          summary: 'Story with summary and description from a target option',
+          description: 'This is the story description as string.'
         }
       },
 
-      // Create specific targets to perform different Jira tasks
-      createOpenBarTask: {
+
+      asValidTaskDescrFromFile_should_PASS: {
         options: {
-          issue_type: 'Task',
+          issue_type: 'Task', // Story, Epic, Task, Technical Task, Sub-Task, Bug, Improvement, New Feature
+          summary: 'Task with summary and description from a filepath',
+          description: 'test/data/issue_body.txt'
+        }
+      },
+
+
+      asValidStoryMarkedDone_should_PASS: {
+        options: {
           issue_state: 2,     // 1 = Open, 2 = Done
+          summary: 'Story marked as done'
+        }
+      },
+
+
+      asValidStoryWithPriority_should_PASS: {
+        options: {
           summary: 'This is the bar task summary',
-          description: 'test/data/issue_body.txt',
           additional_fields: {
             'priority': {
               'name': 'Major' // Critical, Major, Medium (default), Minor
-            },
+            }
+          }
+        }
+      },
+
+
+      asValidStoryWithComponent_should_PASS: {
+        options: {
+          summary: 'This is the bar task summary',
+          additional_fields: {
             'components': [{
               'id': '10804'
             }]
           }
         }
-      }
+      },
+
+
+      /*- Failure Cases ------------------*/
+
+
+      withoutRequiredOptions_should_FAIL: {
+        options: {
+        }
+      },
+
+
+      withInvalidIssueType_should_FAIL: {
+        options: {
+          issue_type: 'BLARG', // Story, Epic, Task, Technical Task, Sub-Task, Bug, Improvement, New Feature
+          summary: 'Should fail because BLARG is not a valid issue type'
+        }
+      },
+
+
+      withInvalidIssueState_should_FAIL: {
+        options: {
+          issue_state: 42, // 1 = Open, 2 = Done
+          summary: 'Should fail because 42 is not a valid issue state'
+        }
+      },
+
+
+      withInvalidFilePathForDesc_should_FAIL: {
+        options: {
+          summary: 'Should fail because filepath is invalid',
+          description: 'test/path/does_not_exist.txt'
+        }
+      },
+
+
+      withInvalidPriority_should_FAIL: {
+        options: {
+          summary: 'Should fail because BLARG is not a valid priority name',
+          additional_fields: {
+            'priority': {
+              'name': 'Major' // Critical, Major, Medium (default), Minor
+            }
+          }
+        }
+      },
+
+
+      withInvalidComponent_should_FAIL: {
+        options: {
+          summary: 'Should fail because 99999999 is not a valid component ID',
+          additional_fields: {
+            'components': [{
+              'id': '99999999'
+            }]
+          }
+        }
+      },
 
     },
 

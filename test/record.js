@@ -27,11 +27,11 @@ module.exports = function (name, options) {
     // Use existing fixture, or start recording to create a new one
     before: function () {
       if (!has_fixtures) try {
-        console.log('BEFORE !has_fixtures');
+        //console.log('Nock Recording BEFORE()');
         require('../' + fp);
         has_fixtures = true;
       } catch (e) {
-        console.log('Exception: ' + e);
+        //console.log('Exception: ' + e);
         console.log('Recording new fixture');
         nock.recorder.rec({
           dont_print: false
@@ -48,7 +48,7 @@ module.exports = function (name, options) {
     // If a recording was created, save it as a new fixuture
     after: function () {
       if (!has_fixtures) {
-        console.log('AFTER !has_fixtures');
+        //console.log('Nock Recording AFTER()');
         has_fixtures = nock.recorder.play();
         var text = "var nock = require('nock');\n" + has_fixtures.join('\n');
         console.log(text);

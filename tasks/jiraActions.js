@@ -217,7 +217,7 @@ module.exports = function(grunt) {
     writeToConsole('Create issue options: ', options);
 
     // Validate presence of values for required options
-    validatePresenceOf(options, ['project_id', 'summary', 'description']);
+    validatePresenceOf(options, ['project_id', 'summary']);
 
     // Get a Jira connection
     var jira = jiraCnn(options);
