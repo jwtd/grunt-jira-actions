@@ -34,7 +34,7 @@ module.exports = function(grunt) {
   // When testing or when verbose is enabled, display the object's structure
   function writeToConsole(msg, obj) {
     if (TESTING || VERBOSE) {
-      grunt.log.writeln(msg + '\n****\n' + JSON.stringify(obj) + '\n****');
+      grunt.log.writeln(msg + '\n||||\n' + JSON.stringify(obj) + '\n||||');
     }
   }
 
@@ -128,7 +128,7 @@ module.exports = function(grunt) {
       return null;
     }
     var content = ref;
-    if (!ref && grunt.file.exists(ref)) {
+    if (grunt.file.exists(ref)) {
       var ext = ref.split('.').pop().toLowerCase();
       grunt.verbose.writeln('Extracting description from contents of ' + ext + ' file ' + ref);
       if (ext === 'json') {
@@ -247,7 +247,8 @@ module.exports = function(grunt) {
 
       // If a description is provided, add it
       if (description != null){
-        issue_json.fields['description'] = description
+        console.log(description);
+        issue_json.fields.description = description;
       }
 
       // Add any other options passed in to the JSON

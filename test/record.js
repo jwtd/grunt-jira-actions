@@ -27,6 +27,7 @@ module.exports = function (name, options) {
         //console.log('Nock Recording BEFORE()');
         require('../' + fp);
         has_fixtures = true;
+        console.log('Using fixture to mock HTTP call');
       } catch (e) {
         //console.log('Exception: ' + e);
         console.log('Recording new fixture');
@@ -48,7 +49,7 @@ module.exports = function (name, options) {
         //console.log('Nock Recording AFTER()');
         has_fixtures = nock.recorder.play();
         var text = "var nock = require('nock');\n" + has_fixtures.join('\n');
-        console.log(text);
+        //console.log(text);
         fs.writeFileSync(fp, text);
       }
     }
