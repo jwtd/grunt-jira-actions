@@ -30,10 +30,18 @@ module.exports = function (name, options) {
         console.log('Using fixture to mock HTTP call');
       } catch (e) {
         //console.log('Exception: ' + e);
-        console.log('Recording new fixture');
-        nock.recorder.rec({
-          dont_print: true
-        });
+        try {
+          console.log('Recording new fixture');
+          nock.recorder.rec({
+            dont_print: true
+          });
+        } catch (e) {
+          // Nock recorder was on, so turn it off and restart it
+          after();
+          nock.recorder.rec({
+            dont_print: true
+          });
+        }
       } else {
         console.log('Recording new fixture');
         has_fixtures = false;

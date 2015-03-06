@@ -41,7 +41,7 @@ function callGrunt(task, whenDoneCallback) {
 
 function parseTestOutput(s){
   var n;
-  var blocks = s.split('***');
+  var blocks = s.split('||||');
   for (n in blocks) {
     if (blocks.hasOwnProperty(n)) {
       console.log('** ' + n + ' **\n' + blocks[n]);
@@ -309,12 +309,8 @@ exports.group = {
         'Should not throw an error'
       );
 
+
       // Test the only thing different in this target
-      //test.equal(
-      //  jira_api_json.fields.description.indexOf('As a foo, I would like bar, so that I don\'t have to baz.') > -1,
-      //  true,
-      //  'Should import its description from a file'
-      //);
       test.equal(
         jira_api_json.fields.description,
         grunt.file.read('test/data/issue_body.txt'),
@@ -328,6 +324,7 @@ exports.group = {
        "key":"GEN-308",
        "self":"https://virtru.atlassian.net/rest/api/2/issue/19884"}
        */
+
       test.ok(
         response.id,
         'Should create an issue with a new id'
@@ -352,6 +349,69 @@ exports.group = {
       );
 
       test.expect(8);
+      test.done();
+    });
+  },
+
+
+  createJiraIssue_asValidStoryMarkedDone_should_PASS: function(test) {
+
+    // Make sure task registers itself in grunt
+    test.ok(
+      grunt.task._tasks.createJiraIssue,
+      'SHould register itself as a grunt task'
+    );
+
+    callGrunt('createJiraIssue:asValidStoryMarkedDone_should_PASS', function (error, stdout, stderr) {
+      //console.log(stdout);
+      //parseTestOutput(stdout);
+
+      // Parse test output
+      var blocks = splitOutput(stdout);
+      var jira_api_json = JSON.parse(blocks[9]);  // Transition json
+      var response = JSON.parse(blocks[11]);      // Transition response
+
+      // Make sure there were no errors
+      test.equal(
+        stderr,
+        '',
+        'Should have an empty standard error stream'
+      );
+      test.equal(
+        error,
+        null,
+        'Should not throw an error'
+      );
+
+      /*
+       Verify response against nocked response unless nock is off
+
+       {"id":"19884",
+       "key":"GEN-308",
+       "self":"https://virtru.atlassian.net/rest/api/2/issue/19884"}
+       */
+      // Test the only thing different in this target
+      test.equal(
+        jira_api_json.transition.id,
+        '2',
+        'Should transition to state 2'
+      );
+
+      test.equal(
+        response,
+        'Success',
+        'Should return Success as the response'
+      );
+
+      // TODO: Search for issue and verify that its description was set correctly
+
+      test.equal(
+        stdout.indexOf('Done, without errors') > -1,
+        true,
+        'Should report that it was Done, without errors'
+      );
+
+      test.expect(6);
       test.done();
     });
   }
