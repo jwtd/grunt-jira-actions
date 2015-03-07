@@ -176,18 +176,6 @@ module.exports = function(grunt) {
       },
 
 
-      asValidStoryWithComponent_should_PASS: {
-        options: {
-          summary: 'This is the bar task summary',
-          additional_fields: {
-            'components': [{
-              'id': '10804'
-            }]
-          }
-        }
-      },
-
-
       /*- Failure Cases ------------------*/
 
 

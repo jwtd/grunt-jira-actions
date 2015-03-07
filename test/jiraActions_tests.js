@@ -414,7 +414,78 @@ exports.group = {
       test.expect(6);
       test.done();
     });
-  }
+  },
 
+
+  createJiraIssue_asValidStoryWithPriority_should_PASS: function(test) {
+
+    // Make sure task registers itself in grunt
+    test.ok(
+      grunt.task._tasks.createJiraIssue,
+      'SHould register itself as a grunt task'
+    );
+
+    callGrunt('createJiraIssue:asValidStoryWithPriority_should_PASS', function (error, stdout, stderr) {
+      //console.log(stdout);
+      parseTestOutput(stdout);
+
+      // Parse test output
+      var blocks = splitOutput(stdout);
+      var jira_api_json = JSON.parse(blocks[3]);  // Create issue json
+      var response = JSON.parse(blocks[5]);       // Create issue response
+
+      // Make sure there were no errors
+      test.equal(
+        stderr,
+        '',
+        'Should have an empty standard error stream'
+      );
+      test.equal(
+        error,
+        null,
+        'Should not throw an error'
+      );
+
+      // Test the only thing different in this target
+      test.equal(
+        jira_api_json.priority.components.name
+        'Major',
+        'Should be able to set the priority of new issues'
+      );
+
+      /*
+       Verify response against nocked response unless nock is off
+
+       {"id":"19884",
+       "key":"GEN-308",
+       "self":"https://virtru.atlassian.net/rest/api/2/issue/19884"}
+       */
+      test.ok(
+        response.id,
+        'Should create an issue with a new id'
+      );
+
+      test.ok(
+        response.key,
+        'Should create an issue with a valid key'
+      );
+
+      test.ok(
+        response.self,
+        'Should create an issue with a valid url as a reference'
+      );
+
+      // TODO: Search for issue and verify that its priority was set correctly
+
+      test.equal(
+        stdout.indexOf('Done, without errors') > -1,
+        true,
+        'Should report that it was Done, without errors'
+      );
+
+      test.expect(8);
+      test.done();
+    });
+  }
 
 };
