@@ -427,7 +427,7 @@ exports.group = {
 
     callGrunt('createJiraIssue:asValidStoryWithPriority_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
-      parseTestOutput(stdout);
+      //parseTestOutput(stdout);
 
       // Parse test output
       var blocks = splitOutput(stdout);
@@ -486,6 +486,57 @@ exports.group = {
       test.expect(8);
       test.done();
     });
+  },
+
+
+  /*-------------------------------------*
+   *  Failure cases for createJiraIssue  *
+   *-------------------------------------*/
+
+
+  createJiraIssue_withoutRequiredOptions_should_FAIL: function(test) {
+
+    // Make sure task registers itself in grunt
+    test.ok(
+      grunt.task._tasks.createJiraIssue,
+      'SHould register itself as a grunt task'
+    );
+
+    callGrunt('createJiraIssue:withoutRequiredOptions_should_FAIL', function (error, stdout, stderr) {
+      //console.log(stdout);
+      //parseTestOutput(stdout);
+
+      // Parse test output
+      var blocks = splitOutput(stdout);
+      var options = JSON.parse(blocks[1]);  // Create issue options
+
+      test.equal(
+        options.summary,
+        null,
+        'Should not have a default value for summary'
+      );
+
+      test.equal(
+        error.message,
+        'Command failed: ',
+        'Should have error message = Command failed'
+      );
+      test.equal(
+        error.code,
+        1,
+        'Should have result code = 1'
+      );
+
+      test.equal(
+        stdout.indexOf('Required option summary was null') > -1,
+        true,
+        'Should tell user that summary is a required option'
+      );
+
+      test.expect(5);
+      test.done();
+    });
   }
+
 
 };
