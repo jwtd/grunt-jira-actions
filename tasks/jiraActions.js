@@ -117,9 +117,20 @@ module.exports = function(grunt) {
       }
     }
     if (missing !== '') {
-      grunt.fatal(missing);
+      grunt.fail.fatal(missing);
     }
   }
+
+
+  function unpackJiraError(error) {
+    var e,
+        emsg=[];
+    for (e in error.errors) {
+      emsg.push(error.errors[e]);
+    }
+    grunt.fail.fatal(emsg.join(', '));
+  }
+
 
 
   // If a string reference is a valid file path, use its contents as the string, otherwise return the string
@@ -273,10 +284,10 @@ module.exports = function(grunt) {
     }
 
     // Call the create issue method and then transition it if necessary
-    //startRecord(current_action);
+    startRecord(current_action);
     createJiraIssue()
       .then(function(issue_id){
-        //stopRecord();
+        stopRecord();
         grunt.config('jira.last_issue_id', issue_id);
         if (options.issue_state > 1) {
           grunt.task.run('transitionJiraIssue:' + issue_id + ':' + options.issue_state);
@@ -284,7 +295,7 @@ module.exports = function(grunt) {
       })
       .catch(function(error){
         writeToConsole('Create issue error', error);
-        grunt.fatal(error);
+        unpackJiraError(error);
       })
       .done(function(){
         grunt.verbose.writeln('Create issue completed');
@@ -357,7 +368,7 @@ module.exports = function(grunt) {
       })
       .catch(function(error){
         writeToConsole('Transition issue error', error);
-        grunt.fatal(error);
+        unpackJiraError(error);
       })
       .done(function(){
         grunt.log.writeln('Transition issue completed');
@@ -442,7 +453,7 @@ module.exports = function(grunt) {
       })
       .catch(function(error){
         writeToConsole('Link issues error', error);
-        grunt.fatal(error);
+        unpackJiraError(error);
       })
       .done(function(){
         grunt.log.writeln('Link issues completed');
@@ -509,7 +520,7 @@ module.exports = function(grunt) {
       })
       .catch(function(error){
         writeToConsole('Add comment error', error);
-        grunt.fatal(error);
+        unpackJiraError(error);
       })
       .done(function(){
         grunt.log.writeln('Add comment completed');
@@ -604,7 +615,7 @@ module.exports = function(grunt) {
       })
       .catch(function(error){
         writeToConsole('Add version error', error);
-        grunt.fatal(error);
+        unpackJiraError(error);
       })
       .done(function(){
         grunt.log.writeln('Add version completed');
@@ -704,7 +715,7 @@ module.exports = function(grunt) {
       })
       .catch(function(error){
         writeToConsole('Jira search error', error);
-        grunt.fatal(error);
+        unpackJiraError(error);
       })
       .done(function(){
         grunt.log.writeln('Jira search completed');
@@ -769,7 +780,7 @@ module.exports = function(grunt) {
       })
       .catch(function(error){
         writeToConsole('Jira project error', error);
-        grunt.fatal(error);
+        unpackJiraError(error);
       })
       .done(function(){
         grunt.log.writeln('Jira project completed');

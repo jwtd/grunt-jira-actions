@@ -208,12 +208,6 @@ exports.group = {
 
   createJiraIssue_asValidStoryDescrFromOption_should_PASS: function(test) {
 
-    // Make sure task registers itself in grunt
-    test.ok(
-      grunt.task._tasks.createJiraIssue,
-      'SHould register itself as a grunt task'
-    );
-
     callGrunt('createJiraIssue:asValidStoryDescrFromOption_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
@@ -273,7 +267,7 @@ exports.group = {
         'Should report that it was Done, without errors'
       );
 
-      test.expect(8);
+      test.expect(7);
       test.done();
     });
   },
@@ -281,12 +275,6 @@ exports.group = {
 
 
   createJiraIssue_asValidTaskDescrFromFile_should_PASS: function(test) {
-
-    // Make sure task registers itself in grunt
-    test.ok(
-      grunt.task._tasks.createJiraIssue,
-      'SHould register itself as a grunt task'
-    );
 
     callGrunt('createJiraIssue:asValidTaskDescrFromFile_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
@@ -348,19 +336,13 @@ exports.group = {
         'Should report that it was Done, without errors'
       );
 
-      test.expect(8);
+      test.expect(7);
       test.done();
     });
   },
 
 
   createJiraIssue_asValidStoryMarkedDone_should_PASS: function(test) {
-
-    // Make sure task registers itself in grunt
-    test.ok(
-      grunt.task._tasks.createJiraIssue,
-      'SHould register itself as a grunt task'
-    );
 
     callGrunt('createJiraIssue:asValidStoryMarkedDone_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
@@ -411,19 +393,13 @@ exports.group = {
         'Should report that it was Done, without errors'
       );
 
-      test.expect(6);
+      test.expect(5);
       test.done();
     });
   },
 
 
   createJiraIssue_asValidStoryWithPriority_should_PASS: function(test) {
-
-    // Make sure task registers itself in grunt
-    test.ok(
-      grunt.task._tasks.createJiraIssue,
-      'SHould register itself as a grunt task'
-    );
 
     callGrunt('createJiraIssue:asValidStoryWithPriority_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
@@ -448,7 +424,7 @@ exports.group = {
 
       // Test the only thing different in this target
       test.equal(
-        jira_api_json.priority.components.name
+        jira_api_json.priority.components.name,
         'Major',
         'Should be able to set the priority of new issues'
       );
@@ -483,7 +459,7 @@ exports.group = {
         'Should report that it was Done, without errors'
       );
 
-      test.expect(8);
+      test.expect(7);
       test.done();
     });
   },
@@ -495,12 +471,6 @@ exports.group = {
 
 
   createJiraIssue_withoutRequiredOptions_should_FAIL: function(test) {
-
-    // Make sure task registers itself in grunt
-    test.ok(
-      grunt.task._tasks.createJiraIssue,
-      'SHould register itself as a grunt task'
-    );
 
     callGrunt('createJiraIssue:withoutRequiredOptions_should_FAIL', function (error, stdout, stderr) {
       //console.log(stdout);
@@ -516,15 +486,10 @@ exports.group = {
         'Should not have a default value for summary'
       );
 
-      test.equal(
-        error.message,
-        'Command failed: ',
-        'Should have error message = Command failed'
-      );
-      test.equal(
-        error.code,
-        1,
-        'Should have result code = 1'
+      test.notEqual(
+        error,
+        null,
+        'Should return an error'
       );
 
       test.equal(
@@ -533,7 +498,35 @@ exports.group = {
         'Should tell user that summary is a required option'
       );
 
-      test.expect(5);
+      test.expect(3);
+      test.done();
+    });
+  },
+
+
+  createJiraIssue_withInvalidIssueType_should_FAIL: function(test) {
+
+    callGrunt('createJiraIssue:withInvalidIssueType_should_FAIL', function (error, stdout, stderr) {
+      //console.log(stdout);
+      parseTestOutput(stdout);
+
+      // Parse test output
+      var blocks = splitOutput(stdout);
+      var error = JSON.parse(blocks[5]);  // Create issue options
+
+      test.notEqual(
+        error,
+        null,
+        'Should return an error'
+      );
+
+      test.equal(
+        stdout.indexOf('issue type is required') > -1,
+        true,
+        'Should tell user that issue type is a required option'
+      );
+
+      test.expect(2);
       test.done();
     });
   }
