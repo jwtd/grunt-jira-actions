@@ -132,21 +132,27 @@ module.exports = function(grunt) {
   }
 
 
-
   // If a string reference is a valid file path, use its contents as the string, otherwise return the string
   function resolveContent(ref) {
+
+    // If ref is null, return null
     if (!ref){
       return null;
     }
+
+    // If ref is a file, extract the contents
     var content = ref;
     if (grunt.file.exists(ref)) {
       var ext = ref.split('.').pop().toLowerCase();
-      grunt.verbose.writeln('Extracting description from contents of ' + ext + ' file ' + ref);
+      grunt.verbose.writeln('Extracting content from contents of ' + ext + ' file ' + ref);
       if (ext === 'json') {
         content = grunt.file.readJSON(ref);
       } else {
         content = grunt.file.read(ref);
       }
+    } else {
+      // Content was not a file, so use it as is
+      grunt.verbose.writeln('Content was not a file reference');
     }
     return content;
   }
@@ -154,6 +160,7 @@ module.exports = function(grunt) {
 
   // Make sure Jira credentials have been set in ENV
   function jiraCnn(opt) {
+
     // Make sure Jira creds are set
     validateEnvVars(opt.env_var_for_jira_username, opt.env_var_for_jira_password);
 

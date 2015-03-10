@@ -31,12 +31,13 @@ module.exports = function (name, options) {
       } catch (e) {
         //console.log('Exception: ' + e);
         try {
-          console.log('Recording new fixture');
+          console.log('Fixture not found, recording new fixture');
           nock.recorder.rec({
             dont_print: true
           });
         } catch (e) {
           // Nock recorder was on, so turn it off and restart it
+          console.log('Stop nock recording and start a new one');
           after();
           nock.recorder.rec({
             dont_print: true

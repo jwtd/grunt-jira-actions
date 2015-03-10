@@ -201,33 +201,13 @@ module.exports = function(grunt) {
       },
 
 
-      withInvalidFilePathForDesc_should_FAIL: {
-        options: {
-          summary: 'Should fail because filepath is invalid',
-          description: 'test/path/does_not_exist.txt'
-        }
-      },
-
-
       withInvalidPriority_should_FAIL: {
         options: {
           summary: 'Should fail because BLARG is not a valid priority name',
           additional_fields: {
             'priority': {
-              'name': 'Major' // Critical, Major, Medium (default), Minor
+              'name': 'BLARG' // Critical, Major, Medium (default), Minor
             }
-          }
-        }
-      },
-
-
-      withInvalidComponent_should_FAIL: {
-        options: {
-          summary: 'Should fail because 99999999 is not a valid component ID',
-          additional_fields: {
-            'components': [{
-              'id': '99999999'
-            }]
           }
         }
       }

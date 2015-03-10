@@ -466,8 +466,8 @@ exports.group = {
 
 
   /*-------------------------------------*
-   *  Failure cases for createJiraIssue  *
-   *-------------------------------------*/
+  *  Failure cases for createJiraIssue  *
+  *-------------------------------------*/
 
 
   createJiraIssue_withoutRequiredOptions_should_FAIL: function(test) {
@@ -524,6 +524,62 @@ exports.group = {
         stdout.indexOf('issue type is required') > -1,
         true,
         'Should tell user that issue type is a required option'
+      );
+
+      test.expect(2);
+      test.done();
+    });
+  },
+
+
+  createJiraIssue_withInvalidIssueState_should_FAIL: function(test) {
+
+    callGrunt('createJiraIssue:withInvalidIssueState_should_FAIL', function (error, stdout, stderr) {
+      //console.log(stdout);
+      //parseTestOutput(stdout);
+
+      // Parse test output
+      var blocks = splitOutput(stdout);
+      var error = JSON.parse(blocks[11]);  // Create issue options
+
+      test.notEqual(
+        error,
+        null,
+        'Should return an error'
+      );
+
+      test.equal(
+        stdout.indexOf('Transition issue error') > -1,
+        true,
+        'Should tell user that there was a transition issue error'
+      );
+
+      test.expect(2);
+      test.done();
+    });
+  },
+
+
+  createJiraIssue_withInvalidPriority_should_FAIL: function(test) {
+
+    callGrunt('createJiraIssue:withInvalidPriority_should_FAIL', function (error, stdout, stderr) {
+      //console.log(stdout);
+      //parseTestOutput(stdout);
+
+      // Parse test output
+      var blocks = splitOutput(stdout);
+      var error = JSON.parse(blocks[5]);  // Create issue options
+
+      test.notEqual(
+        error,
+        null,
+        'Should return an error'
+      );
+
+      test.equal(
+        stdout.indexOf('Fatal error: Priority name \'BLARG\' is not valid') > -1,
+        true,
+        'Should tell user that the priority was invalid'
       );
 
       test.expect(2);
