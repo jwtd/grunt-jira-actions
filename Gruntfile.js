@@ -257,8 +257,12 @@ module.exports = function(grunt) {
         jira_host: 'virtru.atlassian.net'
       },
 
+
+      /*- Success Cases ------------------*/
+
+
       // Create specific targets to perform different Jira tasks
-      onIssue: {
+      fromOption_should_PASS: {
         options: {
           // issue_id: This value will be passed in via target call
           comment: 'This is a comment on the story.'
@@ -266,10 +270,19 @@ module.exports = function(grunt) {
       },
 
       // Create specific targets to perform different Jira tasks
-      fromFileToIssue: {
+      fromFileToIssue_should_PASS: {
         options: {
           // issue_id: This value will be passed in via target call such as addJiraComment:fromFileToIssue:19400
           comment: 'test/data/comment_body.txt'
+        }
+      },
+
+
+      /*- Failure Cases ------------------*/
+
+      // Create specific targets to perform different Jira tasks
+      withoutContent_should_FAIL: {
+        options: {
         }
       }
 
