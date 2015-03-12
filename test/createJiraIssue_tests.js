@@ -352,6 +352,8 @@ exports.group = {
       var blocks = splitOutput(stdout);
       var jira_api_json = JSON.parse(blocks[9]);  // Transition json
       var response = JSON.parse(blocks[11]);      // Transition response
+      //var jira_api_json = JSON.parse(blocks[3]);  // Transition json
+      //var response = JSON.parse(blocks[5]);      // Transition response
 
       // Make sure there were no errors
       test.equal(
@@ -424,7 +426,7 @@ exports.group = {
 
       // Test the only thing different in this target
       test.equal(
-        jira_api_json.priority.components.name,
+        jira_api_json.fields.priority.name,
         'Major',
         'Should be able to set the priority of new issues'
       );
@@ -508,7 +510,7 @@ exports.group = {
 
     callGrunt('createJiraIssue:withInvalidIssueType_should_FAIL', function (error, stdout, stderr) {
       //console.log(stdout);
-      parseTestOutput(stdout);
+      //parseTestOutput(stdout);
 
       // Parse test output
       var blocks = splitOutput(stdout);

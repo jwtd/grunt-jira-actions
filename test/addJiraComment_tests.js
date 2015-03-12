@@ -62,13 +62,16 @@ exports.group = {
 
   addJiraComment_fromOption_should_PASS: function(test) {
 
-    callGrunt('addJiraComment:fromOption_should_PASS', function (error, stdout, stderr) {
+    // TODO: Add or get an issue whose ID can be used for success cases (use 19935 which is GEN-359 for now)
+
+    callGrunt('addJiraComment:fromOption_should_PASS:19935', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
       // Parse test output
       var blocks = splitOutput(stdout);
-      var jira_api_json = JSON.parse(blocks[3]);  // Add comment json
+      var options = JSON.parse(blocks[1]);       // Add comment response
+      var content = JSON.parse(blocks[3]);       // Add comment content
       var response = JSON.parse(blocks[5]);       // Add comment response
 
       // Make sure there were no errors
@@ -85,19 +88,19 @@ exports.group = {
 
       // Test the only thing different in this target
       test.equal(
-        jira_api_json.fields.description,
+        content,
         'This is the comment as a string.',
         'Comment should be an expected text string'
       );
 
+      // TODO: Search for comment and verify that its content was set correctly
 
-      // Verify response against nocked response unless nock is off
-      test.ok(
-        response.self,
-        'Should create an comment with a valid url as a reference'
+      // Test the only thing different in this target
+      test.equal(
+        response,
+        'Success',
+        'Response should be "Success"'
       );
-
-      // TODO: Search for comment and verify that its description was set correctly
 
       test.equal(
         stdout.indexOf('Done, without errors') > -1,
@@ -105,7 +108,7 @@ exports.group = {
         'Should report that it was Done, without errors'
       );
 
-      test.expect(7);
+      test.expect(5);
       test.done();
     });
   },
@@ -114,13 +117,14 @@ exports.group = {
 
   addJiraComment_fromFileToIssue_should_PASS: function(test) {
 
-    callGrunt('addJiraComment:fromFileToIssue_should_PASS', function (error, stdout, stderr) {
+    callGrunt('addJiraComment:fromFileToIssue_should_PASS:19935', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
       // Parse test output
       var blocks = splitOutput(stdout);
-      var jira_api_json = JSON.parse(blocks[3]);  // Add comment json
+      var options = JSON.parse(blocks[1]);  // Add comment json
+      var content = JSON.parse(blocks[3]);       // Add comment content
       var response = JSON.parse(blocks[5]);       // Add comment response
 
       // Make sure there were no errors
@@ -137,18 +141,19 @@ exports.group = {
 
       // Test the only thing different in this target
       test.equal(
-        jira_api_json.fields.description,
+        content,
         grunt.file.read('test/data/comment_body.txt'),
         'Should import its description from a file'
       );
 
-      // Verify response against nocked response unless nock is off
-      test.ok(
-        response.id,
-        'Should create an comment with a new id'
-      );
-
       // TODO: Search for comment and verify that its content was set correctly
+
+      // Test the only thing different in this target
+      test.equal(
+        response,
+        'Success',
+        'Response should be "Success"'
+      );
 
       test.equal(
         stdout.indexOf('Done, without errors') > -1,
@@ -156,7 +161,7 @@ exports.group = {
         'Should report that it was Done, without errors'
       );
 
-      test.expect(7);
+      test.expect(5);
       test.done();
     });
   },
@@ -181,7 +186,7 @@ exports.group = {
       test.equal(
         options.comment,
         null,
-        'Should not have a default value for summary'
+        'Should not have a default value for comment'
       );
 
       test.notEqual(
@@ -197,6 +202,34 @@ exports.group = {
       );
 
       test.expect(3);
+      test.done();
+    });
+  },
+
+
+  addJiraComment_withoutPassingIssueId_should_FAIL: function(test) {
+
+    callGrunt('addJiraComment:withoutPassingIssueId_should_FAIL', function (error, stdout, stderr) {
+      //console.log(stdout);
+      //parseTestOutput(stdout);
+
+      // Parse test output
+      var blocks = splitOutput(stdout);
+      var options = JSON.parse(blocks[1]);  // Add comment options
+
+      test.notEqual(
+        error,
+        null,
+        'Should return an error'
+      );
+
+      test.equal(
+        stdout.indexOf('404: Error while adding comment') > -1,
+        true,
+        'Should tell user the call resulted in a 404'
+      );
+
+      test.expect(2);
       test.done();
     });
   }

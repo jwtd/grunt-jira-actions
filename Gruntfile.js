@@ -265,7 +265,7 @@ module.exports = function(grunt) {
       fromOption_should_PASS: {
         options: {
           // issue_id: This value will be passed in via target call
-          comment: 'This is a comment on the story.'
+          comment: 'This is the comment as a string.'
         }
       },
 
@@ -280,11 +280,21 @@ module.exports = function(grunt) {
 
       /*- Failure Cases ------------------*/
 
+
       // Create specific targets to perform different Jira tasks
       withoutContent_should_FAIL: {
         options: {
         }
+      },
+
+      // Create specific targets to perform different Jira tasks
+      withoutPassingIssueId_should_FAIL: {
+        options: {
+          // issue_id: This value will be passed in via target call
+          comment: 'This should fail, because no issue id was passed in when it was called.'
+        }
       }
+
 
     },
 

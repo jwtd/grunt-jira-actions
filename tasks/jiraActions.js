@@ -291,10 +291,10 @@ module.exports = function(grunt) {
     }
 
     // Call the create issue method and then transition it if necessary
-    startRecord(current_action);
+    //startRecord(current_action);
     createJiraIssue()
       .then(function(issue_id){
-        stopRecord();
+        //stopRecord();
         grunt.config('jira.last_issue_id', issue_id);
         if (options.issue_state > 1) {
           grunt.task.run('transitionJiraIssue:' + issue_id + ':' + options.issue_state);
@@ -501,6 +501,7 @@ module.exports = function(grunt) {
 
     // If the comment is a file path, use its contents as the comment
     var comment = resolveContent(options.comment);
+    writeToConsole('Comment content', comment)
 
     // Chainable method that adds a comment to an issue
     function addJiraComment() {
