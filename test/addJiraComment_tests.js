@@ -4,56 +4,9 @@
 var util = require('util'),
     path = require('path'),
     grunt = require('grunt'),
-    exec = require('child_process').exec;
+    h = require('./helper');
 
 var exports = module.exports;
-
-
-// Duplicate the environment object
-// NOTE: Environment variables in child processes are always strings
-var envDup = [],
-    envVar;
-for (envVar in process.env) {
-  if (process.env.hasOwnProperty(envVar)) {
-    envDup[envVar] = process.env[envVar];
-  }
-}
-
-// Record new http mocks
-envDup.NOCK_RECORD = true;
-envDup.env = 'TEST';
-
-// Prepare configuration for exec calls
-var execOptions = {
-  cwd: path.join(__dirname, '..'),  // Run in tests directory
-  env: envDup                       // Pass in the duplicated env variables
-  //encoding: 'utf8',
-  //timeout: 0,            // kill child process if it runs longer than timeout milliseconds
-  //maxBuffer: 200*1024,   // kill child process if data in stdout or stderr exceeds this limit
-  //killSignal: 'SIGTERM'  // The child process is killed with killSignal (default: 'SIGTERM')
-};
-
-
-// Call grunt with the correct flags
-function callGrunt(task, whenDoneCallback) {
-  exec('grunt ' + task + ' --env=TEST --no-color', execOptions, whenDoneCallback);
-}
-
-function parseTestOutput(s){
-  var n;
-  var blocks = s.split('||||');
-  for (n in blocks) {
-    if (blocks.hasOwnProperty(n)) {
-      console.log('** ' + n + ' **\n' + blocks[n]);
-    }
-  }
-  //console.log('Inspect Object :: ' + util.inspect(blocks, {showHidden: false, depth: null}));
-}
-
-// Call grunt with the correct flags
-function splitOutput(s) {
-  return s.split('||||');
-}
 
 
 // addJiraComment tests
@@ -64,12 +17,12 @@ exports.group = {
 
     // TODO: Add or get an issue whose ID can be used for success cases (use 19935 which is GEN-359 for now)
 
-    callGrunt('addJiraComment:fromOption_should_PASS:19935', function (error, stdout, stderr) {
+    h.callGrunt('addJiraComment:fromOption_should_PASS:19935', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = splitOutput(stdout);
+      var blocks = h.splitOutput(stdout);
       var options = JSON.parse(blocks[1]);       // Add comment response
       var content = JSON.parse(blocks[3]);       // Add comment content
       var response = JSON.parse(blocks[5]);       // Add comment response
@@ -117,12 +70,12 @@ exports.group = {
 
   addJiraComment_fromFileToIssue_should_PASS: function(test) {
 
-    callGrunt('addJiraComment:fromFileToIssue_should_PASS:19935', function (error, stdout, stderr) {
+    h.callGrunt('addJiraComment:fromFileToIssue_should_PASS:19935', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = splitOutput(stdout);
+      var blocks = h.splitOutput(stdout);
       var options = JSON.parse(blocks[1]);  // Add comment json
       var content = JSON.parse(blocks[3]);       // Add comment content
       var response = JSON.parse(blocks[5]);       // Add comment response
@@ -175,12 +128,12 @@ exports.group = {
 
   addJiraComment_withoutContent_should_FAIL: function(test) {
 
-    callGrunt('addJiraComment:withoutContent_should_FAIL', function (error, stdout, stderr) {
+    h.callGrunt('addJiraComment:withoutContent_should_FAIL', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = splitOutput(stdout);
+      var blocks = h.splitOutput(stdout);
       var options = JSON.parse(blocks[1]);  // Add comment options
 
       test.equal(
@@ -209,12 +162,12 @@ exports.group = {
 
   addJiraComment_withoutPassingIssueId_should_FAIL: function(test) {
 
-    callGrunt('addJiraComment:withoutPassingIssueId_should_FAIL', function (error, stdout, stderr) {
+    h.callGrunt('addJiraComment:withoutPassingIssueId_should_FAIL', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = splitOutput(stdout);
+      var blocks = h.splitOutput(stdout);
       var options = JSON.parse(blocks[1]);  // Add comment options
 
       test.notEqual(

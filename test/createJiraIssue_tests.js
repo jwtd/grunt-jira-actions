@@ -3,58 +3,10 @@
 // nodeunit
 var util = require('util'),
     path = require('path'),
-   grunt = require('grunt'),
-    exec = require('child_process').exec;
+    grunt = require('grunt'),
+    h = require('./helper');
 
 var exports = module.exports;
-
-
-// Duplicate the environment object
-// NOTE: Environment variables in child processes are always strings
-var envDup = [],
-    envVar;
-for (envVar in process.env) {
-  if (process.env.hasOwnProperty(envVar)) {
-    envDup[envVar] = process.env[envVar];
-  }
-}
-
-// Record new http mocks
-envDup.NOCK_RECORD = true;
-envDup.env = 'TEST';
-
-// Prepare configuration for exec calls
-var execOptions = {
-  cwd: path.join(__dirname, '..'),  // Run in tests directory
-  env: envDup                       // Pass in the duplicated env variables
-  //encoding: 'utf8',
-  //timeout: 0,            // kill child process if it runs longer than timeout milliseconds
-  //maxBuffer: 200*1024,   // kill child process if data in stdout or stderr exceeds this limit
-  //killSignal: 'SIGTERM'  // The child process is killed with killSignal (default: 'SIGTERM')
-};
-
-
-// Call grunt with the correct flags
-function callGrunt(task, whenDoneCallback) {
-  exec('grunt ' + task + ' --env=TEST --no-color', execOptions, whenDoneCallback);
-}
-
-function parseTestOutput(s){
-  var n;
-  var blocks = s.split('||||');
-  for (n in blocks) {
-    if (blocks.hasOwnProperty(n)) {
-      console.log('** ' + n + ' **\n' + blocks[n]);
-    }
-  }
-  //console.log('Inspect Object :: ' + util.inspect(blocks, {showHidden: false, depth: null}));
-}
-
-// Call grunt with the correct flags
-function splitOutput(s) {
-  return s.split('||||');
-}
-
 
 // createJiraIssue tests
 exports.group = {
@@ -68,12 +20,12 @@ exports.group = {
       'SHould register itself as a grunt task'
     );
 
-    callGrunt('createJiraIssue:withMinimumOptions_should_PASS', function (error, stdout, stderr) {
+    h.callGrunt('createJiraIssue:withMinimumOptions_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = splitOutput(stdout);
+      var blocks = h.splitOutput(stdout);
       var target_options = JSON.parse(blocks[1]); // Create issue options
       var jira_api_json = JSON.parse(blocks[3]);  // Create issue json
       var response = JSON.parse(blocks[5]);       // Create issue response
@@ -208,12 +160,12 @@ exports.group = {
 
   createJiraIssue_asValidStoryDescrFromOption_should_PASS: function(test) {
 
-    callGrunt('createJiraIssue:asValidStoryDescrFromOption_should_PASS', function (error, stdout, stderr) {
+    h.callGrunt('createJiraIssue:asValidStoryDescrFromOption_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = splitOutput(stdout);
+      var blocks = h.splitOutput(stdout);
       var jira_api_json = JSON.parse(blocks[3]);  // Create issue json
       var response = JSON.parse(blocks[5]);       // Create issue response
 
@@ -276,12 +228,12 @@ exports.group = {
 
   createJiraIssue_asValidTaskDescrFromFile_should_PASS: function(test) {
 
-    callGrunt('createJiraIssue:asValidTaskDescrFromFile_should_PASS', function (error, stdout, stderr) {
+    h.callGrunt('createJiraIssue:asValidTaskDescrFromFile_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = splitOutput(stdout);
+      var blocks = h.splitOutput(stdout);
       var jira_api_json = JSON.parse(blocks[3]);  // Create issue json
       var response = JSON.parse(blocks[5]);       // Create issue response
 
@@ -344,12 +296,12 @@ exports.group = {
 
   createJiraIssue_asValidStoryMarkedDone_should_PASS: function(test) {
 
-    callGrunt('createJiraIssue:asValidStoryMarkedDone_should_PASS', function (error, stdout, stderr) {
+    h.callGrunt('createJiraIssue:asValidStoryMarkedDone_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = splitOutput(stdout);
+      var blocks = h.splitOutput(stdout);
       var jira_api_json = JSON.parse(blocks[9]);  // Transition json
       var response = JSON.parse(blocks[11]);      // Transition response
       //var jira_api_json = JSON.parse(blocks[3]);  // Transition json
@@ -403,12 +355,12 @@ exports.group = {
 
   createJiraIssue_asValidStoryWithPriority_should_PASS: function(test) {
 
-    callGrunt('createJiraIssue:asValidStoryWithPriority_should_PASS', function (error, stdout, stderr) {
+    h.callGrunt('createJiraIssue:asValidStoryWithPriority_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = splitOutput(stdout);
+      var blocks = h.splitOutput(stdout);
       var jira_api_json = JSON.parse(blocks[3]);  // Create issue json
       var response = JSON.parse(blocks[5]);       // Create issue response
 
@@ -474,12 +426,12 @@ exports.group = {
 
   createJiraIssue_withoutRequiredOptions_should_FAIL: function(test) {
 
-    callGrunt('createJiraIssue:withoutRequiredOptions_should_FAIL', function (error, stdout, stderr) {
+    h.callGrunt('createJiraIssue:withoutRequiredOptions_should_FAIL', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = splitOutput(stdout);
+      var blocks = h.splitOutput(stdout);
       var options = JSON.parse(blocks[1]);  // Create issue options
 
       test.equal(
@@ -508,12 +460,12 @@ exports.group = {
 
   createJiraIssue_withInvalidIssueType_should_FAIL: function(test) {
 
-    callGrunt('createJiraIssue:withInvalidIssueType_should_FAIL', function (error, stdout, stderr) {
+    h.callGrunt('createJiraIssue:withInvalidIssueType_should_FAIL', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = splitOutput(stdout);
+      var blocks = h.splitOutput(stdout);
       var error = JSON.parse(blocks[5]);  // Create issue options
 
       test.notEqual(
@@ -536,12 +488,12 @@ exports.group = {
 
   createJiraIssue_withInvalidIssueState_should_FAIL: function(test) {
 
-    callGrunt('createJiraIssue:withInvalidIssueState_should_FAIL', function (error, stdout, stderr) {
+    h.callGrunt('createJiraIssue:withInvalidIssueState_should_FAIL', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = splitOutput(stdout);
+      var blocks = h.splitOutput(stdout);
       var error = JSON.parse(blocks[11]);  // Create issue options
 
       test.notEqual(
@@ -564,12 +516,12 @@ exports.group = {
 
   createJiraIssue_withInvalidPriority_should_FAIL: function(test) {
 
-    callGrunt('createJiraIssue:withInvalidPriority_should_FAIL', function (error, stdout, stderr) {
+    h.callGrunt('createJiraIssue:withInvalidPriority_should_FAIL', function (error, stdout, stderr) {
       //console.log(stdout);
       //parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = splitOutput(stdout);
+      var blocks = h.splitOutput(stdout);
       var error = JSON.parse(blocks[5]);  // Create issue options
 
       test.notEqual(
