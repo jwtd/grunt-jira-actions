@@ -78,6 +78,81 @@ module.exports = function(grunt) {
     },
 
 
+    /*--------------------------------*
+     *         Code Coverage          *
+     *--------------------------------*/
+
+
+    // Copy all of the app files to a dir for coverage analysis
+    copy: {
+      application: {
+        expand: true,
+        flatten: false,
+        src: ['<%= gc.srcDir %>/**'],
+        dest: '<%= gc.coverageDir %>/istanbul/'
+      }
+    },
+
+
+    // Add coverage instrumentation to the copies of the app files
+    instrument: {
+      files: [
+        'src/**/*.js'
+      ],
+      options: {
+        lazy: false,
+        basePath: '<%= gc.coverageDir %>/istanbul/'
+      }
+    },
+
+
+    // Point the test runner at the dir with the instrumentated app files
+    env: {
+      coverage: {
+        APP_DIR_FOR_CODE_COVERAGE: '../../<%= gc.coverageDir %>/istanbul/src/'
+      }
+    },
+
+
+    // Save the raw coverage analysis data
+    storeCoverage: {
+      options: {
+        dir: '<%= gc.coverageDir %>/istanbul/'
+      }
+    },
+
+
+    // Generate a coverage report from the raw coverage analysis data
+    makeReport: {
+      src: '<%= gc.coverageDir %>/istanbul/coverage.json',
+      options: {
+        type: ['lcov', 'text'],
+        dir: '<%= gc.coverageDir %>/istanbul/',
+        print: 'detail'
+      }
+    },
+
+
+    // Enforce minimum thresholds of code coverage
+    coverage: {
+      options: {
+        thresholds: {
+          'statements': 90,
+          'branches': 90,
+          'lines': 90,
+          'functions': 90
+        },
+        root: '<%= gc.testsDir %>',
+        dir: '<%= gc.coverageDir %>/istanbul/'
+      }
+    },
+
+
+    /*--------------------------------*
+     *       Release Management        *
+     *--------------------------------*/
+
+
     release: {
       options: {
         changelog: true, //default: false
