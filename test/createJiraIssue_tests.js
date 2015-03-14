@@ -17,12 +17,12 @@ exports.group = {
     // Make sure task registers itself in grunt
     test.ok(
       grunt.task._tasks.createJiraIssue,
-      'SHould register itself as a grunt task'
+      'Should register itself as a grunt task'
     );
 
     h.callGrunt('createJiraIssue:withMinimumOptions_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
-      //parseTestOutput(stdout);
+      //h.parseTestOutput(stdout);
 
       // Parse test output
       var blocks = h.splitOutput(stdout);
@@ -162,7 +162,7 @@ exports.group = {
 
     h.callGrunt('createJiraIssue:asValidStoryDescrFromOption_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
-      //parseTestOutput(stdout);
+      //h.parseTestOutput(stdout);
 
       // Parse test output
       var blocks = h.splitOutput(stdout);
@@ -230,7 +230,7 @@ exports.group = {
 
     h.callGrunt('createJiraIssue:asValidTaskDescrFromFile_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
-      //parseTestOutput(stdout);
+      //h.parseTestOutput(stdout);
 
       // Parse test output
       var blocks = h.splitOutput(stdout);
@@ -298,7 +298,7 @@ exports.group = {
 
     h.callGrunt('createJiraIssue:asValidStoryMarkedDone_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
-      //parseTestOutput(stdout);
+      //h.parseTestOutput(stdout);
 
       // Parse test output
       var blocks = h.splitOutput(stdout);
@@ -357,7 +357,7 @@ exports.group = {
 
     h.callGrunt('createJiraIssue:asValidStoryWithPriority_should_PASS', function (error, stdout, stderr) {
       //console.log(stdout);
-      //parseTestOutput(stdout);
+      //h.parseTestOutput(stdout);
 
       // Parse test output
       var blocks = h.splitOutput(stdout);
@@ -428,7 +428,7 @@ exports.group = {
 
     h.callGrunt('createJiraIssue:withoutRequiredOptions_should_FAIL', function (error, stdout, stderr) {
       //console.log(stdout);
-      //parseTestOutput(stdout);
+      //h.parseTestOutput(stdout);
 
       // Parse test output
       var blocks = h.splitOutput(stdout);
@@ -462,7 +462,7 @@ exports.group = {
 
     h.callGrunt('createJiraIssue:withInvalidIssueType_should_FAIL', function (error, stdout, stderr) {
       //console.log(stdout);
-      //parseTestOutput(stdout);
+      //h.parseTestOutput(stdout);
 
       // Parse test output
       var blocks = h.splitOutput(stdout);
@@ -490,7 +490,7 @@ exports.group = {
 
     h.callGrunt('createJiraIssue:withInvalidIssueState_should_FAIL', function (error, stdout, stderr) {
       //console.log(stdout);
-      //parseTestOutput(stdout);
+      //h.parseTestOutput(stdout);
 
       // Parse test output
       var blocks = h.splitOutput(stdout);
@@ -518,7 +518,7 @@ exports.group = {
 
     h.callGrunt('createJiraIssue:withInvalidPriority_should_FAIL', function (error, stdout, stderr) {
       //console.log(stdout);
-      //parseTestOutput(stdout);
+      //h.parseTestOutput(stdout);
 
       // Parse test output
       var blocks = h.splitOutput(stdout);

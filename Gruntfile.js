@@ -19,10 +19,22 @@ module.exports = function(grunt) {
    *        Global properties for use in all tasks        *
    *------------------------------------------------------*/
 
+  // Prepare to calculate paths
+  var path = require('path');
+  var root = path.resolve();
+
   // Create global config (gc)
   var gc = {
-    env: grunt.option('env') || 'default'
+    env: grunt.option('env') || 'default',
+    root: root,
+    srcDir: 'src',
+    docsSrcDir: 'docs',
+    testsDir: 'test',
+    coverageDir: 'coverage',
+    configDir: 'config',
+    buildDir: 'build'
   };
+
 
   // Project configuration.
   grunt.initConfig({
@@ -47,31 +59,31 @@ module.exports = function(grunt) {
       target: [
         'Gruntfile.js',
         'tasks/**/*.js',
-        'test/**/*_tests.js'
+        '<%= gc.testsDir %>/**/*_tests.js'
       ]
     },
 
 
     nodeunit: {
-      all: ['test/**/*_tests.js'],
+      all: ['<%= gc.testsDir %>/**/*_tests.js'],
       options: {
         reporter: 'verbose'
       },
       tap: {
         options: {
           reporter: 'tap',
-          reporterOutput: 'reports/tap-test-results.tap',
+          reporterOutput: '<%= gc.buildDir %>/tap-test-results.tap',
           reporterOptions: {
-            output: './reports'
+            output: '<%= gc.buildDir %>/reports'
           }
         }
       },
       ci: {
         options: {
           reporter: 'junit', // Creates jUnit compatible XML reports, which can be used with continuous integration tools such as Hudson.
-          reporterOutput: 'reports/junit-test-results.xml',
+          reporterOutput: '<%= gc.buildDir %>/reports/junit-test-results.xml',
           reporterOptions: {
-            output: './reports'
+            output: '<%= gc.buildDir %>/reports'
           }
         }
       }

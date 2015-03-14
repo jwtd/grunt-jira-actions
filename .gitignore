@@ -2,4 +2,7 @@ node_modules
 npm-debug.log
 tmp
 .idea
+docs
+build
+coverage
 reports

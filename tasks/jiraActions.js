@@ -38,17 +38,12 @@ module.exports = function(grunt) {
     }
   }
 
-
   // Prepare nock to record and mock HTTP calls when env=TEST
   var recorder = null;
-  var NOCK_RECORD = TESTING || !!grunt.option('NOCK_RECORD') || !!process.env.NOCK_RECORD;
-  var NOCK_OFF = !NOCK_RECORD || !!grunt.option('NOCK_OFF') || !!process.env.NOCK_OFF;
-  grunt.verbose.writeln('NOCK_RECORD: ' + NOCK_RECORD);
-  grunt.verbose.writeln('NOCK_OFF: ' + NOCK_OFF);
 
   // Start nock recorder
   function startRecord(name) {
-    if (NOCK_RECORD) {
+    if (TESTING) {
       //grunt.verbose.writeln('START NOCK RECORDING: ' + name);
       recorder = record(name);
       recorder.before();
@@ -57,7 +52,7 @@ module.exports = function(grunt) {
 
   // Stop nock recorder
   function stopRecord() {
-    if (NOCK_RECORD) {
+    if (TESTING) {
       //grunt.verbose.writeln('STOP NOCK RECORDING');
       recorder.after();
     }
@@ -215,7 +210,7 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('createJiraIssue', 'Create an issue in JIRA', function() {
 
     // Reveal task, target, and options
-    var current_action = this.nameArgs.replace(':', '_');
+    var current_action = this.nameArgs.replace(/:/g, '_');
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -291,16 +286,17 @@ module.exports = function(grunt) {
     }
 
     // Call the create issue method and then transition it if necessary
-    //startRecord(current_action);
+    startRecord(current_action);
     createJiraIssue()
       .then(function(issue_id){
-        //stopRecord();
+        stopRecord();
         grunt.config('jira.last_issue_id', issue_id);
         if (options.issue_state > 1) {
           grunt.task.run('transitionJiraIssue:' + issue_id + ':' + options.issue_state);
         }
       })
       .catch(function(error){
+        stopRecord();
         writeToConsole('Create issue error', error);
         unpackJiraError(error);
       })
@@ -317,7 +313,7 @@ module.exports = function(grunt) {
   grunt.registerTask('transitionJiraIssue', 'Transition an issue in JIRA', function(issue_id, issue_state) {
 
     // Reveal task, target, and options
-    var current_action = this.nameArgs.replace(':', '_');
+    var current_action = this.nameArgs.replace(/:/g, '_');
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -367,13 +363,14 @@ module.exports = function(grunt) {
     }
 
     // Call the transition issue method and then transition it if necessary
-    startRecord('transitionJiraIssue');
+    startRecord(current_action);
     transitionJiraIssue()
       .then(function(response){
         stopRecord();
         writeToConsole('Transition response', response);
       })
       .catch(function(error){
+        stopRecord();
         writeToConsole('Transition issue error', error);
         unpackJiraError(error);
       })
@@ -392,7 +389,7 @@ module.exports = function(grunt) {
   grunt.registerTask('linkJiraIssue', 'Link two Jira issues', function(from_issue_key, to_issue_key, link_type, comment) {
 
     // Reveal task, target, and options
-    var current_action = this.nameArgs.replace(':', '_');
+    var current_action = this.nameArgs.replace(/:/g, '_');
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -459,6 +456,7 @@ module.exports = function(grunt) {
         writeToConsole('Link issues response', response);
       })
       .catch(function(error){
+        stopRecord();
         writeToConsole('Link issues error', error);
         unpackJiraError(error);
       })
@@ -475,7 +473,7 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('addJiraComment', 'Add a comment to an issue in JIRA', function(issue_id) {
 
     // Reveal task, target, and options
-    var current_action = this.nameArgs.replace(':', '_');
+    var current_action = this.nameArgs.replace(/:/g, '_');
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -527,6 +525,7 @@ module.exports = function(grunt) {
         writeToConsole('Add comment response', response);
       })
       .catch(function(error){
+        stopRecord();
         writeToConsole('Add comment error', error);
         unpackJiraError(error);
       })
@@ -545,7 +544,7 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('createJiraVersion', 'Create a new version for a project in JIRA', function(project_key, version_name, release_date_string) {
 
     // Reveal task, target, and options
-    var current_action = this.nameArgs.replace(':', '_');
+    var current_action = this.nameArgs.replace(/:/g, '_');
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -622,6 +621,7 @@ module.exports = function(grunt) {
         writeToConsole('Add version response', response);
       })
       .catch(function(error){
+        stopRecord();
         writeToConsole('Add version error', error);
         unpackJiraError(error);
       })
@@ -639,7 +639,7 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('searchJira', 'Search JIRA with JQL', function() {
 
     // Reveal task, target, and options
-    var current_action = this.nameArgs.replace(':', '_');
+    var current_action = this.nameArgs.replace(/:/g, '_');
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -722,6 +722,7 @@ module.exports = function(grunt) {
         grunt.config(this.target + 'search_results', results);
       })
       .catch(function(error){
+        stopRecord();
         writeToConsole('Jira search error', error);
         unpackJiraError(error);
       })
@@ -740,7 +741,7 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('jiraProjectDetails', 'Lookup a JIRA project\'s details', function(project_key) {
 
     // Reveal task, target, and options
-    var current_action = this.nameArgs.replace(':', '_');
+    var current_action = this.nameArgs.replace(/:/g, '_');
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -787,6 +788,7 @@ module.exports = function(grunt) {
         writeToConsole('Jira project response', response);
       })
       .catch(function(error){
+        stopRecord();
         writeToConsole('Jira project error', error);
         unpackJiraError(error);
       })

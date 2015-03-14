@@ -18,10 +18,9 @@ for (envVar in process.env) {
 }
 
 // Record new http mocks
-envDup.NOCK_RECORD = true;
-envDup.env = 'TEST';
-// Prepare configuration for exec calls
+//envDup.env = 'TEST';
 
+// Prepare configuration for exec calls
 var execOptions = {
   cwd: path.join(__dirname, '..'),  // Run in tests directory
   env: envDup                       // Pass in the duplicated env variables
@@ -57,4 +56,4 @@ module.exports = {
     return s.split('||||');
   }
 
-}
+};

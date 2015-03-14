@@ -17,6 +17,7 @@ module.exports = function (name, options) {
   or doesn't, so we should record and save them.
   the environment variable `NOCK_RECORD` can be used to force a new recording.
   */
+
   var has_fixtures = !!process.env.NOCK_RECORD;
 
   return {
@@ -27,7 +28,7 @@ module.exports = function (name, options) {
         //console.log('Nock Recording BEFORE()');
         require('../' + fp);
         has_fixtures = true;
-        console.log('Using fixture to mock HTTP call');
+        console.log('Using fixture to mock HTTP call: ' + fp);
       } catch (e) {
         //console.log('Exception: ' + e);
         try {
@@ -36,9 +37,12 @@ module.exports = function (name, options) {
             dont_print: true
           });
         } catch (e) {
-          // Nock recorder was on, so turn it off and restart it
+          // Nock recorder was on, so save the current fixture and restart recording
           console.log('Stop nock recording and start a new one');
-          after();
+          has_fixtures = nock.recorder.play();
+          var text = "var nock = require('nock');\n" + has_fixtures.join('\n');
+          fs.writeFileSync(fp, text);
+          // Restart recording
           nock.recorder.rec({
             dont_print: true
           });
@@ -55,7 +59,7 @@ module.exports = function (name, options) {
     // If a recording was created, save it as a new fixuture
     after: function () {
       if (!has_fixtures) {
-        //console.log('Nock Recording AFTER()');
+        console.log('Nock Recording AFTER()');
         has_fixtures = nock.recorder.play();
         var text = "var nock = require('nock');\n" + has_fixtures.join('\n');
         //console.log(text);
