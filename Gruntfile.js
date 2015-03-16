@@ -95,6 +95,16 @@ module.exports = function(grunt) {
      *--------------------------------*/
 
 
+    // Clean out old test coverage reports before each run
+    clean: {
+      istanbul: {
+        src: ['<%= gc.coverageDir %>/istanbul']
+      },
+      build: ['build'],
+      release: ['release']
+    },
+
+
     // Copy all of the app files to a dir for coverage analysis
     copy: {
       application: {
@@ -493,6 +503,7 @@ module.exports = function(grunt) {
   // Project tasks
   grunt.registerTask('check', ['eslint', 'test']);
   grunt.registerTask('test', ['nodeunit']);
+  grunt.registerTask('cover', ['istanbul-cover']);
   //grunt.registerTask('default', ['setJiraConfig', 'searchJira:forGenIssues']);
 
 };

@@ -17,9 +17,6 @@ for (envVar in process.env) {
   }
 }
 
-// Record new http mocks
-//envDup.env = 'TEST';
-
 // Prepare configuration for exec calls
 var execOptions = {
   cwd: path.join(__dirname, '..'),  // Run in tests directory
@@ -29,6 +26,13 @@ var execOptions = {
   //maxBuffer: 200*1024,   // kill child process if data in stdout or stderr exceeds this limit
   //killSignal: 'SIGTERM'  // The child process is killed with killSignal (default: 'SIGTERM')
 };
+
+
+// Get the require helper that allows test coverage analysis
+//var requireHelper = require('./require_helper');
+
+// Bring in the object we're going to test
+//var ObjectToBeTested = requireHelper('models/channel-type');
 
 
 module.exports = {
