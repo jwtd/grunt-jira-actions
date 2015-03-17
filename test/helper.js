@@ -28,13 +28,6 @@ var execOptions = {
 };
 
 
-// Get the require helper that allows test coverage analysis
-//var requireHelper = require('./require_helper');
-
-// Bring in the object we're going to test
-//var ObjectToBeTested = requireHelper('models/channel-type');
-
-
 module.exports = {
 
   envDup: envDup,
