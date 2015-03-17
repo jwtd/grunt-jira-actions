@@ -14,8 +14,7 @@
 var util = require('util'),
     q = require('q'),
     JiraApi = require('jira').JiraApi,
-    record = require('../test/record');
-
+    record = require(process.env.PWD + '/test/record'); //, {fixtures_folder: path.resolve(__dirname});
 
 module.exports = function(grunt) {
 

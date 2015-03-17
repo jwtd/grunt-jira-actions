@@ -72,7 +72,7 @@ module.exports = function(grunt) {
       tap: {
         options: {
           reporter: 'tap',
-          reporterOutput: '<%= gc.buildDir %>/tap-test-results.tap',
+          reporterOutput: '<%= gc.buildDir %>/reports/tap-test-results.tap',
           reporterOptions: {
             output: '<%= gc.buildDir %>/reports'
           }
@@ -97,10 +97,7 @@ module.exports = function(grunt) {
 
     // Clean out old test coverage reports before each run
     clean: {
-      istanbul: {
-        src: ['<%= gc.coverageDir %>/istanbul']
-      },
-      build: ['build'],
+      build: ['<%= gc.buildDir %>'],
       release: ['release']
     },
 
@@ -111,7 +108,7 @@ module.exports = function(grunt) {
         expand: true,
         flatten: false,
         src: ['tasks/**'],
-        dest: '<%= gc.coverageDir %>/istanbul/'
+        dest: '<%= gc.coverageDir %>/'
       }
     },
 
@@ -123,33 +120,25 @@ module.exports = function(grunt) {
       ],
       options: {
         lazy: false,
-        basePath: '<%= gc.coverageDir %>/istanbul/'
+        basePath: '<%= gc.coverageDir %>/'
       }
     },
-
-
-    // Point the test runner at the dir with the instrumentated app files
-    //env: {
-    //  coverage: {
-    //    APP_DIR_FOR_CODE_COVERAGE: '../../<%= gc.coverageDir %>/istanbul/tasks/'
-    //  }
-    //},
 
 
     // Save the raw coverage analysis data
     storeCoverage: {
       options: {
-        dir: '<%= gc.coverageDir %>/istanbul/'
+        dir: '<%= gc.coverageDir %>/'
       }
     },
 
 
     // Generate a coverage report from the raw coverage analysis data
     makeReport: {
-      src: '<%= gc.coverageDir %>/istanbul/coverage.json',
+      src: '<%= gc.coverageDir %>/coverage.json',
       options: {
         type: ['lcov', 'text'],
-        dir: '<%= gc.coverageDir %>/istanbul/',
+        dir: '<%= gc.buildDir %>/reports/',
         print: 'detail'
       }
     },
@@ -165,7 +154,7 @@ module.exports = function(grunt) {
           'functions': 10
         },
         root: '<%= gc.testsDir %>',
-        dir: '<%= gc.coverageDir %>/istanbul/'
+        dir: '<%= gc.coverageDir %>/'
       }
     },
 
@@ -499,19 +488,22 @@ module.exports = function(grunt) {
 
   // Load this plugin's tasks
 
-  if (gc.env == 'TEST' && grunt.file.exists(gs.coverageDir + '/tasks/jiraActions.js')) {
-    grunt.loadTasks(gs.coverageDir + '/tasks');
-  } else {
-    grunt.loadTasks('tasks');
-  }
+  //if (gc.env == 'TEST' && grunt.file.exists(gc.coverageDir + '/tasks/jiraActions.js')) {
+  //  console.log('USING INSTRUMENTED TASKS: ' + gc.coverageDir + '/tasks');
+    grunt.loadTasks(gc.coverageDir + '/tasks');
+  //} else {
+  //  console.log('USING NORMAL TASKS');
+  //  grunt.loadTasks('tasks');
+  //}
 
 
   // Project tasks
   grunt.registerTask('check', ['eslint', 'test']);
   grunt.registerTask('test', ['nodeunit']);
-  //grunt.registerTask('cover', ['clean:istanbul', 'copy:application', 'env:coverage', 'instrument', 'test', 'storeCoverage', 'makeReport', 'coverage']);
-  grunt.registerTask('cover', ['clean:istanbul', 'copy:application', 'instrument', 'test', 'storeCoverage', 'makeReport']);//, 'coverage']);
+  grunt.registerTask('cover', ['clean:build', 'copy:application', 'instrument', 'test', 'storeCoverage', 'makeReport']);//, 'coverage']);
 
-  //grunt.registerTask('default', ['setJiraConfig', 'searchJira:forGenIssues']);
+  grunt.registerTask('search', ['setJiraConfig', 'searchJira:forGenIssues']);
+
+  grunt.registerTask('default', ['cover']);
 
 };

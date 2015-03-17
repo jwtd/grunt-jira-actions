@@ -19,7 +19,7 @@ exports.group = {
 
     h.callGrunt('addJiraComment:fromOption_should_PASS:19935', function (error, stdout, stderr) {
       //console.log(stdout);
-      //parseTestOutput(stdout);
+      //h.parseTestOutput(stdout);
 
       // Parse test output
       var blocks = h.splitOutput(stdout);
@@ -72,7 +72,7 @@ exports.group = {
 
     h.callGrunt('addJiraComment:fromFileToIssue_should_PASS:19935', function (error, stdout, stderr) {
       //console.log(stdout);
-      //parseTestOutput(stdout);
+      //h.parseTestOutput(stdout);
 
       // Parse test output
       var blocks = h.splitOutput(stdout);
@@ -130,7 +130,7 @@ exports.group = {
 
     h.callGrunt('addJiraComment:withoutContent_should_FAIL', function (error, stdout, stderr) {
       //console.log(stdout);
-      //parseTestOutput(stdout);
+      //h.parseTestOutput(stdout);
 
       // Parse test output
       var blocks = h.splitOutput(stdout);
@@ -164,7 +164,7 @@ exports.group = {
 
     h.callGrunt('addJiraComment:withoutPassingIssueId_should_FAIL', function (error, stdout, stderr) {
       //console.log(stdout);
-      //parseTestOutput(stdout);
+      //h.parseTestOutput(stdout);
 
       // Parse test output
       var blocks = h.splitOutput(stdout);
