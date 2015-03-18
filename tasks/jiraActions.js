@@ -32,8 +32,10 @@ module.exports = function(grunt) {
 
   // When testing or when verbose is enabled, display the object's structure
   function writeToConsole(msg, obj) {
-    if (TESTING || VERBOSE) {
+    if (TESTING) {
       grunt.log.writeln(msg + '\n||||\n' + JSON.stringify(obj) + '\n||||');
+    } else if (VERBOSE) {
+      grunt.log.writeln(msg + JSON.stringify(obj));
     }
   }
 
@@ -793,6 +795,71 @@ module.exports = function(grunt) {
       })
       .done(function(){
         grunt.log.writeln('Jira project completed');
+        done();
+      });
+
+  });
+
+
+  /*
+   Lookup Jira Project Rapid View
+   */
+  grunt.registerMultiTask('jiraProjectRapidView', 'Lookup a JIRA project\'s rapid view', function(project_key) {
+
+    // Reveal task, target, and options
+    var current_action = this.nameArgs.replace(/:/g, '_');
+
+    // Prepare promise chain for API calls (which are asynchronous)
+    var done = this.async();
+
+    // Setup task specific default options
+    var default_options = {
+      project_key: project_key
+    };
+
+    // Extend default task specific options with default common options
+    recursiveMerge(default_options, commonOptions());
+
+    // Overwrite default values with values specified in the target
+    var options = this.options(default_options);
+    writeToConsole('jiraProjectDetails options', options);
+
+    // Validate presence of values for required options
+    validatePresenceOf(options, ['project_key']);
+
+    // Get a Jira connection
+    var jira = jiraCnn(options);
+
+    // Chainable method that adds a comment to an issue
+    function getProject() {
+      var deferred = q.defer();
+
+      // Pass version object to node-jira
+      jira.findRapidView(options.project_key, function(error, response){
+        if (error) {
+          deferred.reject(error);
+        } else {
+          deferred.resolve(response);
+        }
+      });
+
+      return deferred.promise;
+    }
+
+    // Call the transition issue method
+    startRecord(current_action);
+    getProject()
+      .then(function(response){
+        stopRecord();
+        writeToConsole('Jira project rapid view response', response);
+      })
+      .catch(function(error){
+        stopRecord();
+        writeToConsole('Jira project rapid view error', error);
+        unpackJiraError(error);
+      })
+      .done(function(){
+        grunt.log.writeln('Jira project rapid view completed');
         done();
       });
 

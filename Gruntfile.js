@@ -435,6 +435,23 @@ module.exports = function(grunt) {
     },
 
 
+    // Lookup Jira project rapid view
+    jiraProjectRapidView: {
+
+      // Declare options that are common to all Jira actions
+      options: {
+        jira_host: 'virtru.atlassian.net'
+      },
+
+      // Create specific targets for different Jira project lookups
+      forGeneralProject: {
+        options: {
+          project_key: 'GEN'
+        }
+      }
+    },
+
+
     /*--------------------------------*
      *     Search Jira using JQL      *
      *--------------------------------*/
@@ -486,14 +503,12 @@ module.exports = function(grunt) {
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
 
-  // Load this plugin's tasks
-
-  //if (gc.env == 'TEST' && grunt.file.exists(gc.coverageDir + '/tasks/jiraActions.js')) {
+  // Load this plugin's tasks  //if (gc.env == 'TEST' && grunt.file.exists(gc.coverageDir + '/tasks/jiraActions.js')) {
   //  console.log('USING INSTRUMENTED TASKS: ' + gc.coverageDir + '/tasks');
-    grunt.loadTasks(gc.coverageDir + '/tasks');
+  //  grunt.loadTasks(gc.coverageDir + '/tasks');
   //} else {
   //  console.log('USING NORMAL TASKS');
-  //  grunt.loadTasks('tasks');
+  grunt.loadTasks('tasks');
   //}
 
 
@@ -503,6 +518,9 @@ module.exports = function(grunt) {
   grunt.registerTask('cover', ['clean:build', 'copy:application', 'instrument', 'test', 'storeCoverage', 'makeReport']);//, 'coverage']);
 
   grunt.registerTask('search', ['setJiraConfig', 'searchJira:forGenIssues']);
+
+  grunt.registerTask('project', ['jiraProjectDetails:forGeneralProject']);
+  grunt.registerTask('project-view', ['jiraProjectRapidView:forGeneralProject']);
 
   grunt.registerTask('default', ['cover']);
 
