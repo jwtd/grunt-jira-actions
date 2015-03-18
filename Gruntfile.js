@@ -8,6 +8,11 @@
 
 'use strict';
 
+/*
+ Jira API Docs
+ https://docs.atlassian.com/jira/REST/latest/#d2e4023
+ */
+
 module.exports = function(grunt) {
 
 
@@ -482,19 +487,6 @@ module.exports = function(grunt) {
         }
       }
     }
-
-
-    /*
-     Jira API Docs
-     https://docs.atlassian.com/jira/REST/latest/#d2e4023
-
-     Project : /rest/api/2/project/{projectIdOrKey}
-     Project Versions : /rest/api/2/project/{projectIdOrKey}/versions
-     Project Properties : /rest/api/2/project/{projectIdOrKey}/properties
-     Project Version Issues:
-       /jira/rest/api/2/version/{id}/relatedIssueCounts
-       /jira/rest/api/2/version/{id}/unresolvedIssueCount
-    */
 
   });
 
