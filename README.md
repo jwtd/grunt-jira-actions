@@ -31,9 +31,9 @@ Once the plugin has been installed, it may be enabled inside your Gruntfile with
 grunt.loadNpmTasks('grunt-jira-actions');
 ```
 
-## Performing Actions in Jira
+# Performing Actions in Jira
 
-### <a name="setJiraConfig"></a>Specify Jira Connection Properties
+## <a name="setJiraConfig"></a>Specify Jira Connection Properties
 
 The following options are used by all Jira Action tasks:
 
@@ -49,7 +49,7 @@ These values can be:
 * Set in each task's top level options collection
 * Set in each target's option collection
 
-#### Example
+### Example
 
 ```js
 
@@ -107,11 +107,11 @@ module.exports = function(grunt) {
 
 ```
 
-### <a name="createJiraIssue"></a>Creating Jira Issues with 'createJiraIssue'
+## <a name="createJiraIssue"></a>Creating Jira Issues with 'createJiraIssue'
 
 In your project's Gruntfile, add a section named `createJiraIssue` to the data object passed into `grunt.initConfig()`. Within that section, you can create any number of targets that add Jira issues of various types. Place common values in the top level options collection. Place target specific values in their respective target's option's collections.
 
-#### Parameters specific to `createJiraIssue` targets
+### Parameters specific to `createJiraIssue` targets
 
 - `project_id` - Jira id of the project the story will be created in.
 - `issue_type` - Jira name of the type of issue to be created. Default is 'Story'. Valid values are:
@@ -128,7 +128,7 @@ In your project's Gruntfile, add a section named `createJiraIssue` to the data o
 - `description` - The description of the issue being created. If value is a valid file path, the contents of the file will be used (plain txt and JSON are supported).
 - `optional_fields` - JSON to be added to the create issue call's fields JSON. For more details check [developer.atlassian.com](https://developer.atlassian.com/display/JIRADEV/JIRA+REST+API+Example+-+Create+Issue)
 
-#### Example
+### Example
 
 ```js
 
@@ -177,16 +177,16 @@ grunt.initConfig({
 
 ```
 
-### <a name="transitionJiraIssue"></a>Transition an Existing Jira Issue 'transitionJiraIssue'
+## <a name="transitionJiraIssue"></a>Transition an Existing Jira Issue 'transitionJiraIssue'
 
 The `transitionJiraIssue` task is called from other tasks, but can also be called directly using the format `grunt transitionJiraIssue:<issue_id>:<issue_state>`.
 
-#### Parameters specific to `createJiraIssue` targets
+### Parameters specific to `createJiraIssue` targets
 
 - `issue_id` - Jira id of the issue that will be transitioned.
 - `issue_state` - The transition id that the issue should end up in. Default is 1 which is Open. 2 is Closed.
 
-#### Example
+### Example
 
 ```shell
 
@@ -195,11 +195,11 @@ grunt transitionJiraIssue:19416:2
 ```
 
 
-### <a name="linkJiraIssues"></a>Add Comments to Existing Issues with 'linkJiraIssues'
+## <a name="linkJiraIssues"></a>Add Comments to Existing Issues with 'linkJiraIssues'
 
 The `linkJiraIssues` task can be called directly using the format `grunt linkJiraIssues:<from_issue_key>:<to_issue_key>:<link_type>:<comment>`.
 
-#### Parameters specific to `linkJiraIssues` target
+### Parameters specific to `linkJiraIssues` target
 
 - `from_issue_key` - Jira issue KEY that will be linked.
 - `to_issue_key` - Jira issue KEY that will be linked.
@@ -207,7 +207,7 @@ The `linkJiraIssues` task can be called directly using the format `grunt linkJir
 - `comment` - The body of the comment that should accompany the link. If value is a valid file path, the contents of the file will be used (plain txt and JSON are supported).
 
 
-#### Example
+### Example
 
 ```shell
 
@@ -216,16 +216,16 @@ grunt linkJiraIssues:GEN-200:GEN-201:Relates:tmp/link/description.txt
 ```
 
 
-### <a name="addJiraComment"></a>Add Comments to Existing Issues with 'addJiraComment'
+## <a name="addJiraComment"></a>Add Comments to Existing Issues with 'addJiraComment'
 
 In your project's Gruntfile, add a section named `addJiraComment` to the data object passed into `grunt.initConfig()`. Within that section, you can create any number of targets that will add Jira comments to existing issues. Place common values in the top level options collection. Place target specific values in their respective target's option's collections.
 
-#### Parameters specific to `addJiraComment` target
+### Parameters specific to `addJiraComment` target
 
 - `issue_id` - Jira id of the project the story will be created in.
 - `comment` - The body of the comment being added. If value is a valid file path, the contents of the file will be used (plain txt and JSON are supported).
 
-#### Example
+### Example
 
 ```js
 
@@ -262,11 +262,11 @@ grunt.initConfig({
 ```
 
 
-### <a name="createJiraVersion"></a>Create a Project Version with 'createJiraVersion'
+## <a name="createJiraVersion"></a>Create a Project Version with 'createJiraVersion'
 
 In your project's Gruntfile, add a section named `createJiraVersion` to the data object passed into `grunt.initConfig()`. Within that section, you can create any number of targets that can be used to create project versions. Place common values in the top level options collection. Place target specific values in their respective target's option's collections.
 
-#### Parameters specific to `createJiraVersion` target
+### Parameters specific to `createJiraVersion` target
 
 - `project` - Jira's three letter project key (ex. 'FOO')
 - `name` - String that will be used as the name of the version.
@@ -275,7 +275,7 @@ In your project's Gruntfile, add a section named `createJiraVersion` to the data
 - `released` - Boolean value indicating whether the version has been released. Default is false.
 - `release_date` - Date on which the version was released. Default is the current date.
 
-#### Example
+### Example
 
 ```js
 
@@ -319,19 +319,19 @@ grunt.initConfig({
 ```
 
 
-### <a name="searchJira"></a>Use JQL to fetch a hash of Jira issues with 'searchJira'
+## <a name="searchJira"></a>Use JQL to fetch a hash of Jira issues with 'searchJira'
 
 In your project's Gruntfile, add a section named `searchJira` to the data object passed into `grunt.initConfig()`. Within that section, you can create any number of targets that can be used to submit different JQL queries. Place common values in the top level options collection. Place target specific values in their respective target's option's collections.
 
 Each target within this task will save its results `grunt.config` with the variable `this.target + 'search_results` as a hash of issues with the issue key as the hash key.
 
-#### Parameters specific to `searchJira` target
+### Parameters specific to `searchJira` target
 
 - `search_string` - A valid JQL search string.
 - `start_at` - Optional page offset for the search. Default is 0.
 - `max_results` - Optional max limit of issues. Default is 9999.
 
-#### Example
+### Example
 
 ```js
 
@@ -370,7 +370,7 @@ grunt.initConfig({
 ```
 
 
-#### JQL Search Results
+### JQL Search Results
 
 The results hash contains the issue id, key, summary, status id, and status label.
 
