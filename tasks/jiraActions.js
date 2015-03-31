@@ -120,9 +120,11 @@ module.exports = function(grunt) {
 
   function unpackJiraError(error) {
     var e,
-        emsg=[];
+        emsg = [];
     for (e in error.errors) {
-      emsg.push(error.errors[e]);
+      if (error.errors.hasOwnProperty(e)) {
+        emsg.push(error.errors[e]);
+      }
     }
     grunt.fail.fatal(emsg.join(', '));
   }
@@ -500,7 +502,7 @@ module.exports = function(grunt) {
 
     // If the comment is a file path, use its contents as the comment
     var comment = resolveContent(options.comment);
-    writeToConsole('Comment content', comment)
+    writeToConsole('Comment content', comment);
 
     // Chainable method that adds a comment to an issue
     function addJiraComment() {

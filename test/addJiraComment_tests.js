@@ -23,7 +23,7 @@ exports.group = {
 
       // Parse test output
       var blocks = h.splitOutput(stdout);
-      var options = JSON.parse(blocks[1]);       // Add comment response
+      //var options = JSON.parse(blocks[1]);       // Add comment response
       var content = JSON.parse(blocks[3]);       // Add comment content
       var response = JSON.parse(blocks[5]);       // Add comment response
 
@@ -76,7 +76,7 @@ exports.group = {
 
       // Parse test output
       var blocks = h.splitOutput(stdout);
-      var options = JSON.parse(blocks[1]);  // Add comment json
+      //var options = JSON.parse(blocks[1]);  // Add comment json
       var content = JSON.parse(blocks[3]);       // Add comment content
       var response = JSON.parse(blocks[5]);       // Add comment response
 
@@ -128,7 +128,7 @@ exports.group = {
 
   addJiraComment_withoutContent_should_FAIL: function(test) {
 
-    h.callGrunt('addJiraComment:withoutContent_should_FAIL', function (error, stdout, stderr) {
+    h.callGrunt('addJiraComment:withoutContent_should_FAIL', function (error, stdout) {
       //console.log(stdout);
       //h.parseTestOutput(stdout);
 
@@ -162,13 +162,13 @@ exports.group = {
 
   addJiraComment_withoutPassingIssueId_should_FAIL: function(test) {
 
-    h.callGrunt('addJiraComment:withoutPassingIssueId_should_FAIL', function (error, stdout, stderr) {
+    h.callGrunt('addJiraComment:withoutPassingIssueId_should_FAIL', function (error, stdout) {
       //console.log(stdout);
       //h.parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = h.splitOutput(stdout);
-      var options = JSON.parse(blocks[1]);  // Add comment options
+      //var blocks = h.splitOutput(stdout);
+      //var options = JSON.parse(blocks[1]);  // Add comment options
 
       test.notEqual(
         error,

@@ -426,7 +426,7 @@ exports.group = {
 
   createJiraIssue_withoutRequiredOptions_should_FAIL: function(test) {
 
-    h.callGrunt('createJiraIssue:withoutRequiredOptions_should_FAIL', function (error, stdout, stderr) {
+    h.callGrunt('createJiraIssue:withoutRequiredOptions_should_FAIL', function (error, stdout) {
       //console.log(stdout);
       //h.parseTestOutput(stdout);
 
@@ -460,13 +460,13 @@ exports.group = {
 
   createJiraIssue_withInvalidIssueType_should_FAIL: function(test) {
 
-    h.callGrunt('createJiraIssue:withInvalidIssueType_should_FAIL', function (error, stdout, stderr) {
+    h.callGrunt('createJiraIssue:withInvalidIssueType_should_FAIL', function (error, stdout) {
       //console.log(stdout);
       //h.parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = h.splitOutput(stdout);
-      var error = JSON.parse(blocks[5]);  // Create issue options
+      //var blocks = h.splitOutput(stdout);
+      //var error = JSON.parse(blocks[5]);  // Create issue options
 
       test.notEqual(
         error,
@@ -488,13 +488,13 @@ exports.group = {
 
   createJiraIssue_withInvalidIssueState_should_FAIL: function(test) {
 
-    h.callGrunt('createJiraIssue:withInvalidIssueState_should_FAIL', function (error, stdout, stderr) {
+    h.callGrunt('createJiraIssue:withInvalidIssueState_should_FAIL', function (error, stdout) {
       //console.log(stdout);
       //h.parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = h.splitOutput(stdout);
-      var error = JSON.parse(blocks[11]);  // Create issue options
+      //var blocks = h.splitOutput(stdout);
+      //var error = JSON.parse(blocks[11]);  // Create issue options
 
       test.notEqual(
         error,
@@ -516,13 +516,13 @@ exports.group = {
 
   createJiraIssue_withInvalidPriority_should_FAIL: function(test) {
 
-    h.callGrunt('createJiraIssue:withInvalidPriority_should_FAIL', function (error, stdout, stderr) {
+    h.callGrunt('createJiraIssue:withInvalidPriority_should_FAIL', function (error, stdout) {
       //console.log(stdout);
       //h.parseTestOutput(stdout);
 
       // Parse test output
-      var blocks = h.splitOutput(stdout);
-      var error = JSON.parse(blocks[5]);  // Create issue options
+      //var blocks = h.splitOutput(stdout);
+      //var error = JSON.parse(blocks[5]);  // Create issue options
 
       test.notEqual(
         error,
