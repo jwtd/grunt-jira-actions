@@ -35,7 +35,6 @@ module.exports = function(grunt) {
     srcDir: 'src',
     docsSrcDir: 'docs',
     testsDir: 'test',
-    coverageDir: 'coverage',
     configDir: 'config',
     buildDir: 'build'
   };
@@ -91,75 +90,6 @@ module.exports = function(grunt) {
             output: '<%= gc.buildDir %>/reports'
           }
         }
-      }
-    },
-
-
-    /*--------------------------------*
-     *         Code Coverage          *
-     *--------------------------------*/
-
-
-    // Clean out old test coverage reports before each run
-    clean: {
-      build: ['<%= gc.buildDir %>'],
-      release: ['release']
-    },
-
-
-    // Copy all of the app files to a dir for coverage analysis
-    copy: {
-      application: {
-        expand: true,
-        flatten: false,
-        src: ['tasks/**'],
-        dest: '<%= gc.coverageDir %>/'
-      }
-    },
-
-
-    // Add coverage instrumentation to the copies of the app files
-    instrument: {
-      files: [
-        'tasks/**/*.js'
-      ],
-      options: {
-        lazy: false,
-        basePath: '<%= gc.coverageDir %>/'
-      }
-    },
-
-
-    // Save the raw coverage analysis data
-    storeCoverage: {
-      options: {
-        dir: '<%= gc.coverageDir %>/'
-      }
-    },
-
-
-    // Generate a coverage report from the raw coverage analysis data
-    makeReport: {
-      src: '<%= gc.coverageDir %>/coverage.json',
-      options: {
-        type: ['lcov', 'text'],
-        dir: '<%= gc.buildDir %>/reports/',
-        print: 'detail'
-      }
-    },
-
-
-    // Enforce minimum thresholds of code coverage
-    coverage: {
-      options: {
-        thresholds: {
-          'statements': 10,
-          'branches': 10,
-          'lines': 10,
-          'functions': 10
-        },
-        root: '<%= gc.testsDir %>',
-        dir: '<%= gc.coverageDir %>/'
       }
     },
 
@@ -451,7 +381,7 @@ module.exports = function(grunt) {
       // Create specific targets for different Jira project lookups
       forGeneralProject: {
         options: {
-          project_key: 'GEN'
+          project_key: 'General'
         }
       }
     },
@@ -495,19 +425,13 @@ module.exports = function(grunt) {
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
 
-  // Load this plugin's tasks  //if (gc.env == 'TEST' && grunt.file.exists(gc.coverageDir + '/tasks/jiraActions.js')) {
-  //  console.log('USING INSTRUMENTED TASKS: ' + gc.coverageDir + '/tasks');
-  //  grunt.loadTasks(gc.coverageDir + '/tasks');
-  //} else {
-  //  console.log('USING NORMAL TASKS');
+  // Load this plugin's tasks
   grunt.loadTasks('tasks');
-  //}
 
 
   // Project tasks
   grunt.registerTask('check', ['eslint', 'test']);
   grunt.registerTask('test', ['nodeunit']);
-  grunt.registerTask('cover', ['clean:build', 'copy:application', 'instrument', 'test', 'storeCoverage', 'makeReport']);//, 'coverage']);
 
   grunt.registerTask('search', ['setJiraConfig', 'searchJira:forGenIssues']);
 
