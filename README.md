@@ -5,6 +5,8 @@
 [![npm version](https://badge.fury.io/js/grunt-jira-actions.svg)](http://badge.fury.io/js/grunt-jira-actions)
 [![Build Status](https://travis-ci.org/jwtd/grunt-jira-actions.png)](https://travis-ci.org/jwtd/grunt-jira-actions)
 
+[![NPM](https://nodei.co/npm/grunt-jira-actions.png)](https://nodei.co/npm/grunt-jira-actions)
+
 ## What You Can Do
 * [Specify Jira connection properties](#setJiraConfig)
 * [Create any type of Jira issue (Epic, Story, Bug, etc)](#createJiraIssue)
