@@ -1,11 +1,8 @@
 language: node_js
 node_js:
   - "stable"
-  - "0.13"
   - "0.12"
   - "0.10"
-  - "0.8"
-  - "0.6"
 before_script:
   - npm install -g grunt-cli
 env: JIRA_UN=foo JIRA_PW=bar
