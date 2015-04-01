@@ -24,7 +24,9 @@
 
 ### Installation
 
-I bet you were expecting me to to tell you that if you haven't used [Grunt](http://gruntjs.com/) before, to be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, because it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
+I bet you were expecting me to to tell you that if you haven't used [Grunt](http://gruntjs.com/) before, to be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, because it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins.
+
+Well, I'm not going to do that. Instead, I'm going to assume you are familiar with that process, and will skip ahead to explaining how you can install this plugin. You do so with this command:
 
 ```shell
 npm install grunt-jira-actions --save-dev
@@ -49,10 +51,10 @@ The following options are used by all Jira Action tasks:
 - `jira_port` - The port on which Jira's api allows connections on. Default is 443.
 - `jira_api_version` - The version of Jira's api to target. Default is '2'.
 
-These values can be:
-* Set globaly using the `setJiraConfig` task
-* Set in each task's top level options collection
-* Set in each target's option collection
+These values can be set:
+* Globaly using the `setJiraConfig` task
+* In each task's top level options collection (will override global values)
+* In each target's option collection (will override task and global values)
 
 ### Example
 
