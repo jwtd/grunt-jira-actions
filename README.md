@@ -406,7 +406,31 @@ The results hash contains the issue id, key, summary, status id, and status labe
 
 ```
 
+## Experimental : jiraProjectRapidView
+```js
 
+grunt.initConfig({
+
+    // Get a Jira project's rapid view
+    jiraProjectRapidView: {
+
+      // Declare options that are common to all Jira actions
+      options: {
+        jira_host: 'foo.atlassian.net'
+      },
+
+      // Create specific targets for different Jira searches
+      ofGeneralProject: {
+        options: {
+          project_key: 'GEN'
+        }
+      }
+
+    }
+
+});
+
+```
 
 ## Contact, feedback and bugs
 
