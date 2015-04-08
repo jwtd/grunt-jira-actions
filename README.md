@@ -407,6 +407,7 @@ The results hash contains the issue id, key, summary, status id, and status labe
 ```
 
 ## Experimental : jiraProjectRapidView
+
 ```js
 
 grunt.initConfig({
