@@ -116,6 +116,16 @@ module.exports = function(grunt) {
       }
     },
 
+    githubChanges: {
+      dist: {
+        options: {
+          owner: 'jwtd',
+          repository: 'grunt-jira-actions',
+          //order-semver : use semantic versioning for the ordering instead of the tag date
+        }
+      }
+    },
+
 
     /*--------------------------------*
      *    Setup Jira Configuration    *
@@ -424,7 +434,6 @@ module.exports = function(grunt) {
   // Load from package.json
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
-
   // Load this plugin's tasks
   grunt.loadTasks('tasks');
 
@@ -434,9 +443,13 @@ module.exports = function(grunt) {
   grunt.registerTask('test', ['nodeunit']);
 
   grunt.registerTask('search', ['setJiraConfig', 'searchJira:forGenIssues']);
-
   grunt.registerTask('project', ['jiraProjectDetails:forGeneralProject']);
   grunt.registerTask('project-view', ['jiraProjectRapidView:forGeneralProject']);
+
+
+  // These plugins provide necessary tasks.
+  grunt.registerTask('changelog', ['githubChanges']);
+
 
   grunt.registerTask('default', ['cover']);
 
