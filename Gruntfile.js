@@ -116,6 +116,7 @@ module.exports = function(grunt) {
       }
     },
 
+    // https://github.com/lalitkapoor/github-changes
     githubChanges: {
       dist: {
         options: {
@@ -441,16 +442,12 @@ module.exports = function(grunt) {
   // Project tasks
   grunt.registerTask('check', ['eslint', 'test']);
   grunt.registerTask('test', ['nodeunit']);
+  grunt.registerTask('changelog', ['githubChanges']);
 
   grunt.registerTask('search', ['setJiraConfig', 'searchJira:forGenIssues']);
   grunt.registerTask('project', ['jiraProjectDetails:forGeneralProject']);
   grunt.registerTask('project-view', ['jiraProjectRapidView:forGeneralProject']);
 
-
-  // These plugins provide necessary tasks.
-  grunt.registerTask('changelog', ['githubChanges']);
-
-
-  grunt.registerTask('default', ['cover']);
+  grunt.registerTask('default', ['check']);
 
 };
