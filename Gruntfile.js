@@ -444,6 +444,8 @@ module.exports = function(grunt) {
   grunt.registerTask('test', ['nodeunit']);
   grunt.registerTask('changelog', ['githubChanges']);
 
+  
+  grunt.registerTask('version', ['setJiraConfig', 'createJiraVersion']);
   grunt.registerTask('search', ['setJiraConfig', 'searchJira:forGenIssues']);
   grunt.registerTask('project', ['jiraProjectDetails:forGeneralProject']);
   grunt.registerTask('project-view', ['jiraProjectRapidView:forGeneralProject']);
