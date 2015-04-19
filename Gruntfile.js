@@ -443,15 +443,15 @@ module.exports = function(grunt) {
   grunt.registerTask('check', ['eslint', 'test']);
   grunt.registerTask('test', ['nodeunit']);
   grunt.registerTask('changelog', ['githubChanges']);
-  
+
   grunt.registerTask('issue', ['setJiraConfig', 'createJiraIssue']);
-  grunt.registerTask('comment', ['setJiraConfig', 'addJiraComment']);
   grunt.registerTask('transition', ['setJiraConfig', 'transitionJiraIssue']);
   grunt.registerTask('link', ['setJiraConfig', 'linkJiraIssue']);
+  grunt.registerTask('comment', ['setJiraConfig', 'addJiraComment']);
   grunt.registerTask('version', ['setJiraConfig', 'createJiraVersion']);
-  grunt.registerTask('search', ['setJiraConfig', 'searchJira:forGenIssues']);
   grunt.registerTask('project', ['jiraProjectDetails:forGeneralProject']);
   grunt.registerTask('project-view', ['jiraProjectRapidView:forGeneralProject']);
+  grunt.registerTask('search', ['setJiraConfig', 'searchJira:forGenIssues']);
 
   grunt.registerTask('default', ['check']);
 
