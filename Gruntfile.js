@@ -1,6 +1,6 @@
 /*
  * grunt-jira-tasks
- * https://github.com/jwtd/grunt-jira-tasks
+ * https://github.com/jwtd/grunt-jira-actions
  *
  * Copyright (c) 2015 Jordan Duggan
  * Licensed under the MIT license.
@@ -23,6 +23,7 @@ module.exports = function(grunt) {
   /*-----------------------------------------------------*
    *        Global properties for use in all tasks        *
    *------------------------------------------------------*/
+
 
   // Prepare to calculate paths
   var path = require('path');
