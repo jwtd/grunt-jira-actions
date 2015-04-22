@@ -122,8 +122,8 @@ module.exports = function(grunt) {
       dist: {
         options: {
           owner: 'jwtd',
-          repository: 'grunt-jira-actions',
-          //order-semver : use semantic versioning for the ordering instead of the tag date
+          repository: 'grunt-jira-actions'
+          //order-semver : use semantic Versioning for the ordering instead of the tag date
         }
       }
     },
@@ -191,7 +191,7 @@ module.exports = function(grunt) {
 
       asValidStoryMarkedDone_should_PASS: {
         options: {
-          issue_state: 2,     // 1 = Open, 2 = Done
+          issue_state: 2,  // 1 = Open, 2 = Done
           summary: 'Story marked as done'
         }
       },
@@ -270,7 +270,7 @@ module.exports = function(grunt) {
       options: {
         jira_host: 'virtru.atlassian.net',
         from_issue_key: 'GEN-345',
-        link_type: 'Relates',              // Blocks, Cloners, Duplicate, Relates
+        link_type: 'Relates',              // Blocks, Clones, Duplicate, Relates
         to_issue_key: 'GEN-123',
         comment: 'This is a test link'
       }
@@ -420,11 +420,11 @@ module.exports = function(grunt) {
       //        +AND+issuetype+in%20(%22Bug%22,%22Story%22)
       forGenIssues: {
         options: {
-          search_string: 'project="WS" AND status="OPEN" AND issuetype in ("Bug","Story")'
+          search_string: 'project="WS" AND status="OPEN" AND issuetype in ("Bug", "Story")'
           //start_at: 0,
           //max_results: 3,
           //fields: {},
-          //before_search: [],    // optional grunt tasks to run before search
+          //before_search: [],   // optional grunt tasks to run before search
           //after_search: []     // optional grunt tasks to run after search
         }
       }
