@@ -1,5 +1,5 @@
 /*
- * grunt-jira-tasks
+ * grunt-jira-actions
  * https://github.com/jwtd/grunt-jira-actions
  *
  * Copyright (c) 2015 Jordan Duggan
