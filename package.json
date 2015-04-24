@@ -1,7 +1,7 @@
 {
   "name": "grunt-jira-actions",
   "description": "Grunt tasks to perform Jira actions",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "homepage": "https://github.com/jwtd/grunt-jira-actions",
   "author": {
     "name": "Jordan Duggan",
