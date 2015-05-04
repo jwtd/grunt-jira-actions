@@ -11,7 +11,7 @@
 /*
  Jira API Docs
  https://docs.atlassian.com/jira/REST/latest/#d2e4023
- */
+*/
 
 module.exports = function(grunt) {
 
