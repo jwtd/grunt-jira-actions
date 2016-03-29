@@ -168,9 +168,9 @@ module.exports = function(grunt) {
 
     // If a jira host is specified return a connection. If it wasn't, use the cached Jira connection if one exists.
     var jira;
-    if (opt.jira_host == null && grunt.config('last_jira_connection')) {
+    if (opt.jira_host === null && grunt.config('last_jira_connection')) {
       jira = grunt.config('last_jira_connection');
-    } else if (opt.jira_host != null) {
+    } else if (opt.jira_host !== null) {
       jira = new JiraApi(
         opt.jira_protocol,
         opt.jira_host,
@@ -266,13 +266,13 @@ module.exports = function(grunt) {
       };
 
       // If a description is provided, add it
-      if (description != null){
+      if (description !== null){
         console.log(description);
         issue_json.fields.description = description;
       }
 
       // Add any other options passed in to the JSON
-      if (options.additional_fields != null){
+      if (options.additional_fields !== null){
         recursiveMerge(issue_json.fields, options.additional_fields);
       }
       writeToConsole('Create issue json', issue_json);
