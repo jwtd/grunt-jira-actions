@@ -47,7 +47,7 @@
     "grunt": "~0.4.5"
   },
   "dependencies": {
-    "matchdep": "^0.3.0",
+    "matchdep": "^1.0.1",
     "jira": "^0.10.0",
     "q": "^2.0.3"
   }
