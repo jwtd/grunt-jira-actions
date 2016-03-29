@@ -118,6 +118,11 @@ module.exports = function(grunt) {
   }
 
 
+  function getCurrentAction(obj) {
+    return obj.nameArgs.replace(/:/g, '_');
+  }
+
+
   function unpackJiraError(error) {
     var e,
         emsg = [];
@@ -213,7 +218,7 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('createJiraIssue', 'Create an issue in JIRA', function() {
 
     // Reveal task, target, and options
-    var current_action = this.nameArgs.replace(/:/g, '_');
+    var current_action = getCurrentAction(this);
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -316,7 +321,7 @@ module.exports = function(grunt) {
   grunt.registerTask('transitionJiraIssue', 'Transition an issue in JIRA', function(issue_id, issue_state) {
 
     // Reveal task, target, and options
-    var current_action = this.nameArgs.replace(/:/g, '_');
+    var current_action = getCurrentAction(this);
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -392,7 +397,7 @@ module.exports = function(grunt) {
   grunt.registerTask('linkJiraIssue', 'Link two Jira issues', function(from_issue_key, to_issue_key, link_type, comment) {
 
     // Reveal task, target, and options
-    var current_action = this.nameArgs.replace(/:/g, '_');
+    var current_action = getCurrentAction(this);
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -476,7 +481,7 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('addJiraComment', 'Add a comment to an issue in JIRA', function(issue_id) {
 
     // Reveal task, target, and options
-    var current_action = this.nameArgs.replace(/:/g, '_');
+    var current_action = getCurrentAction(this);
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -547,7 +552,7 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('createJiraVersion', 'Create a new version for a project in JIRA', function(project_key, version_name, release_date_string) {
 
     // Reveal task, target, and options
-    var current_action = this.nameArgs.replace(/:/g, '_');
+    var current_action = getCurrentAction(this);
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -642,7 +647,7 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('searchJira', 'Search JIRA with JQL', function() {
 
     // Reveal task, target, and options
-    var current_action = this.nameArgs.replace(/:/g, '_');
+    var current_action = getCurrentAction(this);
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -744,7 +749,7 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('jiraProjectDetails', 'Lookup a JIRA project\'s details', function(project_key) {
 
     // Reveal task, target, and options
-    var current_action = this.nameArgs.replace(/:/g, '_');
+    var current_action = getCurrentAction(this);
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
@@ -809,7 +814,7 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('jiraProjectRapidView', 'Lookup a JIRA project\'s rapid view', function(project_key) {
 
     // Reveal task, target, and options
-    var current_action = this.nameArgs.replace(/:/g, '_');
+    var current_action = getCurrentAction(this);
 
     // Prepare promise chain for API calls (which are asynchronous)
     var done = this.async();
