@@ -33,7 +33,7 @@ module.exports = {
   envDup: envDup,
 
   // Call grunt with the correct flags
-  // Examples:   grunt createJiraIssue:addJiraComment:withoutContent_should_FAIL --env=TEST --no-color
+  // Examples:   grunt addJiraComment:withoutContent_should_FAIL --env=TEST --no-color
   callGrunt: function (task, whenDoneCallback) {
     exec('grunt ' + task + ' --env=TEST --no-color', execOptions, whenDoneCallback);
   },

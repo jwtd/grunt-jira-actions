@@ -177,9 +177,9 @@ exports.group = {
       );
 
       test.equal(
-        stdout.indexOf('404: Error while adding comment') > -1,
+        stdout.indexOf('Required option issue_id was null') > -1,
         true,
-        'Should tell user the call resulted in a 404'
+        'Should tell user that issue_id is a required option'
       );
 
       test.expect(2);

@@ -45,7 +45,7 @@ module.exports = function(grunt) {
   // Start nock recorder
   function startRecord(name) {
     if (TESTING) {
-      //grunt.verbose.writeln('START NOCK RECORDING: ' + name);
+      grunt.verbose.writeln('START NOCK RECORDING: ' + name);
       recorder = record(name);
       recorder.before();
     }
@@ -54,7 +54,7 @@ module.exports = function(grunt) {
   // Stop nock recorder
   function stopRecord() {
     if (TESTING) {
-      //grunt.verbose.writeln('STOP NOCK RECORDING');
+      grunt.verbose.writeln('STOP NOCK RECORDING');
       recorder.after();
     }
   }
@@ -108,7 +108,7 @@ module.exports = function(grunt) {
     var v,
         missing = '';
     for (v in val) {
-      if (opt[val[v]] === null) {
+      if (opt[val[v]] == null) {
         missing += '\nRequired option ' + val[v] + ' was null';
       }
     }
