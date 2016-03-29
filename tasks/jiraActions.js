@@ -11,8 +11,7 @@
 
 'use strict';
 
-var util = require('util'),
-    q = require('q'),
+var q = require('q'),
     JiraApi = require('jira').JiraApi,
     record = require(process.env.PWD + '/test/record'); //, {fixtures_folder: path.resolve(__dirname});
 

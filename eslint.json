@@ -9,7 +9,7 @@
   ],
   "rules": {
     "block-scoped-var": 0,
-    "brace-style": ["2", "1tbs"],
+    "brace-style": [2, "1tbs"],
     "camelcase": 0,
     "comma-style": [2, "last"],
     "consistent-this": [2, "self"],
@@ -27,7 +27,7 @@
     "quotes": [2, "single"],
     "radix": 2,
     "semi": [2, "always"],
-    "space-after-keywords": [2, "always"],
+    "keyword-spacing": "error",
     "strict": 2,
     "use-isnan": 2,
     "valid-jsdoc": [1, {

@@ -1,9 +1,7 @@
 'use strict';
 
 // nodeunit
-var util = require('util'),
-    path = require('path'),
-    grunt = require('grunt'),
+var grunt = require('grunt'),
     h = require('./helper');
 
 var exports = module.exports;
