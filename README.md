@@ -20,7 +20,7 @@
 
 ### Requirements
 
-* Grunt `~0.4.5`
+* Grunt `>=0.4.0`
 * API access to a Jira instance
 
 ### Installation
