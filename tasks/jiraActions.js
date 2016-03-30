@@ -61,7 +61,7 @@ module.exports = function(grunt) {
 
   // Build a fresh version of the Jira global config each time in case overrides were used in a previous task
   function commonOptions() {
-    return {
+    var opt = {
       env_var_for_jira_username: grunt.config('env_var_for_jira_username') || 'JIRA_UN',
       env_var_for_jira_password: grunt.config('env_var_for_jira_password') || 'JIRA_PW',
       jira_protocol: grunt.config('jira_protocol') || 'https',
@@ -69,6 +69,7 @@ module.exports = function(grunt) {
       jira_port: grunt.config('jira_port') || 443,
       jira_api_version: grunt.config('jira_api_version') || '2'
     };
+    return opt;
   }
 
 
@@ -107,7 +108,7 @@ module.exports = function(grunt) {
     var v,
         missing = '';
     for (v in val) {
-      if (opt[val[v]] == null) {
+      if (opt[val[v]] === null || opt[val[v]] === undefined) {
         missing += '\nRequired option ' + val[v] + ' was null';
       }
     }
